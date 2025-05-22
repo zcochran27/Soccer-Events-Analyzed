@@ -164,22 +164,41 @@ canvas.addEventListener("click", (event) => {
 
   if (xPitch < 0 || xPitch > 120 || yPitch < 0 || yPitch > 80) return;
 
+  console.log(`Clicked at: (${xPitch.toFixed(2)}, ${yPitch.toFixed(2)})`);
+
   if (firstClick) {
     startPos = [xPitch, yPitch];
-    drawPitch();
+    // drawPitch();
     const [sx, sy] = scaleToCanvas(...startPos);
     ctx.beginPath();
     ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
     ctx.fillStyle = "red";
     ctx.fill();
+    collectedStats.push([startPos]);
     firstClick = false;
-  } else {
+  } else if (!firstClick && collectedStats[0].length == 1) {
     endPos = [xPitch, yPitch];
-    drawPitch();
+    // drawPitch();
     const [sx, sy] = scaleToCanvas(...startPos);
     const [ex, ey] = scaleToCanvas(...endPos);
+    console.log(collectedStats);
+    collectedStats[collectedStats.length - 1].push(endPos);
     drawArrow(sx, sy, ex, ey);
-    firstClick = true;
+    // firstClick = true;
+  } else {
+    endPos = [xPitch, yPitch];
+    startPos = collectedStats[collectedStats.length - 1][1];
+    console.log(collectedStats);
+    console.log(endPos, startPos);
+    // drawPitch();
+    const [sx, sy] = scaleToCanvas(...startPos);
+    const [ex, ey] = scaleToCanvas(...endPos);
+    ctx.beginPath();
+    ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = "blue";
+    ctx.fill();
+    collectedStats.push([startPos, endPos]);
+    drawArrow(sx, sy, ex, ey);
   }
 });
 drawPitch();
