@@ -7,6 +7,7 @@ import xgboost as xgb
 import numpy as np
 from sklearn.pipeline import make_pipeline
 from typing import List, Union
+import logging
 
 class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
@@ -14,7 +15,7 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
         
     def transform(self, X):
         # Initialize array to store features
-        features = np.zeros((1, 66))  # Match the 67 columns from processed_game
+        features = np.zeros((1, 55))  # Match the 67 columns from processed_game
         
         # Process each pass (every 3 elements in input list)
         for i in range(0, len(X), 3):
@@ -58,8 +59,8 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
 
 
 
-model = xgb.XGBRegressor()
-model.load_model("xgboost_model_r_xg.json")
+model = xgb.XGBClassifier()
+model.load_model("final_xgb_model.json")
 
 websitePipeline = make_pipeline(
     websiteInputPreprocessor(),
@@ -83,10 +84,16 @@ class PredictionRequest(BaseModel):
 
 @app.post("/predict")
 def predict(request: PredictionRequest):
-    input_array = list(request.features)#.reshape(1, -1)
-    print(input_array)
-    prediction = websitePipeline.predict(input_array)
-    return {"prediction": float(prediction[0])}
+
+    try:
+        # print("Function called", flush=True)
+        input_array = list(request.features)
+        print(input_array,flush=True)
+        
+        return {"prediction": float(websitePipeline.predict_proba(input_array)[0,1])}
+    except Exception as e:
+        print(f"Error occurred: {e}", flush=True)
+        return {"error": str(e)}
 
 #run uvicorn app:app --reload
 #to start the api server

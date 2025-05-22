@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+    <script type="module" src="main.js"></script>
+
     <meta charset="UTF-8">
     <title>XGBoost Prediction</title>
 </head>
@@ -80,29 +82,15 @@
         <input type="number" id="outcome5" value="1" min="0" max="1" step="1">
     </div>
 
-    <div>
-        <h3>Pass 6</h3>
-        <label for="startX6">X coordinate:</label>
-        <input type="number" id="startX6" value="40">
-        <label for="startY6">Y coordinate:</label>
-        <input type="number" id="startY6" value="20">
-        <label for="endX6">End X:</label>
-        <input type="number" id="endX6" value="30">
-        <label for="endY6">End Y:</label>
-        <input type="number" id="endY6" value="60">
-        <label for="outcome6">Outcome:</label>
-        <input type="number" id="outcome6" value="1" min="0" max="1" step="1">
-    </div>
-
     <button onclick="makePrediction()">Predict</button>
     <p id="result"></p>
-
+    <canvas id="pitchCanvas" width="720" height="480"></canvas>
     <script>
         async function makePrediction() {
             let features = [];
             
             // Collect values from all 6 passes
-            for(let i = 1; i <= 6; i++) {
+            for(let i = 1; i <= 5; i++) {
                 const startX = parseFloat(document.getElementById(`startX${i}`).value);
                 const startY = parseFloat(document.getElementById(`startY${i}`).value);
                 const endX = parseFloat(document.getElementById(`endX${i}`).value);
@@ -126,6 +114,7 @@
 
             if (response.ok) {
                 const data = await response.json();
+                console.log(data.prediction.toFixed(4))
                 document.getElementById("result").textContent = "Prediction: " + data.prediction.toFixed(4);
             } else {
                 document.getElementById("result").textContent = "Error: " + response.status;
