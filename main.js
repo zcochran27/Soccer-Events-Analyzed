@@ -5,6 +5,8 @@ const pitchWidth = 120;
 const pitchHeight = 80;
 const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
+const goalCoords = [120, 40]; // Center of goal on right side
+
 
 let firstClick = true;
 let startPos = [-1, -1];
@@ -156,7 +158,17 @@ function scaleToCanvas(x, y) {
   return [(x / pitchWidth) * canvasWidth, (y / pitchHeight) * canvasHeight];
 }
 
+let firstPassComplete = false;
+let lastRedDot = null; 
+let passIndex = 1;
+
+
 canvas.addEventListener("click", (event) => {
+  if (collectedStats.length >= 5) {
+    console.log("Maximum of 5 passes reached.");
+    return;
+  }
+
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -164,41 +176,241 @@ canvas.addEventListener("click", (event) => {
 
   if (xPitch < 0 || xPitch > 120 || yPitch < 0 || yPitch > 80) return;
 
-  console.log(`Clicked at: (${xPitch.toFixed(2)}, ${yPitch.toFixed(2)})`);
+  if (!firstPassComplete) {
+    
+    if (firstClick) {
+      startPos = [xPitch, yPitch];
+      const [sx, sy] = scaleToCanvas(...startPos);
 
-  if (firstClick) {
-    startPos = [xPitch, yPitch];
-    // drawPitch();
-    const [sx, sy] = scaleToCanvas(...startPos);
-    ctx.beginPath();
-    ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = "red";
-    ctx.fill();
-    collectedStats.push([startPos]);
-    firstClick = false;
-  } else if (!firstClick && collectedStats[0].length == 1) {
-    endPos = [xPitch, yPitch];
-    // drawPitch();
-    const [sx, sy] = scaleToCanvas(...startPos);
-    const [ex, ey] = scaleToCanvas(...endPos);
-    console.log(collectedStats);
-    collectedStats[collectedStats.length - 1].push(endPos);
-    drawArrow(sx, sy, ex, ey);
-    // firstClick = true;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "green";
+      ctx.fill();
+
+      firstClick = false;
+    } else {
+      endPos = [xPitch, yPitch];
+      const [sx, sy] = scaleToCanvas(...startPos);
+      const [ex, ey] = scaleToCanvas(...endPos);
+
+      if (lastRedDot) {
+        const [lx, ly] = lastRedDot;
+        ctx.beginPath();
+        ctx.arc(lx, ly, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = "blue";
+        ctx.fill();
+      }
+
+
+      ctx.beginPath();
+      ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "red";
+      ctx.fill();
+
+      drawArrow(sx, sy, ex, ey);
+      // Midpoint
+      const mx = (sx + ex) / 2;
+      const my = (sy + ey) / 2;
+
+      // Label 
+      ctx.fillStyle = "black";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("pass " +passIndex, mx, my - 10);  
+
+      passIndex++;
+
+      collectedStats.push([startPos, endPos]);
+      updatePredictBtn();
+
+      lastRedDot = [ex, ey]; 
+      firstPassComplete = true;
+      firstClick = true;
+    }
   } else {
+
+    const lastEnd = collectedStats[collectedStats.length - 1][1];
+    startPos = lastEnd;
     endPos = [xPitch, yPitch];
-    startPos = collectedStats[collectedStats.length - 1][1];
-    console.log(collectedStats);
-    console.log(endPos, startPos);
-    // drawPitch();
     const [sx, sy] = scaleToCanvas(...startPos);
     const [ex, ey] = scaleToCanvas(...endPos);
+
+
+    if (lastRedDot) {
+      const [lx, ly] = lastRedDot;
+      ctx.beginPath();
+      ctx.arc(lx, ly, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "blue";
+      ctx.fill();
+    }
+
+
     ctx.beginPath();
     ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = "blue";
+    ctx.fillStyle = "red";
     ctx.fill();
-    collectedStats.push([startPos, endPos]);
+
     drawArrow(sx, sy, ex, ey);
+    // Midpoint 
+    const mx = (sx + ex) / 2;
+    const my = (sy + ey) / 2;
+      
+    // Label 
+    ctx.fillStyle = "black";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("pass " + passIndex, mx, my - 10);
+      
+    passIndex++;
+
+    collectedStats.push([startPos, endPos]);
+    updatePredictBtn();
+    if (collectedStats.length === 5) {
+      const lastEnd = collectedStats[collectedStats.length - 1][1];
+      const [lx, ly] = scaleToCanvas(...lastEnd);
+      const [gx, gy] = scaleToCanvas(...goalCoords);
+
+      // Draw dashed line
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(gx, gy);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+      
+      // Label above the dashed line
+      const midX = (lx + gx) / 2;
+      const midY = (ly + gy) / 2;
+      ctx.fillStyle = "black";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("shot!", midX, midY - 10);
+  }
+
+    lastRedDot = [ex, ey];
+
+
   }
 });
+
+document.getElementById("predictBtn").addEventListener("click", async () => {
+  if (collectedStats.length === 0) {
+    alert("Please create at least one pass before predicting.");
+    return;
+  }
+
+const formatted = collectedStats.flatMap(pass => [
+  pass[0], // start 
+  pass[1], // end 
+  1        // dummy value for outcome
+]);
+
+
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ features: formatted })
+    });
+
+    const result = await response.json();
+
+    if (result.prediction !== undefined) {
+      document.getElementById("predictionResult").innerText =
+        `Prediction: ${result.prediction.toFixed(4)}`;
+    } else {
+      document.getElementById("predictionResult").innerText =
+        `Error: ${result.error}`;
+    }
+  } catch (error) {
+    console.error("Fetch error:", error);
+    document.getElementById("predictionResult").innerText =
+      `Fetch error: ${error}`;
+  }
+});
+
+document.getElementById("undoBtn").addEventListener("click", function () {
+  if (collectedStats.length === 0) return;
+
+  collectedStats.pop();
+
+  passIndex = 1;
+  firstPassComplete = collectedStats.length > 0;
+  lastRedDot = null;
+
+  drawPitch();
+
+  collectedStats.forEach((pass, index) => {
+    const [start, end] = pass;
+    const [sx, sy] = scaleToCanvas(...start);
+    const [ex, ey] = scaleToCanvas(...end);
+
+    // Green dot for start point
+    if (index === 0) {
+      ctx.beginPath();
+      ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "green";
+      ctx.fill();
+    } else {
+      const prevEnd = collectedStats[index - 1][1];
+      const [psx, psy] = scaleToCanvas(...prevEnd);
+      ctx.beginPath();
+      ctx.arc(psx, psy, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "blue";
+      ctx.fill();
+    }
+
+    // Red dot for endpoint
+    if (index === collectedStats.length - 1) {
+      ctx.beginPath();
+      ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "red";
+      ctx.fill();
+      lastRedDot = [ex, ey];
+    } else {
+      ctx.beginPath();
+      ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = "blue";
+      ctx.fill();
+    }
+
+    drawArrow(sx, sy, ex, ey);
+    const mx = (sx + ex) / 2;
+    const my = (sy + ey) / 2;
+    ctx.fillStyle = "black";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("pass " + (index + 1), mx, my - 10);
+  });
+
+  passIndex = collectedStats.length + 1;
+
+  updatePredictBtn();
+});
+
+function updatePredictBtn() {
+  const predictBtn = document.getElementById("predictBtn");
+  if (collectedStats.length === 5) {
+    predictBtn.classList.add("active");
+    predictBtn.disabled = false;
+  } else {
+    predictBtn.classList.remove("active");
+    predictBtn.disabled = true;
+  }
+}
+
+
+
+
+
+
 drawPitch();
+updatePredictBtn();
+
