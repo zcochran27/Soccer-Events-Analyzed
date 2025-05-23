@@ -7,5 +7,4 @@ pydantic
 pandas
 matplotlib
 seaborn
-sklearn
 mplsoccer
