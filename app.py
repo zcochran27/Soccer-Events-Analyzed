@@ -7,7 +7,7 @@ import xgboost as xgb
 import numpy as np
 from sklearn.pipeline import make_pipeline
 from typing import List, Union
-import logging
+
 
 class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
