@@ -11,6 +11,8 @@ const goalCoords = [120, 40]; // Center of goal on right side
 let firstClick = true;
 let startPos = [-1, -1];
 let endPos = [-1, -1];
+let shotTaken = false;
+
 
 let collectedStats = []; // Array to store all submitted data
 
@@ -161,13 +163,24 @@ function scaleToCanvas(x, y) {
 let firstPassComplete = false;
 let lastRedDot = null; 
 let passIndex = 1;
+let dribbleCount = 0;
+let passCount = 0;
+let passNumber = 1;
+let dribbleNumber = 1;
+
+
 
 
 canvas.addEventListener("click", (event) => {
-  if (collectedStats.length >= 5) {
-    console.log("Maximum of 5 passes reached.");
+  if (dribbleNumber > 5 && isDribbleMode()) {
+    alert("Maximum 5 dribbles reached!");
     return;
   }
+  if (passNumber > 5 && !isDribbleMode()) {
+    alert("Maximum 5 passes reached!");
+    return;
+  }
+  
 
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -175,6 +188,7 @@ canvas.addEventListener("click", (event) => {
   const [xPitch, yPitch] = scaleToPitch(x, y);
 
   if (xPitch < 0 || xPitch > 120 || yPitch < 0 || yPitch > 80) return;
+  const currentIsDribble = isDribbleMode();
 
   if (!firstPassComplete) {
     
@@ -207,29 +221,56 @@ canvas.addEventListener("click", (event) => {
       ctx.fillStyle = "red";
       ctx.fill();
 
-      drawArrow(sx, sy, ex, ey);
-      // Midpoint
       const mx = (sx + ex) / 2;
       const my = (sy + ey) / 2;
 
-      // Label 
+    if (isDribbleMode()) {
+      // Dashed orange line for dribble
+      ctx.save();
+      ctx.strokeStyle = "orange";
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    
+      // Label
+      ctx.fillStyle = "orange";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("dribble " + dribbleNumber, mx, my - 10);
+      console.log("Drawing dribble line");
+      dribbleNumber++;
+
+    } else {
+      drawArrow(sx, sy, ex, ey);
+    
       ctx.fillStyle = "black";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("pass " +passIndex, mx, my - 10);  
+      ctx.fillText("pass " + passNumber, mx, my - 10);
+      passNumber++;
+    }
 
-      passIndex++;
-
-      collectedStats.push([startPos, endPos]);
+      collectedStats.push({ type: isDribbleMode() ? "dribble" : "pass", start: startPos, end: endPos });
+        if (currentIsDribble) {
+          dribbleCount++;
+        } else {
+          passCount++;
+        }
       updatePredictBtn();
 
       lastRedDot = [ex, ey]; 
       firstPassComplete = true;
       firstClick = true;
+      console.log("Drawing pass arrow");
+
     }
   } else {
 
-    const lastEnd = collectedStats[collectedStats.length - 1][1];
+    const lastEnd = collectedStats[collectedStats.length - 1].end;
     startPos = lastEnd;
     endPos = [xPitch, yPitch];
     const [sx, sy] = scaleToCanvas(...startPos);
@@ -243,57 +284,76 @@ canvas.addEventListener("click", (event) => {
       ctx.fillStyle = "blue";
       ctx.fill();
     }
-
-
+    // Draw new red dot
     ctx.beginPath();
     ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
     ctx.fillStyle = "red";
     ctx.fill();
 
-    drawArrow(sx, sy, ex, ey);
-    // Midpoint 
-    const mx = (sx + ex) / 2;
-    const my = (sy + ey) / 2;
-      
-    // Label 
-    ctx.fillStyle = "black";
-    ctx.font = "16px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("pass " + passIndex, mx, my - 10);
-      
-    passIndex++;
+    if (isDribbleMode()) {
+      ctx.save();
+      ctx.strokeStyle = "orange";
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    
+      ctx.fillStyle = "orange";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("dribble " + dribbleNumber, (sx + ex) / 2, (sy + ey) / 2 - 10);
+      dribbleNumber++;
+    } else {
+      drawArrow(sx, sy, ex, ey);
+    
+      ctx.fillStyle = "black";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("pass " + passNumber, (sx + ex) / 2, (sy + ey) / 2 - 10);
+      passNumber++;
+    }
 
-    collectedStats.push([startPos, endPos]);
+
+
+    collectedStats.push({ type: isDribbleMode() ? "dribble" : "pass", start: startPos, end: endPos });
     updatePredictBtn();
-    if (collectedStats.length === 5) {
-      const lastEnd = collectedStats[collectedStats.length - 1][1];
+    if (collectedStats.length === 10) {
+      const lastEnd = collectedStats[collectedStats.length - 1].end;
       const [lx, ly] = scaleToCanvas(...lastEnd);
       const [gx, gy] = scaleToCanvas(...goalCoords);
 
-      // Draw dashed line
+      // Draw dashed shot line
       ctx.save();
       ctx.setLineDash([6, 4]);
       ctx.beginPath();
       ctx.moveTo(lx, ly);
       ctx.lineTo(gx, gy);
-      ctx.strokeStyle = "black";
+      ctx.strokeStyle = "green";
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.restore();
-      
-      // Label above the dashed line
+
+      // Label above shot line
       const midX = (lx + gx) / 2;
       const midY = (ly + gy) / 2;
-      ctx.fillStyle = "black";
+      ctx.fillStyle = "green";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
       ctx.fillText("shot!", midX, midY - 10);
-  }
+
+      // Highlight prediction box in green
+      const resultDiv = document.getElementById("predictionResult");
+      resultDiv.style.backgroundColor = "#c1f0c1"; // light green
+      resultDiv.style.border = "2px solid green";
+      resultDiv.style.padding = "4px";
+      resultDiv.style.display = "inline-block";
+    }
 
     lastRedDot = [ex, ey];
-
-
   }
 });
 
@@ -303,11 +363,14 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
     return;
   }
 
-const formatted = collectedStats.flatMap(pass => [
-  pass[0], // start 
-  pass[1], // end 
-  1        // dummy value for outcome
+const formatted = collectedStats.flatMap(({ start, end }) => [
+  start[0], start[1],
+  end[0], end[1],
+  1  // dummy placeholder for outcome
 ]);
+
+
+
 
 
 
@@ -339,27 +402,35 @@ const formatted = collectedStats.flatMap(pass => [
 document.getElementById("undoBtn").addEventListener("click", function () {
   if (collectedStats.length === 0) return;
 
-  collectedStats.pop();
+  const last = collectedStats.pop(); // You forgot to define 'last'
 
-  passIndex = 1;
+  if (last.type === "dribble") {
+    dribbleCount = Math.max(0, dribbleCount - 1);
+    dribbleNumber = Math.max(1, dribbleNumber - 1);
+  } else {
+    passCount = Math.max(0, passCount - 1);
+    passNumber = Math.max(1, passNumber - 1);
+  }
+
   firstPassComplete = collectedStats.length > 0;
   lastRedDot = null;
 
+  // Redraw the entire pitch and passes
   drawPitch();
 
-  collectedStats.forEach((pass, index) => {
-    const [start, end] = pass;
+  collectedStats.forEach((event, index) => {
+    const { type, start, end } = event;
     const [sx, sy] = scaleToCanvas(...start);
     const [ex, ey] = scaleToCanvas(...end);
 
-    // Green dot for start point
+    // Draw start dot
     if (index === 0) {
       ctx.beginPath();
       ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
       ctx.fillStyle = "green";
       ctx.fill();
     } else {
-      const prevEnd = collectedStats[index - 1][1];
+      const prevEnd = collectedStats[index - 1].end;
       const [psx, psy] = scaleToCanvas(...prevEnd);
       ctx.beginPath();
       ctx.arc(psx, psy, 6, 0, 2 * Math.PI);
@@ -367,37 +438,88 @@ document.getElementById("undoBtn").addEventListener("click", function () {
       ctx.fill();
     }
 
-    // Red dot for endpoint
-    if (index === collectedStats.length - 1) {
+    // Draw end dot
+    ctx.beginPath();
+    ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
+
+    // Draw event line
+    const midX = (sx + ex) / 2;
+    const midY = (sy + ey) / 2;
+    if (type === "dribble") {
+      ctx.save();
+      ctx.strokeStyle = "orange";
+      ctx.setLineDash([6, 4]);
       ctx.beginPath();
-      ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
-      ctx.fillStyle = "red";
-      ctx.fill();
-      lastRedDot = [ex, ey];
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      ctx.fillStyle = "orange";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("dribble " + (index + 1), midX, midY - 10);
     } else {
-      ctx.beginPath();
-      ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
-      ctx.fillStyle = "blue";
-      ctx.fill();
+      drawArrow(sx, sy, ex, ey);
+      ctx.fillStyle = "black";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("pass " + (index + 1), midX, midY - 10);
     }
 
-    drawArrow(sx, sy, ex, ey);
-    const mx = (sx + ex) / 2;
-    const my = (sy + ey) / 2;
-    ctx.fillStyle = "black";
-    ctx.font = "16px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("pass " + (index + 1), mx, my - 10);
+    shotTaken = false;
+    shootBtn.disabled = false;
+    lastRedDot = [ex, ey];
   });
-
-  passIndex = collectedStats.length + 1;
 
   updatePredictBtn();
 });
+document.getElementById("shootBtn").addEventListener("click", () => {
+  if (collectedStats.length === 0) {
+    alert("Add at least one event before shooting!");
+    return;
+  }
+
+  shotTaken = true;
+  const lastEnd = collectedStats[collectedStats.length - 1].end;
+  const [lx, ly] = scaleToCanvas(...lastEnd);
+  const [gx, gy] = scaleToCanvas(...goalCoords);
+
+  // Draw dashed shot line
+  ctx.save();
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(lx, ly);
+  ctx.lineTo(gx, gy);
+  ctx.strokeStyle = "green";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // Label above shot line
+  const midX = (lx + gx) / 2;
+  const midY = (ly + gy) / 2;
+  ctx.fillStyle = "green";
+  ctx.font = "16px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("shot!", midX, midY - 10);
+
+  document.getElementById("shootBtn").disabled = true;
+
+  predictBtn.classList.add("active");
+  predictBtn.disabled = false;
+
+
+});
+
 
 function updatePredictBtn() {
   const predictBtn = document.getElementById("predictBtn");
-  if (collectedStats.length === 5) {
+  if (collectedStats.length === 12) {
     predictBtn.classList.add("active");
     predictBtn.disabled = false;
   } else {
@@ -405,6 +527,20 @@ function updatePredictBtn() {
     predictBtn.disabled = true;
   }
 }
+
+// Dribbling
+
+const dribbleToggle = document.getElementById("dribbleToggle");
+function isDribbleMode() {
+  const toggle = document.getElementById("dribbleToggle");
+  if (!toggle) {
+    console.warn("Dribble toggle element missing!");
+    return false;
+  }
+  console.log("Dribble mode:", toggle.checked);
+  return toggle.checked;
+}
+
 
 
 
