@@ -1,10 +1,15 @@
 #predictBtn {
+  position: static; 
+  padding: 8px 12px;
   background-color: gray;
   color: white;
   padding: 8px 16px;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-weight: bold;
+  z-index: auto;
 }
 
 #predictBtn.active {
@@ -22,6 +27,18 @@
   position: static; 
   padding: 8px 12px;
   background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: auto;
+}
+
+#shootBtn {
+  position: static; 
+  padding: 8px 12px;
+  background-color: #3498db;
   color: white;
   border: none;
   border-radius: 6px;

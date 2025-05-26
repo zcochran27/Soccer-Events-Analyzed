@@ -1,24 +1,15 @@
-const canvas = document.getElementById("pitchCanvas");
-const ctx = canvas.getContext("2d");
-
 const pitchWidth = 120;
 const pitchHeight = 80;
-const canvasWidth = canvas.width;
-const canvasHeight = canvas.height;
 const goalCoords = [120, 40]; // Center of goal on right side
-
 
 let firstClick = true;
 let startPos = [-1, -1];
 let endPos = [-1, -1];
 let shotTaken = false;
 
-
 let collectedStats = []; // Array to store all submitted data
 
-function drawPitch() {
-  const ctx = canvas.getContext("2d");
-
+export function drawPitch(ctx, canvas) {
   // Clear the pitch
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -28,7 +19,7 @@ function drawPitch() {
   const scaleX = canvas.width / fieldWidth;
   const scaleY = canvas.height / fieldHeight;
 
-  ctx.strokeStyle = "#333";
+  ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2;
 
   // Draw outer boundary
@@ -129,7 +120,7 @@ function drawPitch() {
   });
 }
 
-function drawArrow(fromX, fromY, toX, toY) {
+function drawArrow(fromX, fromY, toX, toY, ctx) {
   const headlen = 10;
   const angle = Math.atan2(toY - fromY, toX - fromX);
   ctx.beginPath();
@@ -152,26 +143,28 @@ function drawArrow(fromX, fromY, toX, toY) {
   ctx.fill();
 }
 
-function scaleToPitch(x, y) {
+function scaleToPitch(x, y, canvas) {
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
   return [(x / canvasWidth) * pitchWidth, (y / canvasHeight) * pitchHeight];
 }
 
-function scaleToCanvas(x, y) {
+function scaleToCanvas(x, y, canvas) {
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
   return [(x / pitchWidth) * canvasWidth, (y / pitchHeight) * canvasHeight];
 }
 
 let firstPassComplete = false;
-let lastRedDot = null; 
+let lastRedDot = null;
 let passIndex = 1;
 let dribbleCount = 0;
 let passCount = 0;
 let passNumber = 1;
 let dribbleNumber = 1;
 
-
-
-
-canvas.addEventListener("click", (event) => {
+export const clickEvent = (event, ctx, canvas) => {
+  console.log(dribbleNumber, passNumber, collectedStats.length);
   if (dribbleNumber > 5 && isDribbleMode()) {
     alert("Maximum 5 dribbles reached!");
     return;
@@ -180,21 +173,19 @@ canvas.addEventListener("click", (event) => {
     alert("Maximum 5 passes reached!");
     return;
   }
-  
 
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
-  const [xPitch, yPitch] = scaleToPitch(x, y);
+  const [xPitch, yPitch] = scaleToPitch(x, y, canvas);
 
   if (xPitch < 0 || xPitch > 120 || yPitch < 0 || yPitch > 80) return;
   const currentIsDribble = isDribbleMode();
 
   if (!firstPassComplete) {
-    
     if (firstClick) {
       startPos = [xPitch, yPitch];
-      const [sx, sy] = scaleToCanvas(...startPos);
+      const [sx, sy] = scaleToCanvas(...startPos, canvas);
 
       ctx.beginPath();
       ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
@@ -204,8 +195,8 @@ canvas.addEventListener("click", (event) => {
       firstClick = false;
     } else {
       endPos = [xPitch, yPitch];
-      const [sx, sy] = scaleToCanvas(...startPos);
-      const [ex, ey] = scaleToCanvas(...endPos);
+      const [sx, sy] = scaleToCanvas(...startPos, canvas);
+      const [ex, ey] = scaleToCanvas(...endPos, canvas);
 
       if (lastRedDot) {
         const [lx, ly] = lastRedDot;
@@ -215,7 +206,6 @@ canvas.addEventListener("click", (event) => {
         ctx.fill();
       }
 
-
       ctx.beginPath();
       ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
       ctx.fillStyle = "red";
@@ -224,58 +214,58 @@ canvas.addEventListener("click", (event) => {
       const mx = (sx + ex) / 2;
       const my = (sy + ey) / 2;
 
-    if (isDribbleMode()) {
-      // Dashed orange line for dribble
-      ctx.save();
-      ctx.strokeStyle = "orange";
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(ex, ey);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-    
-      // Label
-      ctx.fillStyle = "orange";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("dribble " + dribbleNumber, mx, my - 10);
-      console.log("Drawing dribble line");
-      dribbleNumber++;
+      if (isDribbleMode()) {
+        // Dashed orange line for dribble
+        ctx.save();
+        ctx.strokeStyle = "orange";
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
 
-    } else {
-      drawArrow(sx, sy, ex, ey);
-    
-      ctx.fillStyle = "black";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("pass " + passNumber, mx, my - 10);
-      passNumber++;
-    }
+        // Label
+        ctx.fillStyle = "orange";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("dribble " + dribbleNumber, mx, my - 10);
+        console.log("Drawing dribble line");
+        dribbleNumber++;
+      } else {
+        drawArrow(sx, sy, ex, ey, ctx);
 
-      collectedStats.push({ type: isDribbleMode() ? "dribble" : "pass", start: startPos, end: endPos });
-        if (currentIsDribble) {
-          dribbleCount++;
-        } else {
-          passCount++;
-        }
-      updatePredictBtn();
+        ctx.fillStyle = "black";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("pass " + passNumber, mx, my - 10);
+        passNumber++;
+      }
 
-      lastRedDot = [ex, ey]; 
+      collectedStats.push({
+        type: isDribbleMode() ? "dribble" : "pass",
+        start: startPos,
+        end: endPos,
+      });
+      if (currentIsDribble) {
+        dribbleCount++;
+      } else {
+        passCount++;
+      }
+      // updatePredictBtn();
+
+      lastRedDot = [ex, ey];
       firstPassComplete = true;
       firstClick = true;
       console.log("Drawing pass arrow");
-
     }
   } else {
-
     const lastEnd = collectedStats[collectedStats.length - 1].end;
     startPos = lastEnd;
     endPos = [xPitch, yPitch];
-    const [sx, sy] = scaleToCanvas(...startPos);
-    const [ex, ey] = scaleToCanvas(...endPos);
-
+    const [sx, sy] = scaleToCanvas(...startPos, canvas);
+    const [ex, ey] = scaleToCanvas(...endPos, canvas);
 
     if (lastRedDot) {
       const [lx, ly] = lastRedDot;
@@ -300,15 +290,19 @@ canvas.addEventListener("click", (event) => {
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.restore();
-    
+
       ctx.fillStyle = "orange";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("dribble " + dribbleNumber, (sx + ex) / 2, (sy + ey) / 2 - 10);
+      ctx.fillText(
+        "dribble " + dribbleNumber,
+        (sx + ex) / 2,
+        (sy + ey) / 2 - 10
+      );
       dribbleNumber++;
     } else {
-      drawArrow(sx, sy, ex, ey);
-    
+      drawArrow(sx, sy, ex, ey, ctx);
+
       ctx.fillStyle = "black";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
@@ -316,14 +310,16 @@ canvas.addEventListener("click", (event) => {
       passNumber++;
     }
 
-
-
-    collectedStats.push({ type: isDribbleMode() ? "dribble" : "pass", start: startPos, end: endPos });
-    updatePredictBtn();
+    collectedStats.push({
+      type: isDribbleMode() ? "dribble" : "pass",
+      start: startPos,
+      end: endPos,
+    });
+    // updatePredictBtn();
     if (collectedStats.length === 10) {
       const lastEnd = collectedStats[collectedStats.length - 1].end;
-      const [lx, ly] = scaleToCanvas(...lastEnd);
-      const [gx, gy] = scaleToCanvas(...goalCoords);
+      const [lx, ly] = scaleToCanvas(...lastEnd, canvas);
+      const [gx, gy] = scaleToCanvas(...goalCoords, canvas);
 
       // Draw dashed shot line
       ctx.save();
@@ -355,51 +351,52 @@ canvas.addEventListener("click", (event) => {
 
     lastRedDot = [ex, ey];
   }
-});
+};
 
-document.getElementById("predictBtn").addEventListener("click", async () => {
+// document.getElementById("predictBtn").addEventListener("click",
+export const predictBtn = async (predictionResult) => {
   if (collectedStats.length === 0) {
     alert("Please create at least one pass before predicting.");
     return;
   }
 
-const formatted = collectedStats.flatMap(({ start, end }) => [
-  start[0], start[1],
-  end[0], end[1],
-  1  // dummy placeholder for outcome
-]);
-
-
-
-
-
+  const formatted = collectedStats.flatMap(({ start, end }) => [
+    start[0],
+    start[1],
+    end[0],
+    end[1],
+    1, // dummy placeholder for outcome
+  ]);
 
   try {
-    const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ features: formatted })
-    });
+    const response = await fetch(
+      "https://soccer-events-analyzed.onrender.com/predict",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ features: formatted }),
+      }
+    );
 
     const result = await response.json();
 
     if (result.prediction !== undefined) {
-      document.getElementById("predictionResult").innerText =
-        `Prediction: ${result.prediction.toFixed(4)}`;
+      predictionResult.innerText = `Prediction: ${result.prediction.toFixed(
+        4
+      )}`;
     } else {
-      document.getElementById("predictionResult").innerText =
-        `Error: ${result.error}`;
+      predictionResult.innerText = `Error: ${result.error}`;
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    document.getElementById("predictionResult").innerText =
-      `Fetch error: ${error}`;
+    predictionResult.innerText = `Fetch error: ${error}`;
   }
-});
+};
 
-document.getElementById("undoBtn").addEventListener("click", function () {
+// document.getElementById("undoBtn").addEventListener("click",
+export const undoBtn = (predictBtn, ctx, canvas) => {
   if (collectedStats.length === 0) return;
 
   const last = collectedStats.pop(); // You forgot to define 'last'
@@ -416,12 +413,12 @@ document.getElementById("undoBtn").addEventListener("click", function () {
   lastRedDot = null;
 
   // Redraw the entire pitch and passes
-  drawPitch();
+  drawPitch(ctx, canvas);
 
   collectedStats.forEach((event, index) => {
     const { type, start, end } = event;
-    const [sx, sy] = scaleToCanvas(...start);
-    const [ex, ey] = scaleToCanvas(...end);
+    const [sx, sy] = scaleToCanvas(...start, canvas);
+    const [ex, ey] = scaleToCanvas(...end, canvas);
 
     // Draw start dot
     if (index === 0) {
@@ -431,7 +428,7 @@ document.getElementById("undoBtn").addEventListener("click", function () {
       ctx.fill();
     } else {
       const prevEnd = collectedStats[index - 1].end;
-      const [psx, psy] = scaleToCanvas(...prevEnd);
+      const [psx, psy] = scaleToCanvas(...prevEnd, canvas);
       ctx.beginPath();
       ctx.arc(psx, psy, 6, 0, 2 * Math.PI);
       ctx.fillStyle = "blue";
@@ -463,7 +460,7 @@ document.getElementById("undoBtn").addEventListener("click", function () {
       ctx.textAlign = "center";
       ctx.fillText("dribble " + (index + 1), midX, midY - 10);
     } else {
-      drawArrow(sx, sy, ex, ey);
+      drawArrow(sx, sy, ex, ey, ctx);
       ctx.fillStyle = "black";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
@@ -476,8 +473,30 @@ document.getElementById("undoBtn").addEventListener("click", function () {
   });
 
   updatePredictBtn();
-});
-document.getElementById("shootBtn").addEventListener("click", () => {
+};
+
+export const clearPassesBtn = (ctx, canvas, shootBtn, predictBtn) => {
+  collectedStats = [];
+  firstPassComplete = false;
+  lastRedDot = null;
+  passIndex = 1;
+  dribbleCount = 0;
+  passCount = 0;
+  passNumber = 1;
+  dribbleNumber = 1;
+  shotTaken = false;
+
+  // Redraw the pitch
+  drawPitch(ctx, canvas);
+
+  predictBtn.classList.remove("activate-predict");
+  predictBtn.disabled = false;
+  shootBtn.disabled = false;
+  shootBtn.classList.remove("active-predict");
+};
+
+// document.getElementById("shootBtn").addEventListener("click",
+export const shootBtn = (shoot, predict, canvas, ctx) => {
   if (collectedStats.length === 0) {
     alert("Add at least one event before shooting!");
     return;
@@ -485,8 +504,8 @@ document.getElementById("shootBtn").addEventListener("click", () => {
 
   shotTaken = true;
   const lastEnd = collectedStats[collectedStats.length - 1].end;
-  const [lx, ly] = scaleToCanvas(...lastEnd);
-  const [gx, gy] = scaleToCanvas(...goalCoords);
+  const [lx, ly] = scaleToCanvas(...lastEnd, canvas);
+  const [gx, gy] = scaleToCanvas(...goalCoords, canvas);
 
   // Draw dashed shot line
   ctx.save();
@@ -494,7 +513,7 @@ document.getElementById("shootBtn").addEventListener("click", () => {
   ctx.beginPath();
   ctx.moveTo(lx, ly);
   ctx.lineTo(gx, gy);
-  ctx.strokeStyle = "green";
+  ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
   ctx.stroke();
   ctx.setLineDash([]);
@@ -503,22 +522,18 @@ document.getElementById("shootBtn").addEventListener("click", () => {
   // Label above shot line
   const midX = (lx + gx) / 2;
   const midY = (ly + gy) / 2;
-  ctx.fillStyle = "green";
+  ctx.fillStyle = "black";
   ctx.font = "16px Arial";
   ctx.textAlign = "center";
   ctx.fillText("shot!", midX, midY - 10);
 
-  document.getElementById("shootBtn").disabled = true;
+  shoot.disabled = true;
 
-  predictBtn.classList.add("active");
-  predictBtn.disabled = false;
+  predict.classList.add("activate-predict");
+  predict.disabled = false;
+};
 
-
-});
-
-
-function updatePredictBtn() {
-  const predictBtn = document.getElementById("predictBtn");
+function updatePredictBtn(predictBtn) {
   if (collectedStats.length === 12) {
     predictBtn.classList.add("active");
     predictBtn.disabled = false;
@@ -530,7 +545,7 @@ function updatePredictBtn() {
 
 // Dribbling
 
-const dribbleToggle = document.getElementById("dribbleToggle");
+// const dribbleToggle = document.getElementById("dribbleToggle");
 function isDribbleMode() {
   const toggle = document.getElementById("dribbleToggle");
   if (!toggle) {
@@ -541,12 +556,5 @@ function isDribbleMode() {
   return toggle.checked;
 }
 
-
-
-
-
-
-
-drawPitch();
-updatePredictBtn();
-
+// drawPitch();
+// updatePredictBtn();
