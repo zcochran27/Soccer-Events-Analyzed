@@ -88,10 +88,28 @@
     <div class="canvas-container">
         <canvas id="pitchCanvas" width="720" height="480"></canvas>
     </div>
-    <label>
+    <!-- <label>
         <input type="checkbox" id="dribbleToggle" />
         <label for="dribbleToggle">Dribble Mode</label>
-    </label>
+    </label> -->
+    <label for="passType">Select Pass Type:</label>
+    <select id="passType" name="passType">
+        <option value="normal">Normal Pass</option>
+        <option value="Cross">Cross</option>
+        <option value="Through Ball">Through Ball</option>
+        <option value="Cut-back">Cut Back</option>
+        <option value="Switch">Switch</option>
+        <option value="Throw-in">Throw-in</option>
+        <option value="Corner">Corner</option>
+        <option value="Free Kick">Free Kick</option>
+        <option value="Goal Kick">Goal Kick</option>
+    </select>
+    <label for="passHeight">Select Pass Height:</label>
+    <select id="passHeight" name="passHeight">
+        <option value="Ground">Ground Pass</option>
+        <option value="Low">Low Pass</option>
+        <option value="High">High Pass</option>
+    </select>
     <button id="undoBtn">Undo last pass</button>
     <button id="shootBtn">Shoot!</button>
     <button id="predictBtn">Predict Play Probability</button>
