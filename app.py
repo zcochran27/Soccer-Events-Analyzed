@@ -67,6 +67,11 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
                 free_kick,
                 goal_kick
             ])
+        
+        # Pad with zeros if we don't have enough features
+        expected_length = 100  # 5 passes * 20 features per pass
+        if len(features) < expected_length:
+            features.extend([0] * (expected_length - len(features)))
                 
         return np.array(features).reshape(1, -1)
 
