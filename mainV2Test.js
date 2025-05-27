@@ -436,25 +436,25 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
     pass_height
   ]);
   console.log(formatted);
-  // try {
-  //   const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ features: formatted })
-  //   });
+  try {
+    const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ features: formatted })
+    });
 
-  //   const result = await response.json();
-  //   if (result.prediction !== undefined) {
-  //     document.getElementById("predictionResult").innerText =
-  //       `Prediction: ${result.prediction.toFixed(4)}`;
-  //   } else {
-  //     document.getElementById("predictionResult").innerText =
-  //       `Error: ${result.error}`;
-  //   }
-  // } catch (error) {
-  //   document.getElementById("predictionResult").innerText =
-  //     `Fetch error: ${error}`;
-  // }
+    const result = await response.json();
+    if (result.prediction !== undefined) {
+      document.getElementById("predictionResult").innerText =
+        `Prediction: ${result.prediction.toFixed(4)}`;
+    } else {
+      document.getElementById("predictionResult").innerText =
+        `Error: ${result.error}`;
+    }
+  } catch (error) {
+    document.getElementById("predictionResult").innerText =
+      `Fetch error: ${error}`;
+  }
 });
 
 function updatePredictBtn() {
