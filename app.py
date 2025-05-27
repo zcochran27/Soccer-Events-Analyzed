@@ -93,7 +93,7 @@ app.add_middleware(
 
 # Input schema
 class PredictionRequest(BaseModel):
-    features: List[Union[List[float], int]]
+    features: List[Union[float, str]]
 
 @app.post("/predict")
 def predict(request: PredictionRequest):

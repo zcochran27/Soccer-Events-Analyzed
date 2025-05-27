@@ -436,7 +436,13 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
     pass_height
   ]);
   console.log(formatted);
+  const resultBox = document.getElementById("predictionResult");
+  const spinner = document.getElementById("loadingSpinner");
+
+  resultBox.innerText = "";
+  spinner.style.display = "block"; 
   try {
+    console.log("fetching");
     const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -445,15 +451,14 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
 
     const result = await response.json();
     if (result.prediction !== undefined) {
-      document.getElementById("predictionResult").innerText =
-        `Prediction: ${result.prediction.toFixed(4)}`;
+      resultBox.innerText =`Prediction: ${result.prediction.toFixed(4)}`;
     } else {
-      document.getElementById("predictionResult").innerText =
-        `Error: ${result.error}`;
-    }
+      resultBox.innerText =`Error: ${result.error}`;
+    } 
   } catch (error) {
-    document.getElementById("predictionResult").innerText =
-      `Fetch error: ${error}`;
+    resultBox.innerText =`Fetch error: ${error}`;
+  } finally {
+    spinner.style.display = "none";
   }
 });
 
