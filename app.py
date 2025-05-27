@@ -15,11 +15,11 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
         
     def transform(self, X):
         # Initialize array to store features
-        features = np.zeros((1, 55))  # Match the 67 columns from processed_game
+        features = np.zeros((1, 100)) 
         
-        # Process each pass (every 3 elements in input list)
-        for i in range(0, len(X), 3):
-            idx = i // 3  # Get pass number (0-4)
+        # Process each pass (every 5 elements in input list)
+        for i in range(0, len(X), 5):
+            idx = i // 5  # Get pass number (0-4)
             start_loc = X[i]
             end_loc = X[i+1]
             outcome = X[i+2]
@@ -29,38 +29,51 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
             pass_length = np.sqrt((end_loc[0] - start_loc[0])**2 + (end_loc[1] - start_loc[1])**2)
             
             # Calculate distances and angles
-            start_dist_center = np.sqrt((start_loc[0] - 60)**2 + (start_loc[1] - 40)**2)
-            end_dist_center = np.sqrt((end_loc[0] - 60)**2 + (end_loc[1] - 40)**2)
+            start_dist_center = np.abs(start_loc[0] - 40)
+            end_dist_center = np.abs(end_loc[0] - 40)
             end_dist_goal = np.sqrt((end_loc[0] - 120)**2 + (end_loc[1] - 40)**2)
             end_angle_goal = np.arctan2(end_loc[1] - 40, end_loc[0] - 120)
-            if idx == 0:  # Current pass
-                features[0, 0] = outcome
-                features[0, 1] = pass_angle
-                features[0, 2] = pass_length
-                features[0, 3:5] = start_loc
-                features[0, 5:7] = end_loc
-                features[0, 7] = start_dist_center
-                features[0, 8] = end_dist_center
-                features[0, 9] = end_dist_goal
-                features[0, 10] = end_angle_goal
-            else:  # Previous passes
-                offset = (idx - 1) * 11 + 11  # Starting index for this previous pass
-                features[0, offset] = pass_angle
-                features[0, offset+1] = pass_length
-                features[0, offset+2:offset+4] = start_loc
-                features[0, offset+4:offset+6] = end_loc
-                features[0, offset+6] = start_dist_center
-                features[0, offset+7] = end_dist_center
-                features[0, offset+8] = end_dist_goal
-                features[0, offset+9] = end_angle_goal
-                features[0, offset+10] = outcome
+            pass_type = X[i+3]
+            pass_height = 0 if X[i+4] == "Ground" else 1 if X[i+4] == "Low" else 2
+            cross = 1 if pass_type == "Cross" else 0
+            throw_in = 1 if pass_type == "Throw-in" else 0
+            corner = 1 if pass_type == "Corner" else 0
+            free_kick = 1 if pass_type == "Free Kick" else 0
+            goal_kick = 1 if pass_type == "Goal Kick" else 0
+            cut_back = 1 if pass_type == "Cut-back" else 0
+            switch = 1 if pass_type == "Switch" else 0
+            through_ball = 1 if pass_type == "Through Ball" else 0
+
+            # Calculate feature index offset based on pass number
+            offset = idx * 20
+
+            features[0, offset + 0] = outcome
+            features[0, offset + 1] = pass_angle
+            features[0, offset + 2] = pass_length
+            features[0, offset + 3] = cross
+            features[0, offset + 4] = cut_back
+            features[0, offset + 5] = switch
+            features[0, offset + 6] = through_ball
+            features[0, offset + 7] = pass_height
+
+            features[0, offset + 8:offset + 10] = start_loc
+            features[0, offset + 10:offset + 12] = end_loc
+            features[0, offset + 12] = start_dist_center
+            features[0, offset + 13] = end_dist_center
+            features[0, offset + 14] = end_dist_goal
+            features[0, offset + 15] = end_angle_goal
+
+            features[0, offset + 16] = throw_in
+            features[0, offset + 17] = corner
+            features[0, offset + 18] = free_kick
+            features[0, offset + 19] = goal_kick
                 
         return features
 
 
 
 model = xgb.XGBClassifier()
-model.load_model("final_xgb_model.json")
+model.load_model("final_xgb_modeV2.json")
 
 websitePipeline = make_pipeline(
     websiteInputPreprocessor(),
