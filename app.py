@@ -18,11 +18,11 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
         features = np.zeros((1, 100)) 
         
         # Process each pass (every 5 elements in input list)
-        for i in range(0, len(X), 5):
+        for i in range(0, len(X), 7):
             idx = i // 5  # Get pass number (0-4)
-            start_loc = X[i]
-            end_loc = X[i+1]
-            outcome = X[i+2]
+            start_loc = X[i:i+2]
+            end_loc = X[i+2:i+4]
+            outcome = X[i+4]
             
             # Calculate pass features
             pass_angle = np.arctan2(end_loc[1] - start_loc[1], end_loc[0] - start_loc[0])
@@ -33,8 +33,8 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
             end_dist_center = np.abs(end_loc[0] - 40)
             end_dist_goal = np.sqrt((end_loc[0] - 120)**2 + (end_loc[1] - 40)**2)
             end_angle_goal = np.arctan2(end_loc[1] - 40, end_loc[0] - 120)
-            pass_type = X[i+3]
-            pass_height = 0 if X[i+4] == "Ground" else 1 if X[i+4] == "Low" else 2
+            pass_type = X[i+5]
+            pass_height = 0 if X[i+6] == "Ground" else 1 if X[i+6] == "Low" else 2
             cross = 1 if pass_type == "Cross" else 0
             throw_in = 1 if pass_type == "Throw-in" else 0
             corner = 1 if pass_type == "Corner" else 0
