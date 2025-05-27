@@ -73,7 +73,7 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
 
 
 model = xgb.XGBClassifier()
-model.load_model("final_xgb_modeV2.json")
+model.load_model("final_xgb_modelV2.json")
 
 websitePipeline = make_pipeline(
     websiteInputPreprocessor(),
