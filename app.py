@@ -15,7 +15,7 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
         
     def transform(self, X):
         # Initialize array to store features
-        features = np.zeros((1, 100)) 
+        features = []
         
         # Process each pass (every 5 elements in input list)
         for i in range(0, len(X), 7):
@@ -44,31 +44,31 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
             switch = 1 if pass_type == "Switch" else 0
             through_ball = 1 if pass_type == "Through Ball" else 0
 
-            # Calculate feature index offset based on pass number
-            offset = idx * 20
-
-            features[0, offset + 0] = outcome
-            features[0, offset + 1] = pass_angle
-            features[0, offset + 2] = pass_length
-            features[0, offset + 3] = cross
-            features[0, offset + 4] = cut_back
-            features[0, offset + 5] = switch
-            features[0, offset + 6] = through_ball
-            features[0, offset + 7] = pass_height
-
-            features[0, offset + 8:offset + 10] = start_loc
-            features[0, offset + 10:offset + 12] = end_loc
-            features[0, offset + 12] = start_dist_center
-            features[0, offset + 13] = end_dist_center
-            features[0, offset + 14] = end_dist_goal
-            features[0, offset + 15] = end_angle_goal
-
-            features[0, offset + 16] = throw_in
-            features[0, offset + 17] = corner
-            features[0, offset + 18] = free_kick
-            features[0, offset + 19] = goal_kick
+            # Add features in order
+            features.extend([
+                outcome,
+                pass_angle,
+                pass_length,
+                cross,
+                cut_back,
+                switch,
+                through_ball,
+                pass_height,
+                start_loc[0],
+                start_loc[1],
+                end_loc[0],
+                end_loc[1],
+                start_dist_center,
+                end_dist_center,
+                end_dist_goal,
+                end_angle_goal,
+                throw_in,
+                corner,
+                free_kick,
+                goal_kick
+            ])
                 
-        return features
+        return np.array(features).reshape(1, -1)
 
 
 
