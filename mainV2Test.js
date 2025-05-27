@@ -459,7 +459,8 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
     resultBox.innerText =`Fetch error: ${error}`;
   } finally {
     spinner.style.display = "none";
-    collectedStats.reverse();
+    collectedStats = collectedStats.reverse();
+    console.log(collectedStats);
   }
 });
 
