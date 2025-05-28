@@ -65,7 +65,7 @@ svg {
   border: 1px solid #ccc;
 }
 .line { 
-  stroke: black; stroke-width: 0.5; fill: none; 
+  stroke: black; stroke-width: 0.2; fill: none; 
 }
 .pass {
   fill: none;
