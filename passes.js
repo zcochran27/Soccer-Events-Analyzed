@@ -3,7 +3,7 @@ import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 
 const lamineChanceLast5 = await fetch("lamine_chance_last_5.json");
 const passes = await lamineChanceLast5.json();
-
+let passesV2 = passes.slice(0, 4);
 function drawFootballPitch(svg) {
     // Pitch Boundary
     svg.append("rect")
@@ -182,6 +182,7 @@ getHeightLabel(height)
 ]);
 const resultBox = document.getElementById("yamalChancexG");
 try {
+    console.log(passesFormatted);
     const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -190,10 +191,131 @@ try {
 
     const result = await response.json();
     if (result.prediction !== undefined) {
-      resultBox.innerText =`The pass sequence xG for this play is ${result.prediction.toFixed(4)}`;
+      resultBox.innerText =`The pass sequence xG for this play is ${result.prediction.toFixed(4)}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
     } else {
       resultBox.innerText =`Error: ${result.error}`;
     } 
   } catch (error) {
     resultBox.innerText =`Fetch error: ${error}`;
   } 
+
+  const svg2 = d3.select("#pitch2");
+  const lamineOptions = await fetch("lamineOptions.json");
+  const lamineOptionsData = await lamineOptions.json();
+  const endPoints = Object.values(lamineOptionsData).map(d => d.end);
+const startPoint = lamineOptionsData.option1.start;
+
+drawFootballPitch(svg2);
+
+const tooltip2 = d3.select("body")
+  .append("div")
+  .style("position", "absolute")
+  .style("background", "rgba(0,0,0,0.7)")
+  .style("color", "white")
+  .style("padding", "6px")
+  .style("border-radius", "4px")
+  .style("font-size", "12px")
+  .style("pointer-events", "none") // so it doesn't block mouse events
+  .style("opacity", 0);
+
+svg2.selectAll(".pass")
+    .data(passesV2)
+    .join("line")
+    .attr("class", "pass")
+    .attr("x1", d => d.start[0])
+    .attr("y1", d => d.start[1])
+    .attr("x2", d => d.end[0])
+    .attr("y2", d => d.end[1])
+    .attr("stroke", d => d.outcome === 1.0 ? "green" : "red")
+    .attr("stroke-width", (d, i) => .5 + i * .2)
+    .attr("marker-end", (d, i) => `url(#arrow-${i})`)
+
+
+svg2.append("circle")
+  .attr("cx", startPoint[0])
+  .attr("cy", startPoint[1])
+  .attr("r", 1)
+  .attr("fill", "black");
+svg2.append("text")
+  .attr("x", startPoint[0] - 8) // slight offset to the right
+  .attr("y", startPoint[1] +.8) // slight offset above
+  .text("Start")
+  .attr("font-size", "3px")
+  .attr("fill", "black");
+svg2.selectAll(".option-circle")
+  .data(endPoints)
+  .enter()
+  .append("circle")
+  .attr("class", "option-circle")
+  .attr("cx", d => d[0])
+  .attr("cy", d => d[1])
+  .attr("r", 1)
+  .attr("fill", "blue")
+  .on("click",async (event, d) => {
+    svg2.selectAll(".selected-arrow").remove();
+    console.log(d);
+    // Draw new arrow
+    svg2.append("line")
+      .attr("class", "selected-arrow")
+      .attr("x1", startPoint[0])
+      .attr("y1", startPoint[1])
+      .attr("x2", d[0])
+      .attr("y2", d[1])
+      .attr("stroke", 'green')
+      .attr("stroke-width", (d, i) => .5 + 5 * .2)
+      .attr("marker-end", "url(#arrowgreen)");
+    if (passesV2.length === 5) {
+        passesV2 = passesV2.slice(0,4)
+    }
+      passesV2.push({
+        "outcome": 1.0,
+        "start": [85.3,34.5],
+        "end": [d[0],d[1]],
+        "type": "Pass",
+        "height": 0.0
+      });
+
+      try {
+        const reversedPassesV2 = passesV2.reverse();
+        const passesFormattedV2 = reversedPassesV2.flatMap(({ start, end, type, outcome, height}) => [
+        start[0], start[1],
+        end[0], end[1],
+        outcome,
+        type,
+        getHeightLabel(height)
+        ]);
+        const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ features: passesFormattedV2 })
+        });
+    
+        const result = await response.json();
+        if (result.prediction !== undefined) {
+            tooltip2
+                    .style("opacity", 1)
+                    .html(`
+                        Pass sequence xG: ${result.prediction.toFixed(4)}.      
+                    `)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY + 10) + "px");
+        } else {
+          tooltip2.innerText =`Error: ${result.error}`;
+        } 
+      } catch (error) {
+        tooltip2.innerText =`Fetch error: ${error}`;
+      } 
+      passesV2 = passesV2.reverse();    
+  });
+
+  svg2.selectAll(".option-label")
+  .data(endPoints)
+  .enter()
+  .append("text")
+  .attr("class", "option-label")
+  .attr("x", d => d[0] -9)  // use d[0] for x
+  .attr("y", d => d[1] + 1)  // use d[1] for y
+  .text((d, i) => "Option " + (i + 1))
+  .attr("font-size", "2px")
+  .attr("fill", "black")
+  .style("pointer-events", "none");
