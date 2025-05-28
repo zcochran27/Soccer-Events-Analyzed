@@ -13,11 +13,14 @@
 </head>
 
 <body>
-    <h1>Pass Sequences in Soccer</h1>
-    <p>Lets explore how different pass sequences can lead to different outcomes.</p>
+    <h1 style="text-align: center">Pass Sequences in Soccer</h1>
+    <p style="text-align: center">Lets explore how different pass sequences can lead to different outcomes.</p>
 
+    <div class="center-container">
     <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA Euros Semi-Final between Spain and France.</h2>
     <div id="player"></div>
+    <h3>In this clip, we see a couple of passes before the shot is taken and the goal is scored. Let's take a look at the whole sequence of passes that led to the goal. Hover over each pass to see more details. </h3>
+    </div>
     <svg id="pitch" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
         <!-- Pitch Boundary -->
         <rect x="0" y="0" width="120" height="80" class="line" />
@@ -68,8 +71,8 @@
           </defs>
       </svg>
 
-    <h1>Pass Sequence xG Predictor</h1>
-    <h2>This is a tool to predict the probability of a pass being successful based on the pass type, height, and location.</h2>
+    <h1 style="text-align: center;">Pass Sequence Game</h1>
+    <h2 style="text-align: center">Try to get the highest probability possible!</h2>
     <!-- Put the clip embedding and explainations here -->
     
     
@@ -144,8 +147,9 @@
             }
         }
     </script>
-      <div id="heatmap"></div>
-      <script src="../goals/goals.js"></script>
+    <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
+    <div id="heatmap"></div>
+    <script src="../goals/goals.js"></script>
 </div>
 </body>
 
