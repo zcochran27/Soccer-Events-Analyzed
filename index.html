@@ -3,6 +3,8 @@
 
 <head>
     <script type="module" src="mainV2Test.js"></script>
+    <script src="youtube.js"></script>
+    <script type="module" src="passes.js"></script>
     <link rel="stylesheet" href="style.css" />
 
     <meta charset="UTF-8">
@@ -10,6 +12,61 @@
 </head>
 
 <body>
+    <h1>Pass Sequences in Soccer</h1>
+    <p>Lets explore how different pass sequences can lead to different outcomes.</p>
+
+    <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA Euros Semi-Final between Spain and France.</h2>
+    <div id="player"></div>
+    <svg id="pitch" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
+        <!-- Pitch Boundary -->
+        <rect x="0" y="0" width="120" height="80" class="line" />
+      
+        <!-- Halfway Line -->
+        <line x1="60" y1="0" x2="60" y2="80" class="line" />
+      
+        <!-- Center Circle & Spot -->
+        <circle cx="60" cy="40" r="9.15" class="line" />
+        <circle cx="60" cy="40" r="0.5" fill="black" />
+      
+        <!-- Penalty Areas -->
+        <rect x="0" y="19.84" width="16.5" height="40.32" class="line" />
+        <rect x="103.5" y="19.84" width="16.5" height="40.32" class="line" />
+      
+        <!-- Goal Areas -->
+        <rect x="0" y="30.84" width="5.5" height="18.32" class="line" />
+        <rect x="114.5" y="30.84" width="5.5" height="18.32" class="line" />
+      
+        <!-- Penalty Spots -->
+        <circle cx="12" cy="40" r="0.3" fill="black" />
+        <circle cx="108" cy="40" r="0.3" fill="black" />
+      
+        <!-- Corner Arcs (radius 1m) -->
+        <path d="M0,1 A1,1 0 0,1 1,0" class="line" />
+        <path d="M0,79 A1,1 0 0,0 1,80" class="line" />
+        <path d="M120,1 A1,1 0 0,0 119,0" class="line" />
+        <path d="M120,79 A1,1 0 0,1 119,80" class="line" />
+        <!-- Arrowhead marker -->
+        <defs>
+            <marker id="arrowgreen"
+                    viewBox="0 0 10 10"
+                    refX="2" refY="5"
+                    markerWidth="4" markerHeight="4"
+                    orient="auto"
+                    markerUnits="userSpaceOnUse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="green" />
+            </marker>
+          
+            <marker id="arrowred"
+                    viewBox="0 0 10 10"
+                    refX="2" refY="5"
+                    markerWidth="4" markerHeight="4"
+                    orient="auto"
+                    markerUnits="userSpaceOnUse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="red" />
+            </marker>
+          </defs>
+      </svg>
+
     <h1>Pass Sequence xG Predictor</h1>
     <h2>This is a tool to predict the probability of a pass being successful based on the pass type, height, and location.</h2>
     <div class="canvas-container">

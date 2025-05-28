@@ -60,3 +60,13 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+svg {
+  border: 1px solid #ccc;
+}
+.line { 
+  stroke: black; stroke-width: 0.5; fill: none; 
+}
+.pass {
+  fill: none;
+}
