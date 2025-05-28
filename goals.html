@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Minimalist Soccer Heatmap</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #f9f9f9;
+      font-family: sans-serif;
+      display: flex;
+    }
+    svg {
+      display: block;
+      margin: auto;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+    }
+    .pitch-line {
+      stroke: #fdfdfd;
+      stroke-width: 10;
+      fill: none;
+    }
+    .cell {
+      stroke: none;
+      border: none;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .selection-bar {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .selection-bar button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background-color: #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .selection-bar button.active {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #ffffff;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      padding: 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .section-title {
+      font-size: 10px;
+      color: #5f6368;
+      text-transform: uppercase;
+      margin: 1rem 0 0.5rem 1rem;
+      font-weight: 500;
+    }
+
+    .nav-item {
+      display: block;
+      text-decoration: none;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      margin: 2px 0;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #202124;
+      transition: background-color 0.2s;
+    }
+
+    .nav-item:hover {
+      background-color: #e8f0fe;
+    }
+
+    .nav-item.active {
+      background-color: #d2e3fc;
+      font-weight: 500;
+      color: #1a73e8;
+    }
+
+    #content {
+      padding: 2rem;
+      flex-grow: 1;
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar" id="sidebar"></div>
+<div id="content">
+  <div id="tooltip" class="tooltip"></div>
+  <svg id="soccer" width="960" height="640"></svg>
+  <div class="selection-bar">
+    <button data-value="shot_data.json">XG</button>
+    <button data-value="shots_goals.json">Goals</button>
+    <button data-value="shots_taken.json">Shots Taken</button>
+    <button data-value="last_pass.json">Last Pass</button>
+  </div>
+</div>
+
+
+<script>
+const navData = [
+    {
+      title: "Simulation",
+      items: [
+        { name: "Game", href: "game" },
+        { name: "Example", href: "#starred" },
+
+      ]
+    },
+    {
+      title: "Learning",
+      items: [
+        { name: "Passing", href: "#spam" },
+        { name: "Goals", href: "goals.html" },
+      ]
+    },
+    {
+      title: "About",
+      items: [
+        { name: "Prototype", href: "#spam" },
+      ]
+    }
+  ];
+
+  const sidebar = document.getElementById("sidebar");
+  const content = document.getElementById("content");
+
+  let selectedLink = null;
+
+  const currentPage = window.location.pathname.split("/").pop(); // e.g. 'inbox.html'
+
+
+  navData.forEach((section, sectionIndex) => {
+    // Section title
+    const title = document.createElement("div");
+    title.className = "section-title";
+    title.textContent = section.title;
+    sidebar.appendChild(title);
+
+    section.items.forEach((item, itemIndex) => {
+
+    const isActive = currentPage === item.href;
+      const link = document.createElement("a");
+      link.className = "nav-item";
+      link.href = item.href;
+      link.textContent = item.name;
+
+      link.addEventListener("click", (e) => {
+        selectedLink = item.name;
+
+        document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+        link.classList.add("active");
+      });
+
+      // Default active
+      if (isActive) {
+        link.classList.add("active");
+        selectedLink = item.name;
+      }
+
+      sidebar.appendChild(link);
+    });
+  });
+
+const width = 960, height = 640;
+const pitchLength = 120, pitchWidth = 80;
+
+const svg = d3.select("#soccer");
+const xScale = d3.scaleLinear().domain([0, pitchLength]).range([0, width]);
+const yScale = d3.scaleLinear().domain([0, pitchWidth]).range([0, height]);
+const tooltip = d3.select("#tooltip");
+
+
+
+function draw(fdata, tag) {
+  
+  d3.json(fdata).then(raw => {
+  const keys = Object.keys(raw.x);
+  const data = keys.map(key => ({
+    x: +raw.x[key],
+    y: +raw.y[key],
+    z: +raw.z[key]
+  }));
+
+  const xBins = 20, yBins = 15;
+  const xStep = pitchLength / xBins, yStep = pitchWidth / yBins;
+  const grid = Array.from({ length: xBins }, (_, i) =>
+    Array.from({ length: yBins }, (_, j) => ({
+      x0: i * xStep,
+      y0: j * yStep,
+      zValues: []
+    }))
+  );
+
+  for (const d of data) {
+    const i = Math.floor(d.x / xStep);
+    const j = Math.floor(d.y / yStep);
+    if (i >= 0 && i < xBins && j >= 0 && j < yBins) {
+      grid[i][j].zValues.push(d.z);
+    }
+  }
+
+  for (const row of grid) {
+    for (const cell of row) {
+      if (fdata.includes("data") || fdata.includes("last_pass")) {
+        cell.z = d3.mean(cell.zValues) || 0;
+      }
+
+      else if (fdata.includes("goals")){
+        cell.z = d3.sum(cell.zValues);
+      }
+
+      else if (fdata.includes("taken")){
+        cell.z = d3.count(cell.zValues);
+      }
+    }
+  }
+
+
+  let zzz = grid.flat().map(d => d.z)
+  const minn = Math.min(...zzz);
+  const maxx = Math.max(...zzz);
+
+
+  cmap = grid.flat().map(d => ((d.z - minn)/(maxx-minn)) * 0.7 - 0.3);
+  
+  console.log(cmap);
+  const color = d3.scaleSequential()
+    .domain(d3.extent(cmap))
+    .interpolator(d3.interpolateGreens);
+
+  svg.selectAll("rect.cell")
+    .data(grid.flat())
+    .join("rect")
+    .attr("class", "cell")
+    .attr("x", d => xScale(d.x0))
+    .attr("y", d => yScale(d.y0))
+    .attr("width", xScale(xStep) - xScale(0))
+    .attr("height", yScale(yStep) - yScale(0))
+    .attr("fill", d => color((d.z - minn) / (maxx - minn)))
+    .on("mouseover", (event, d) => {
+      tooltip.style("opacity", 1)
+        .html(`${tag}: ${d.z.toFixed(2)}`)
+        .style("left", `${event.pageX + 10}px`)
+        .style("top", `${event.pageY - 20}px`);
+    })
+    .on("mousemove", event => {
+      tooltip.style("left", `${event.pageX + 10}px`)
+             .style("top", `${event.pageY - 20}px`);
+    })
+    .on("mouseout", () => {
+      tooltip.style("opacity", 0);
+    });
+
+  drawPitch();
+});};
+
+const drawPitch = () => {
+  const g = svg.append("g");
+  const cornerRadius = 10;
+
+  g.append("path")
+    .attr("d", `M${cornerRadius},0
+                H${width - cornerRadius}
+                A${cornerRadius},${cornerRadius} 0 0 1 ${width},${cornerRadius}
+                V${height - cornerRadius}
+                A${cornerRadius},${cornerRadius} 0 0 1 ${width - cornerRadius},${height}
+                H${cornerRadius}
+                A${cornerRadius},${cornerRadius} 0 0 1 0,${height - cornerRadius}
+                V${cornerRadius}
+                A${cornerRadius},${cornerRadius} 0 0 1 ${cornerRadius},0
+                Z`)
+    .attr("class", "pitch-line");
+
+  g.append("circle")
+    .attr("cx", width/2).attr("cy", height/2)
+    .attr("r", 9.15 * (width / pitchLength))
+    .attr("class", "pitch-line");
+
+  g.append("circle")
+    .attr("cx", width/2).attr("cy", height/2)
+    .attr("r", 1.5)
+    .attr("fill", "#ccc");
+
+  const penaltyBox = {
+    width: 18 * (width / pitchLength),
+    height: 44 * (height / pitchWidth)
+  };
+  g.append("line")
+    .attr("x1", width / 2)
+    .attr("y1", 0)
+    .attr("x2", width / 2)
+    .attr("y2", height)
+    .attr("class", "pitch-line");
+
+  g.append("rect")
+    .attr("x", 0)
+    .attr("y", (height - penaltyBox.height) / 2)
+    .attr("width", penaltyBox.width)
+    .attr("height", penaltyBox.height)
+    .attr("class", "pitch-line");
+
+  g.append("rect")
+    .attr("x", width - penaltyBox.width)
+    .attr("y", (height - penaltyBox.height) / 2)
+    .attr("width", penaltyBox.width)
+    .attr("height", penaltyBox.height)
+    .attr("class", "pitch-line");
+
+  const goalBox = {
+    width: 6 * (width / pitchLength),
+    height: 20 * (height / pitchWidth)
+  };
+
+  g.append("rect")
+    .attr("x", 0)
+    .attr("y", (height - goalBox.height) / 2)
+    .attr("width", goalBox.width)
+    .attr("height", goalBox.height)
+    .attr("class", "pitch-line");
+
+  g.append("rect")
+    .attr("x", width - goalBox.width)
+    .attr("y", (height - goalBox.height) / 2)
+    .attr("width", goalBox.width)
+    .attr("height", goalBox.height)
+    .attr("class", "pitch-line");
+};
+let data = null;
+
+const buttons = document.querySelectorAll('.selection-bar button');
+const output = document.getElementById('output');
+
+buttons.forEach(button => {
+  button.addEventListener('click', () => {
+    // Update variable
+    data = button.getAttribute('data-value');
+    draw(data, button.textContent);
+
+    // Highlight active button
+    buttons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
