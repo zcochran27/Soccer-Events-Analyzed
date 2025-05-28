@@ -172,3 +172,28 @@ svg1.selectAll(".pass")
   .on("mouseout", () => {
     tooltip1.style("opacity", 0);
   });
+const reversedPasses = passes.reverse();
+const passesFormatted = reversedPasses.flatMap(({ start, end, type, outcome, height}) => [
+start[0], start[1],
+end[0], end[1],
+outcome,
+type,
+getHeightLabel(height)
+]);
+const resultBox = document.getElementById("yamalChancexG");
+try {
+    const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ features: passesFormatted })
+    });
+
+    const result = await response.json();
+    if (result.prediction !== undefined) {
+      resultBox.innerText =`The pass sequence xG for this play is ${result.prediction.toFixed(4)}`;
+    } else {
+      resultBox.innerText =`Error: ${result.error}`;
+    } 
+  } catch (error) {
+    resultBox.innerText =`Fetch error: ${error}`;
+  } 
