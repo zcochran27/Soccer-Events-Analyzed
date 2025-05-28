@@ -4,7 +4,8 @@
 <head>
     <script type="module" src="mainV2Test.js"></script>
     <link rel="stylesheet" href="style.css" />
-
+    <link rel="stylesheet" href="goals/goals.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <meta charset="UTF-8">
     <title>XGBoost Prediction</title>
 </head>
@@ -12,36 +13,44 @@
 <body>
     <h1>Pass Sequence xG Predictor</h1>
     <h2>This is a tool to predict the probability of a pass being successful based on the pass type, height, and location.</h2>
-    <div class="canvas-container">
+    <!-- Put the clip embedding and explainations here -->
+    
+    
+    <div id="main-container">
+      <div class="canvas-container">
         <canvas id="pitchCanvas" width="720" height="480"></canvas>
-    </div>
+      </div>
     <!-- <label>
         <input type="checkbox" id="dribbleToggle" />
         <label for="dribbleToggle">Dribble Mode</label>
     </label> -->
-    <label for="passType">Select Pass Type:</label>
-    <select id="passType" name="passType">
-        <option value="normal">Normal Pass</option>
-        <option value="Cross">Cross</option>
-        <option value="Through Ball">Through Ball</option>
-        <option value="Cut-back">Cut Back</option>
-        <option value="Switch">Switch</option>
-        <option value="Throw-in">Throw-in</option>
-        <option value="Corner">Corner</option>
-        <option value="Free Kick">Free Kick</option>
-        <option value="Goal Kick">Goal Kick</option>
-    </select>
-    <label for="passHeight">Select Pass Height:</label>
-    <select id="passHeight" name="passHeight">
-        <option value="Ground">Ground Pass</option>
-        <option value="Low">Low Pass</option>
-        <option value="High">High Pass</option>
-    </select>
-    <button id="undoBtn">Undo last pass</button>
-    <button id="shootBtn">Shoot!</button>
-    <button id="predictBtn">Predict Play Probability</button>
-    <p id="predictionResult"></p>
-    <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+      <div id="controls">
+          <label for="passType">Select Pass Type:</label>
+          <select id="passType" name="passType">
+            <option value="normal">Normal Pass</option>
+            <option value="Cross">Cross</option>
+            <option value="Through Ball">Through Ball</option>
+            <option value="Cut-back">Cut Back</option>
+            <option value="Switch">Switch</option>
+            <option value="Throw-in">Throw-in</option>
+            <option value="Corner">Corner</option>
+            <option value="Free Kick">Free Kick</option>
+            <option value="Goal Kick">Goal Kick</option>
+          </select>
+      
+          <label for="passHeight">Select Pass Height:</label>
+          <select id="passHeight" name="passHeight">
+            <option value="Ground">Ground Pass</option>
+            <option value="Low">Low Pass</option>
+            <option value="High">High Pass</option>
+          </select>
+      
+          <button id="undoBtn">Undo last pass</button>
+          <button id="shootBtn">Shoot!</button>
+          <button id="predictBtn">Predict Play Probability</button>
+        </div>
+      <p id="predictionResult"></p>
+      <div id="loadingSpinner" class="spinner" style="display: none;"></div>
     <script>
         async function makePrediction() {
             let features = [];
@@ -78,6 +87,9 @@
             }
         }
     </script>
+      <div id="heatmap"></div>
+      <script src="../goals/goals.js"></script>
+</div>
 </body>
 
 </html>

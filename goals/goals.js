@@ -51,7 +51,7 @@ const tooltip = d3.select("#tooltip");
 
 function draw(fdata, tag) {
   
-  d3.json(`data/${fdata}`).then(raw => {
+  d3.json(`goals/data/${fdata}`).then(raw => {
   const keys = Object.keys(raw.x);
   const data = keys.map(key => ({
     x: +raw.x[key],
@@ -218,4 +218,15 @@ buttons2.forEach(button => {
     buttons2.forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
   });
+});
+
+// On page load, simulate clicking the first button (XG)
+window.addEventListener('DOMContentLoaded', () => {
+  const firstButton = document.querySelector('.selection-bar button');
+  if (firstButton) {
+    // Mark button as active visually
+    firstButton.classList.add('active');
+    // Draw initial heatmap with XG data
+    draw(firstButton.getAttribute('data-value'), firstButton.textContent);
+  }
 });

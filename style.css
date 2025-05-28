@@ -60,3 +60,27 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+html, body {
+  height: 100%;
+}
+
+#main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* horizontal centering */
+  justify-content: center;   /* vertical centering */
+  height: 100vh;             /* full viewport height */
+  gap: 20px;     
+  margin: 400px;
+            /* spacing between controls and heatmap */
+}
+#controls {
+  display: flex;
+  align-items: center;  /* vertically center items */
+  gap: 10px;            /* space between controls */
+  flex-wrap: wrap;      /* wrap if too wide */
+  justify-content: center; /* center horizontally */
+  margin-top: 10px;
+}
+
