@@ -50,7 +50,7 @@ function Field() {
     };
 
     const undoClick = () => {
-      undoBtn(predict, ctx, canvas);
+      undoBtn(predict, ctx, canvas, shoot);
     };
 
     const clearClick = () => {
@@ -66,7 +66,7 @@ function Field() {
 
     undo.addEventListener("click", undoClick);
 
-    clear.addEventListener("click", clearClick);
+    // clear.addEventListener("click", clearClick);
 
     predict.addEventListener("click", predictionResultClick);
 
@@ -74,7 +74,7 @@ function Field() {
       canvas.removeEventListener("click", handleClick);
       shoot.removeEventListener("click", shootClick);
       undo.removeEventListener("click", undoClick);
-      clear.removeEventListener("click", clearClick);
+      // clear.removeEventListener("click", clearClick);
       predict.removeEventListener("click", predictionResultClick);
     };
   }, []);
@@ -108,9 +108,9 @@ function Field() {
         <button ref={undoRef} style={{ backgroundColor: "#FF204E" }}>
           Undo last pass
         </button>
-        <button ref={clearRef} style={{ backgroundColor: "#334257" }}>
+        {/* <button ref={clearRef} style={{ backgroundColor: "#334257" }}>
           Clear all passes
-        </button>
+        </button> */}
         <button ref={shootRef}>Shoot</button>
         <button
           style={{

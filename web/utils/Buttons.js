@@ -1,11 +1,23 @@
-import { scaleToCanvas } from "./ClickEvents";
+import { clickPhase, scaleToCanvas, changeClickPhase } from "./ClickEvents";
 import { drawPitch } from "./DrawPitch";
-import { drawArrow } from "./Draw";
+import { drawArrow, drawDribbles, drawEventFromStats } from "./Draw";
 import {
   goalCoords,
   collectedStats,
   shotTaken,
   changeShotTaken,
+  changePassCount,
+  changePassNumber,
+  passCount,
+  passNumber,
+  changeLastRedDot,
+  changeFirstPassComplete,
+  changeCollectedStats,
+  dribbles,
+  changeLastEndPos,
+  changePassIndex,
+  changeDribbleIndex,
+  changeDribbles,
 } from "./Values";
 
 export const predictBtn = async (predictionResult) => {
@@ -60,95 +72,86 @@ export const predictBtn = async (predictionResult) => {
   }
 };
 
-// document.getElementById("undoBtn").addEventListener("click",
-export const undoBtn = (predictBtn, ctx, canvas) => {
-  if (collectedStats.length === 0) return;
+export const undoBtn = (predictBtn, ctx, canvas, shootBtn) => {
+  if (collectedStats.length === 0 && dribbles.length === 0) return;
 
-  const last = collectedStats.pop(); // You forgot to define 'last'
+  console.log(
+    "Before undo - Stats:",
+    collectedStats.length,
+    "Dribbles:",
+    dribbles.length
+  );
 
-  if (last.type === "dribble") {
-    dribbleCount = Math.max(0, dribbleCount - 1);
-    dribbleNumber = Math.max(1, dribbleNumber - 1);
-  } else {
-    passCount = Math.max(0, passCount - 1);
-    passNumber = Math.max(1, passNumber - 1);
+  changeShotTaken(false);
+  shootBtn.disabled = false;
+
+  // If we're in the middle of a dribble (clickPhase 3), just remove the current dribble
+  if (clickPhase === 3) {
+    changeDribbles(dribbles.slice(0, -1));
+    clickPhase = 2; // Set clickPhase directly
+    drawPitch(ctx, canvas);
+    collectedStats.forEach((event, index) =>
+      drawEventFromStats(event, index, ctx, canvas)
+    );
+    drawDribbles(ctx, canvas);
+    updatePredictBtn(predictBtn);
+    return;
   }
 
-  firstPassComplete = collectedStats.length > 0;
-  lastRedDot = null;
+  // If we have passes, remove the last pass
+  if (collectedStats.length > 0) {
+    console.log(collectedStats);
+    collectedStats.pop();
+    console.log(collectedStats);
+    changePassNumber(Math.max(1, passNumber - 1));
+    console.log(passNumber);
+    // If this was the last pass and we have dribbles, remove the last dribble too
+    if (dribbles.length > 0) {
+      dribbles.pop();
+    }
+  }
 
-  // Redraw the entire pitch and passes
+  // Update the state
+  changeFirstPassComplete(collectedStats.length > 0);
+  changeLastRedDot(null);
+
+  // If we removed everything, reset to initial state
+  if (collectedStats.length === 0) {
+    changeLastEndPos(null);
+    changeClickPhase(0);
+  } else {
+    console.log(collectedStats);
+    changeLastEndPos(collectedStats[collectedStats.length - 1].end);
+    changeClickPhase(2); // Set clickPhase directly
+  }
+
+  // Redraw everything
   drawPitch(ctx, canvas);
-
-  collectedStats.forEach((event, index) => {
-    const { type, start, end } = event;
-    const [sx, sy] = scaleToCanvas(...start, canvas);
-    const [ex, ey] = scaleToCanvas(...end, canvas);
-
-    // Draw start dot
-    if (index === 0) {
-      ctx.beginPath();
-      ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
-      ctx.fillStyle = "green";
-      ctx.fill();
-    } else {
-      const prevEnd = collectedStats[index - 1].end;
-      const [psx, psy] = scaleToCanvas(...prevEnd, canvas);
-      ctx.beginPath();
-      ctx.arc(psx, psy, 6, 0, 2 * Math.PI);
-      ctx.fillStyle = "blue";
-      ctx.fill();
-    }
-
-    // Draw end dot
-    ctx.beginPath();
-    ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = "red";
-    ctx.fill();
-
-    // Draw event line
-    const midX = (sx + ex) / 2;
-    const midY = (sy + ey) / 2;
-    if (type === "dribble") {
-      ctx.save();
-      ctx.strokeStyle = "orange";
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(ex, ey);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-
-      ctx.fillStyle = "orange";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("dribble " + (index + 1), midX, midY - 10);
-    } else {
-      drawArrow(sx, sy, ex, ey, ctx);
-      ctx.fillStyle = "black";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("pass " + (index + 1), midX, midY - 10);
-    }
-
-    changeShotTaken(false);
-    shootBtn.disabled = false;
-    lastRedDot = [ex, ey];
-  });
-
+  changePassIndex(0);
+  changeDribbleIndex(0);
+  collectedStats.forEach((event, index) =>
+    drawEventFromStats(event, index, ctx, canvas)
+  );
+  drawDribbles(ctx, canvas);
   updatePredictBtn(predictBtn);
+
+  console.log(
+    "After undo - Stats:",
+    collectedStats.length,
+    "Dribbles:",
+    dribbles.length
+  );
 };
 
 export const clearPassesBtn = (ctx, canvas, shootBtn, predictBtn) => {
-  collectedStats = [];
-  firstPassComplete = false;
-  lastRedDot = null;
-  passIndex = 1;
-  dribbleCount = 0;
-  passCount = 0;
-  passNumber = 1;
-  dribbleNumber = 1;
+  changeCollectedStats([]);
+  changeFirstPassComplete(false);
+  changeLastRedDot(null);
+  changePassIndex(1);
+  changeDribbleCount(0);
+  changePassCount(0);
+  changePassNumber(1);
+  changeDribbleNumber(1);
   changeShotTaken(false);
 
   // Redraw the pitch

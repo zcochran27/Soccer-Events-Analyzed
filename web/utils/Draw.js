@@ -1,4 +1,5 @@
 import { scaleToCanvas } from "./ClickEvents";
+import { changeDribbleIndex, changeLastRedDot, dribbles } from "./Values";
 
 export function drawArrow(fromX, fromY, toX, toY, ctx) {
   const headlen = 10;
@@ -42,11 +43,31 @@ export function drawEventFromStats(event, index, ctx, canvas) {
   const midX = (sx + ex) / 2;
   const midY = (sy + ey) / 2;
 
-  drawArrow(sx, sy, ex, ey, ctx);
+  drawArrow(sx, sy, ex, ey, ctx, ctx);
   ctx.fillStyle = "black";
   ctx.font = "16px Arial";
   ctx.textAlign = "center";
   ctx.fillText("pass " + (index + 1), midX, midY - 10);
 
-  lastRedDot = [ex, ey];
+  changeLastRedDot([ex, ey]);
+}
+
+export function drawDribbles(ctx, canvas) {
+  changeDribbleIndex(0);
+  dribbles.forEach(({ start, end }) => {
+    const [sx, sy] = scaleToCanvas(...start, canvas);
+    const [ex, ey] = scaleToCanvas(...end, canvas);
+    const midX = (sx + ex) / 2;
+    const midY = (sy + ey) / 2;
+
+    ctx.save();
+    ctx.strokeStyle = "gray";
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  });
 }

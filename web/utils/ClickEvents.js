@@ -3,15 +3,23 @@ import { drawArrow } from "./Draw";
 import {
   pitchHeight,
   pitchWidth,
-  startPos,
-  endPos,
   shotTaken,
   collectedStats,
-  changeStartPos,
-  changeEndPos,
+  passNumber,
+  dribbles,
+  lastEndPos,
+  changePassNumber,
+  changeLastEndPos,
+  changeDribbles,
 } from "./Values";
 
-let clickPhase = 0;
+let startPos = [-1, -1];
+let endPos = [-1, -1];
+
+export let clickPhase = 0;
+export function changeClickPhase(phase) {
+  clickPhase = phase;
+}
 
 export function scaleToPitch(x, y, canvas) {
   const canvasWidth = canvas.width;
@@ -24,10 +32,6 @@ export function scaleToCanvas(x, y, canvas) {
   const canvasHeight = canvas.height;
   return [(x / pitchWidth) * canvasWidth, (y / pitchHeight) * canvasHeight];
 }
-
-let passNumber = 1;
-let lastEndPos = null;
-let dribbles = [];
 
 export const clickEvent = (
   event,
@@ -55,9 +59,11 @@ export const clickEvent = (
 
   const [cx, cy] = scaleToCanvas(xPitch, yPitch, canvas);
 
+  console.log(collectedStats, cx, cy, clickPhase);
+
   switch (clickPhase) {
     case 0: // First click - green start dot
-      changeStartPos(xPitch, yPitch);
+      startPos = [xPitch, yPitch];
       ctx.beginPath();
       ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
       ctx.fillStyle = "green";
@@ -66,7 +72,7 @@ export const clickEvent = (
       break;
 
     case 1: // Second click - red dot and solid arrow (first real pass)
-      changeEndPos(xPitch, yPitch);
+      endPos = [xPitch, yPitch];
       const [sx1, sy1] = scaleToCanvas(...startPos, canvas);
       ctx.beginPath();
       ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
@@ -77,6 +83,7 @@ export const clickEvent = (
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
       ctx.fillText("pass " + passNumber, (sx1 + cx) / 2, (sy1 + cy) / 2 - 10);
+      console.log(startPos, endPos);
       collectedStats.push({
         start: startPos,
         end: endPos,
@@ -85,14 +92,14 @@ export const clickEvent = (
         pass_height: passHeight,
       });
 
-      passNumber++;
-      lastEndPos = endPos;
+      changePassNumber(passNumber + 1);
+      changeLastEndPos(endPos);
       updatePredictBtn(predictBtn);
       clickPhase = 2;
       break;
 
     case 2: // Third click - dashed arrow = dribble
-      changeStartPos(xPitch, yPitch);
+      startPos = [xPitch, yPitch];
       const [sx2, sy2] = scaleToCanvas(...lastEndPos, canvas);
       ctx.save();
       ctx.setLineDash([6, 4]);
@@ -110,6 +117,7 @@ export const clickEvent = (
       ctx.fill();
 
       // Save dribble
+
       dribbles.push({
         start: lastEndPos,
         end: [xPitch, yPitch],
@@ -119,7 +127,7 @@ export const clickEvent = (
       break;
 
     case 3: // Fourth click - pass
-      changeEndPos(xPitch, yPitch);
+      endPos = [xPitch, yPitch];
       const [sx3, sy3] = scaleToCanvas(...startPos, canvas);
       ctx.beginPath();
       ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
@@ -139,8 +147,8 @@ export const clickEvent = (
         pass_height: passHeight,
       });
 
-      passNumber++;
-      lastEndPos = endPos;
+      changePassNumber(passNumber + 1);
+      changeLastEndPos(endPos);
       updatePredictBtn(predictBtn);
       clickPhase = 2; // return to dashed line phase
       break;
