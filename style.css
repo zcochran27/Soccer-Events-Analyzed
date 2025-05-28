@@ -93,6 +93,12 @@ svg {
 .pass {
   fill: none;
 }
+.dribble {
+  stroke: gray;
+  stroke-width: .5;
+  stroke-dasharray: 1, 1; /* 4px dash, 2px gap */
+  fill: none;
+}
 
 .center-container {
   display: flex;
@@ -104,4 +110,12 @@ svg {
 
 .center-container h3 {
   max-width: 800px; /* Optional: keeps text from stretching too far */
+}
+#sequence-header {
+  font-family: 'Arial', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  fill: #333; /* dark gray */
+  text-align: center;
+  dominant-baseline: middle;
 }

@@ -17,94 +17,68 @@
     <p style="text-align: center">Lets explore how different pass sequences can lead to different outcomes.</p>
 
     <div class="center-container">
-    <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA Euros Semi-Final between Spain and France.</h2>
-    <div id="player"></div>
-    <h3>In this clip, we see a couple of passes before the shot is taken and the goal is scored. Let's take a look at the whole sequence of passes that led to the goal. Hover over each pass to see more details. </h3>
+        <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA
+            Euros Semi-Final between Spain and France.</h2>
+        <div id="player"></div>
+        <h3>In this clip, we see a couple of passes before the shot is taken and the goal is scored. Let's take a look
+            at the whole sequence of passes that led to the goal. Hover over each pass to see more details. </h3>
     </div>
     <svg id="pitch1" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-    <h3 style="text-align: center" id = "yamalChancexG">The pass sequence xG for this play is Loading... But what would have happened if the the last pass was played differently? Click the options below to explore.</h3>
+    <h3 style="text-align: center" id="yamalChancexG">The pass sequence xG for this play is Loading... But what would
+        have happened if the the last pass was played differently? Click the options below to explore.</h3>
     <svg id="pitch2" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
 
     <h1 style="text-align: center;">Pass Sequence Game</h1>
     <h2 style="text-align: center">Try to get the highest probability possible!</h2>
     <!-- Put the clip embedding and explainations here -->
-    
-    
+
+
     <div id="main-container">
-      <div class="canvas-container">
-        <canvas id="pitchCanvas" width="720" height="480"></canvas>
-      </div>
-    <!-- <label>
+        <div class="canvas-container">
+            <canvas id="pitchCanvas" width="720" height="480"></canvas>
+        </div>
+        <!-- <label>
         <input type="checkbox" id="dribbleToggle" />
         <label for="dribbleToggle">Dribble Mode</label>
     </label> -->
-      <div id="controls">
-          <label for="passType">Select Pass Type:</label>
-          <select id="passType" name="passType">
-            <option value="normal">Normal Pass</option>
-            <option value="Cross">Cross</option>
-            <option value="Through Ball">Through Ball</option>
-            <option value="Cut-back">Cut Back</option>
-            <option value="Switch">Switch</option>
-            <option value="Throw-in">Throw-in</option>
-            <option value="Corner">Corner</option>
-            <option value="Free Kick">Free Kick</option>
-            <option value="Goal Kick">Goal Kick</option>
-          </select>
-      
-          <label for="passHeight">Select Pass Height:</label>
-          <select id="passHeight" name="passHeight">
-            <option value="Ground">Ground Pass</option>
-            <option value="Low">Low Pass</option>
-            <option value="High">High Pass</option>
-          </select>
-      
-          <button id="undoBtn">Undo last pass</button>
-          <button id="shootBtn">Shoot!</button>
-          <button id="predictBtn">Predict Play Probability</button>
-        </div>
-      <p id="predictionResult"></p>
-      <div id="loadingSpinner" class="spinner" style="display: none;"></div>
-    <script>
-        async function makePrediction() {
-            let features = [];
-            
-            // Collect values from all 6 passes
-            for(let i = 1; i <= 5; i++) {
-                const startX = parseFloat(document.getElementById(`startX${i}`).value);
-                const startY = parseFloat(document.getElementById(`startY${i}`).value);
-                const endX = parseFloat(document.getElementById(`endX${i}`).value);
-                const endY = parseFloat(document.getElementById(`endY${i}`).value);
-                const outcome = parseFloat(document.getElementById(`outcome${i}`).value);
-                
-                features = features.concat([[startX, startY], [endX, endY], outcome]);
-            }
-            console.log(features);
-            const payload = {
-                features: features
-            };
-            
-            const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
+        <div id="controls">
+            <label for="passType">Select Pass Type:</label>
+            <select id="passType" name="passType">
+                <option value="normal">Normal Pass</option>
+                <option value="Cross">Cross</option>
+                <option value="Through Ball">Through Ball</option>
+                <option value="Cut-back">Cut Back</option>
+                <option value="Switch">Switch</option>
+                <option value="Throw-in">Throw-in</option>
+                <option value="Corner">Corner</option>
+                <option value="Free Kick">Free Kick</option>
+                <option value="Goal Kick">Goal Kick</option>
+            </select>
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log(data.prediction.toFixed(4))
-                document.getElementById("result").textContent = "Prediction: " + data.prediction.toFixed(4);
-            } else {
-                document.getElementById("result").textContent = "Error: " + response.status;
-            }
-        }
-    </script>
-    <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
-    <div id="heatmap"></div>
-    <script src="goals/goals.js"></script>
-</div>
+            <label for="passHeight">Select Pass Height:</label>
+            <select id="passHeight" name="passHeight">
+                <option value="Ground">Ground Pass</option>
+                <option value="Low">Low Pass</option>
+                <option value="High">High Pass</option>
+            </select>
+
+            <button id="undoBtn">Undo last pass</button>
+            <button id="shootBtn">Shoot!</button>
+            <button id="predictBtn">Predict Play Probability</button>
+        </div>
+        <p id="predictionResult"></p>
+        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+        
+
+        <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
+        <div id="heatmap"></div>
+        <script src="goals/goals.js"></script>
+    </div>
+    <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal. Try and spot the pattern!</h2>
+    <div id="pitch3-container">
+        <h3 id="sequence-header"></h3>
+        <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
 </body>
 
 </html>

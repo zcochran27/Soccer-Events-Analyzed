@@ -103,7 +103,7 @@ const svg1 = d3.select("#pitch1");
 const defs = svg1.append("defs");
 passes.forEach((d, i) => {
   const color = d.outcome === 1.0 ? "green" : "red";
-  const strokeWidth = 1 + i * 0.1; // adjust multiplier as needed
+  const strokeWidth = 1.2 + i * 0.1; // adjust multiplier as needed
 
   defs.append("marker")
     .attr("id", `arrow-${i}`)
@@ -182,7 +182,6 @@ getHeightLabel(height)
 ]);
 const resultBox = document.getElementById("yamalChancexG");
 try {
-    console.log(passesFormatted);
     const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -319,3 +318,216 @@ svg2.selectAll(".option-circle")
   .attr("font-size", "2px")
   .attr("fill", "black")
   .style("pointer-events", "none");
+
+
+  let euroSequences = await d3.csv("europe_sequences_preds.csv");
+  const topTenSequences = euroSequences.sort((a, b) => b.sequence_pred - a.sequence_pred).slice(0, 10);
+
+  function getPassLocationsWithMetadata(sequence) {
+    const passes = [];
+  
+    // Previous passes 4 to 1
+    for (let i = 4; i >= 1; i--) {
+      const x1 = parseFloat(sequence[`prev_pass${i}_x1`]);
+      const y1 = parseFloat(sequence[`prev_pass${i}_y1`]);
+      const x2 = parseFloat(sequence[`prev_pass${i}_x2`]);
+      const y2 = parseFloat(sequence[`prev_pass${i}_y2`]);
+      const outcome = parseFloat(sequence[`prev_pass${i}_outcome`]);
+      const height = parseFloat(sequence[`prev_pass${i}_height`]);
+      const type = "Pass"; // Assuming all are passes (adjust if needed)
+  
+      if (
+        !isNaN(x1) && !isNaN(y1) &&
+        !isNaN(x2) && !isNaN(y2)
+      ) {
+        passes.push({
+          start: [x1, y1],
+          end: [x2, y2],
+          outcome: isNaN(outcome) ? null : outcome,
+          height: isNaN(height) ? null : height,
+          type,
+          sequence_pred: sequence.sequence_pred,
+          team: sequence.team
+        });
+      }
+    }
+  
+    // Final (current) pass
+    const finalX1 = parseFloat(sequence.x1);
+    const finalY1 = parseFloat(sequence.y1);
+    const finalX2 = parseFloat(sequence.x2);
+    const finalY2 = parseFloat(sequence.y2);
+    const finalOutcome = parseFloat(sequence.outcome);
+    const finalHeight = parseFloat(sequence.pass_height);
+    const finalType = sequence.type || "Pass";
+  
+    if (
+      !isNaN(finalX1) && !isNaN(finalY1) &&
+      !isNaN(finalX2) && !isNaN(finalY2)
+    ) {
+      passes.push({
+        start: [finalX1, finalY1],
+        end: [finalX2, finalY2],
+        outcome: isNaN(finalOutcome) ? null : finalOutcome,
+        height: isNaN(finalHeight) ? null : finalHeight,
+        type: finalType,
+        sequence_pred: sequence.sequence_pred,
+        team: sequence.team
+      });
+    }
+  
+    return passes;
+  }
+
+  function getDribblesFromPasses(passes) {
+    const dribbles = [];
+  
+    for (let i = 0; i < passes.length - 1; i++) {
+      const currentPass = passes[i];
+      const nextPass = passes[i + 1];
+  
+      dribbles.push({
+        start: currentPass.end,
+        end: nextPass.start,
+        type: "Dribble"
+      });
+    }
+  
+    return dribbles;
+  }
+  const topTenSequencePasses = topTenSequences.map(getPassLocationsWithMetadata);
+  const topTenSequenceDribbles = topTenSequencePasses.map(getDribblesFromPasses);
+  console.log(topTenSequenceDribbles);
+  const svg3 = d3.select("#pitch3");
+  const defs3 = svg3.append("defs");
+  
+  let currentSequenceIndex = 0;
+
+  function updateArrowDefs() {
+    // Clear existing markers
+    defs3.selectAll("marker").remove();
+    
+    topTenSequencePasses[currentSequenceIndex].forEach((d, i) => {
+      const color = d.outcome === 1.0 ? "green" : "red";
+      const strokeWidth = 1.2 + i * 0.1;
+
+      defs3.append("marker")
+          .attr("id", `arrow3-${i}`)
+          .attr("viewBox", "0 0 10 10")
+          .attr("refX", 2)
+          .attr("refY", 5)
+          .attr("markerWidth", strokeWidth)
+          .attr("markerHeight", strokeWidth)
+          .attr("orient", "auto")
+          .attr("markerUnits", "strokeWidth")
+          .append("path")
+          .attr("d", "M 0 0 L 10 5 L 0 10 z")
+          .attr("fill", color);
+    });
+  }
+
+  function updatePassDisplay() {
+    updateArrowDefs();
+    
+    // Update sequence header
+    const currentSequence = topTenSequencePasses[currentSequenceIndex][0];
+    d3.select("#sequence-header")
+      .html(`Team: ${currentSequence.team}<br>Sequence Probability: ${(currentSequence.sequence_pred * 100).toFixed(2)}%`);
+
+    svg3.selectAll(".pass")
+      .data(topTenSequencePasses[currentSequenceIndex])
+      .join("line")
+      .attr("class", "pass")
+      .attr("x1", d => d.start[0])
+      .attr("y1", d => d.start[1])
+      .attr("x2", d => d.end[0])
+      .attr("y2", d => d.end[1])
+      .attr("stroke", d => d.outcome === 1.0 ? "green" : "red")
+      .attr("stroke-width", (d, i) => .5 + i * .2)
+      .attr("marker-end", (d, i) => `url(#arrow3-${i})`)
+      .on("mouseover", (event, d) => {
+          tooltip3
+            .style("opacity", 1)
+            .html(`
+              <strong>Pass</strong><br/>
+              Outcome: ${d.outcome}<br/>
+              Type: ${d.type}<br/>
+              Height: ${getHeightLabel(d.height)}
+            `);
+        })
+        .on("mousemove", (event) => {
+          tooltip3
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY + 10) + "px");
+        })
+        .on("mouseout", () => {
+          tooltip3.style("opacity", 0);
+        });
+
+        svg3.selectAll(".dribble")
+            .data(topTenSequenceDribbles[currentSequenceIndex])
+            .join("line")
+            .attr("class", "dribble")
+            .attr("x1", d => d.start[0])
+            .attr("y1", d => d.start[1])
+            .attr("x2", d => d.end[0])
+            .attr("y2", d => d.end[1])
+            .attr("stroke-width", .5)
+            .attr("stroke-dasharray", "1 1");
+    // Update sequence counter display
+    d3.select("#sequence-counter")
+      .text(`Sequence ${currentSequenceIndex + 1} of ${topTenSequencePasses.length}`);
+  }
+
+  drawFootballPitch(svg3);
+  
+  const tooltip3 = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("background", "rgba(0,0,0,0.7)")
+    .style("color", "white")
+    .style("padding", "6px")
+    .style("border-radius", "4px")
+    .style("font-size", "12px")
+    .style("pointer-events", "none")
+    .style("opacity", 0);
+
+  // Add navigation controls outside SVG
+  const controlsContainer = d3.select("#pitch3-container")
+    .append("div")
+    .style("text-align", "center")
+    .style("margin-top", "10px");
+
+  controlsContainer.append("span")
+    .attr("id", "sequence-counter")
+    .style("margin", "0 10px")
+    .style("font-size", "12px")
+    .text(`Sequence 1 of ${topTenSequencePasses.length}`);
+
+  controlsContainer.append("button")
+    .style("margin", "0 5px")
+    .text("←")
+    .on("click", () => {
+      currentSequenceIndex = (currentSequenceIndex - 1 + topTenSequencePasses.length) % topTenSequencePasses.length;
+      updatePassDisplay();
+    });
+
+  controlsContainer.append("button")
+    .style("margin", "0 5px")
+    .text("→")
+    .on("click", () => {
+      currentSequenceIndex = (currentSequenceIndex + 1) % topTenSequencePasses.length;
+      updatePassDisplay();
+    });
+
+  // Initial display
+  updatePassDisplay();
+
+
+
+//for pie and bar charts
+  const teamsPreds = d3.rollup(
+    euroSequences,
+    v => d3.mean(v, d => d.sequence_pred),
+    d => d.team
+  );
