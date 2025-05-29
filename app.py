@@ -7,7 +7,7 @@ import xgboost as xgb
 import numpy as np
 from sklearn.pipeline import make_pipeline
 from typing import List, Union
-
+import pandas as pd
 
 class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
@@ -18,67 +18,106 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
         features = []
         
         # Process each pass (every 5 elements in input list)
-        for i in range(0, len(X), 7):
-            idx = i // 5  # Get pass number (0-4)
-            start_loc = X[i:i+2]
-            end_loc = X[i+2:i+4]
-            outcome = X[i+4]
-            
-            # Calculate pass features
-            pass_angle = np.arctan2(end_loc[1] - start_loc[1], end_loc[0] - start_loc[0])
-            pass_length = np.sqrt((end_loc[0] - start_loc[0])**2 + (end_loc[1] - start_loc[1])**2)
-            
-            # Calculate distances and angles
-            start_dist_center = np.abs(start_loc[0] - 40)
-            end_dist_center = np.abs(end_loc[0] - 40)
-            end_dist_goal = np.sqrt((end_loc[0] - 120)**2 + (end_loc[1] - 40)**2)
-            end_angle_goal = np.arctan2(end_loc[1] - 40, end_loc[0] - 120)
-            pass_type = X[i+5]
-            pass_height = 0 if X[i+6] == "Ground" else 1 if X[i+6] == "Low" else 2
-            cross = 1 if pass_type == "Cross" else 0
-            throw_in = 1 if pass_type == "Throw-in" else 0
-            corner = 1 if pass_type == "Corner" else 0
-            free_kick = 1 if pass_type == "Free Kick" else 0
-            goal_kick = 1 if pass_type == "Goal Kick" else 0
-            cut_back = 1 if pass_type == "Cut-back" else 0
-            switch = 1 if pass_type == "Switch" else 0
-            through_ball = 1 if pass_type == "Through Ball" else 0
-
-            # Add features in order
-            features.extend([
-                outcome,
-                pass_angle,
-                pass_length,
-                cross,
-                cut_back,
-                switch,
-                through_ball,
-                pass_height,
-                start_loc[0],
-                start_loc[1],
-                end_loc[0],
-                end_loc[1],
-                start_dist_center,
-                end_dist_center,
-                end_dist_goal,
-                end_angle_goal,
-                throw_in,
-                corner,
-                free_kick,
-                goal_kick
-            ])
-        
-        # Pad with zeros if we don't have enough features
-        expected_length = 100  # 5 passes * 20 features per pass
-        if len(features) < expected_length:
-            features.extend([0] * (expected_length - len(features)))
+        for i in range(0, 35, 7):
+            try:
+                start_loc = X[i:i+2]
+                end_loc = X[i+2:i+4]
+                outcome = X[i+4]
                 
+                # Calculate pass features
+                pass_angle = np.arctan2(end_loc[1] - start_loc[1], end_loc[0] - start_loc[0])
+                pass_length = np.sqrt((end_loc[0] - start_loc[0])**2 + (end_loc[1] - start_loc[1])**2)
+                
+                # Calculate distances and angles
+                start_dist_center = np.abs(start_loc[0] - 40)
+                end_dist_center = np.abs(end_loc[0] - 40)
+                end_dist_goal = np.sqrt((end_loc[0] - 120)**2 + (end_loc[1] - 40)**2)
+                end_angle_goal = np.arctan2(end_loc[1] - 40, end_loc[0] - 120)
+                pass_type = X[i+5]
+                pass_height = 0 if X[i+6] == "Ground" else 1 if X[i+6] == "Low" else 2
+                cross = 1 if pass_type == "Cross" else 0
+                throw_in = 1 if pass_type == "Throw-in" else 0
+                corner = 1 if pass_type == "Corner" else 0
+                free_kick = 1 if pass_type == "Free Kick" else 0
+                goal_kick = 1 if pass_type == "Goal Kick" else 0
+                cut_back = 1 if pass_type == "Cut-back" else 0
+                switch = 1 if pass_type == "Switch" else 0
+                through_ball = 1 if pass_type == "Through Ball" else 0
+
+                # Add features in order
+                features.extend([
+                    outcome,
+                    pass_angle,
+                    pass_length,
+                    cross,
+                    cut_back,
+                    switch,
+                    through_ball,
+                    pass_height,
+                    start_loc[0],
+                    start_loc[1],
+                    end_loc[0],
+                    end_loc[1],
+                    start_dist_center,
+                    end_dist_center,
+                    end_dist_goal,
+                    end_angle_goal,
+                    throw_in,
+                    corner,
+                    free_kick,
+                    goal_kick
+                ])
+            except IndexError:
+                features.extend([np.nan] * 20)
+        num_passes = np.sum(~np.isnan(np.array(features[::20])))
+        # Get coordinates for each pass in sequence
+        pass4x2 = features[4*20+10]
+        pass4y2 = features[4*20+11]
+        pass3x2 = features[3*20+10]
+        pass3y2 = features[3*20+11]
+        pass2x2 = features[2*20+10]
+        pass2y2 = features[2*20+11]
+        pass1x2 = features[1*20+10]
+        pass1y2 = features[1*20+11]
+        pass0x2 = features[0*20+10]
+        pass0y2 = features[0*20+11]
+
+        pass0x1 = features[0*20+8]
+        pass0y1 = features[0*20+9]
+        
+
+        # Find last completed pass end coordinates
+        last_pass_x2 = pass4x2
+        if pd.isna(last_pass_x2):
+            last_pass_x2 = pass3x2
+            if pd.isna(last_pass_x2):
+                last_pass_x2 = pass2x2
+                if pd.isna(last_pass_x2):
+                    last_pass_x2 = pass1x2
+                    if pd.isna(last_pass_x2):
+                        last_pass_x2 = pass0x2
+
+        last_pass_y2 = pass4y2  
+        if pd.isna(last_pass_y2):
+            last_pass_y2 = pass3y2
+            if pd.isna(last_pass_y2):
+                last_pass_y2 = pass2y2
+                if pd.isna(last_pass_y2):
+                    last_pass_y2 = pass1y2
+                    if pd.isna(last_pass_y2):
+                        last_pass_y2 = pass0y2
+        direct_length = np.sqrt((last_pass_x2-pass0x1)**2 + (last_pass_y2-pass0y1)**2)
+        total_length = np.nansum(np.array(features[2::20]))
+        directness = direct_length/total_length if num_passes > 1 else np.nan
+        direct_angle = np.arctan2(last_pass_y2 - pass0y1, last_pass_x2 - pass0x1) if num_passes > 1 else np.nan
+        all_successful = np.all(np.isnan(np.array(features[::20])) | (np.array(features[::20]) == 1))
+        features.extend([num_passes,direct_length,total_length,directness,direct_angle,all_successful])
         return np.array(features).reshape(1, -1)
 
 
 
 model = xgb.XGBClassifier()
-model.load_model("final_xgb_modelV2.json")
+model.load_model("final_xgb_modelV3.json")
 
 websitePipeline = make_pipeline(
     websiteInputPreprocessor(),
