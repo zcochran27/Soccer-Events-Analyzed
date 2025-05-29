@@ -5,7 +5,7 @@
       34.5
     ],
     "end": [
-      92,
+      107,
       12
     ],
     "type": "Pass",
@@ -18,10 +18,10 @@
         34.5
     ],
     "end": [
-      93,
+      103,
       38
     ],
-    "type": "Pass",
+    "type": "Through Ball",
     "height": 0.0
   },
   "option3":{
