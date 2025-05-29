@@ -531,3 +531,4 @@ svg2.selectAll(".option-circle")
     v => d3.mean(v, d => d.sequence_pred),
     d => d.team
   );
+  console.log(teamsPreds);
