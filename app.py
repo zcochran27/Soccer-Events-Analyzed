@@ -9,6 +9,35 @@ from sklearn.pipeline import make_pipeline
 from typing import List, Union
 import pandas as pd
 
+import joblib
+class MultiStageModel:
+    def __init__(self, parameters):
+        self.parameters = parameters or {}
+        self.model1 = xgb.XGBClassifier(use_label_encoder=False, **self.parameters)
+        self.model2 = xgb.XGBClassifier(use_label_encoder=False, **self.parameters)
+
+    def fit(self, X, y1, y2):
+        self.model1.fit(X, y1)
+        X_stage2 = X[y1 == 1]
+        self.model2.fit(X_stage2, y2[y1 == 1])
+
+    def predict_proba(self, X):
+        p1 = self.model1.predict_proba(X)[:, 1]
+        p2 = self.model2.predict_proba(X)[:, 1]
+        return p1 * p2
+    def save(self, path_prefix):
+        joblib.dump(self.model1, f"{path_prefix}_model1.pkl")
+        joblib.dump(self.model2, f"{path_prefix}_model2.pkl")
+        joblib.dump(self.parameters, f"{path_prefix}_params.pkl")
+
+    @classmethod
+    def load(cls, path_prefix):
+        parameters = joblib.load(f"{path_prefix}_params.pkl")
+        instance = cls(parameters)
+        instance.model1 = joblib.load(f"{path_prefix}_model1.pkl")
+        instance.model2 = joblib.load(f"{path_prefix}_model2.pkl")
+        return instance
+
 class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
@@ -116,8 +145,10 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
 
 
 
-model = xgb.XGBClassifier()
-model.load_model("final_xgb_modelV3.json")
+# model = xgb.XGBClassifier()
+# model.load_model("final_xgb_modelV3.json")
+
+model = MultiStageModel.load('msm_model')
 
 websitePipeline = make_pipeline(
     websiteInputPreprocessor(),

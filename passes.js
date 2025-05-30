@@ -320,7 +320,56 @@ svg2.selectAll(".option-circle")
   .style("pointer-events", "none");
 
 
-  let euroSequences = await d3.csv("europe_sequences_preds.csv");
+  let euroSequences = await d3.csv("europe_sequences_preds.csv").then(function(data) {
+    const updatedData = data.map(d => {
+      // Convert strings to numbers if needed
+      const cut_back = +d.pass_cut_back;
+      const switchPass = +d.pass_switch;
+      const cross = +d.pass_cross;
+      const through = +d.pass_through;
+      const throw_in = +d.pass_throw_in;
+      const corner = +d.pass_corner;
+      const goal_kick = +d.pass_goal_kick;
+      const free_kick = +d.pass_free_kick;
+  
+      // Combine into a single string label
+    
+
+      for (let i = 1; i <= 4; i++) {
+        const throw_in_i = +d[`prev_pass${i}_pass_throw_in`];
+        const corner_i = +d[`prev_pass${i}_pass_corner`];
+        const goal_kick_i = +d[`prev_pass${i}_pass_goal_kick`];
+        const free_kick_i = +d[`prev_pass${i}_pass_free_kick`];
+        const cut_back_i = +d[`prev_pass${i}_pass_cut_back`];
+        const switch_i = +d[`prev_pass${i}_pass_switch`];
+        const cross_i = +d[`prev_pass${i}_pass_cross`];
+        const through_i = +d[`prev_pass${i}pass_through`];
+
+        if (throw_in_i) d[`prev_pass${i}_type`] = "Throw In";
+        else if (corner_i) d[`prev_pass${i}_type`] = "Corner";
+        else if (goal_kick_i) d[`prev_pass${i}_type`] = "Goal Kick";
+        else if (free_kick_i) d[`prev_pass${i}_type`] = "Free Kick";
+        else if (through_i) d[`prev_pass${i}_type`] = "Through Ball";
+        else if (cut_back_i) d[`prev_pass${i}_type`] = "Cut Back";
+        else if (switch_i) d[`prev_pass${i}_type`] = "Switch";
+        else if (cross_i) d[`prev_pass${i}_type`] = "Cross";
+        else d[`prev_pass${i}_type`] = "Pass";
+      }
+
+      if (throw_in) d.type = "Throw In";
+      else if (corner) d.type = "Corner";
+      else if (goal_kick) d.type = "Goal Kick";
+      else if (free_kick) d.type = "Free Kick";
+      else if (through) d.type = "Through Ball";
+      else if (cut_back) d.type = "Cut Back";
+      else if (switchPass) d.type = "Switch";
+      else if (cross) d.type = "Cross";
+      else d.type = "Pass";
+      
+      return d;
+    })
+    return updatedData;
+  });
   const topTenSequences = euroSequences.sort((a, b) => b.sequence_pred - a.sequence_pred).slice(0, 10);
 
   function getPassLocationsWithMetadata(sequence) {
@@ -334,8 +383,7 @@ svg2.selectAll(".option-circle")
       const y2 = parseFloat(sequence[`prev_pass${i}_y2`]);
       const outcome = parseFloat(sequence[`prev_pass${i}_outcome`]);
       const height = parseFloat(sequence[`prev_pass${i}_height`]);
-      const type = "Pass"; // Assuming all are passes (adjust if needed)
-  
+      const type = sequence[`prev_pass${i}_type`];
       if (
         !isNaN(x1) && !isNaN(y1) &&
         !isNaN(x2) && !isNaN(y2)
@@ -345,7 +393,7 @@ svg2.selectAll(".option-circle")
           end: [x2, y2],
           outcome: isNaN(outcome) ? null : outcome,
           height: isNaN(height) ? null : height,
-          type,
+          type: type,
           sequence_pred: sequence.sequence_pred,
           team: sequence.team
         });
@@ -431,6 +479,7 @@ svg2.selectAll(".option-circle")
     
     // Update sequence header
     const currentSequence = topTenSequencePasses[currentSequenceIndex][0];
+    console.log(topTenSequencePasses[currentSequenceIndex]);
     d3.select("#sequence-header")
       .html(`Team: ${currentSequence.team}<br>Sequence Probability: ${(currentSequence.sequence_pred * 100).toFixed(2)}%`);
 
