@@ -145,10 +145,10 @@ class websiteInputPreprocessor(BaseEstimator, TransformerMixin):
 
 
 
-# model = xgb.XGBClassifier()
-# model.load_model("final_xgb_modelV3.json")
+model = xgb.XGBClassifier()
+model.load_model("final_xgb_modelV3.json")
 
-model = MultiStageModel.load('msm_model')
+# model = MultiStageModel.load('msm_model')
 
 websitePipeline = make_pipeline(
     websiteInputPreprocessor(),
@@ -178,7 +178,7 @@ def predict(request: PredictionRequest):
         input_array = list(request.features)
         print(input_array,flush=True)
         
-        return {"prediction": float(websitePipeline.predict_proba(input_array))}
+        return {"prediction": float(websitePipeline.predict_proba(input_array)[0,1])} # changed for multi stage model
     except Exception as e:
         print(f"Error occurred: {e}", flush=True)
         return {"error": str(e)}
