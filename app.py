@@ -178,7 +178,7 @@ def predict(request: PredictionRequest):
         input_array = list(request.features)
         print(input_array,flush=True)
         
-        return {"prediction": float(websitePipeline.predict_proba(input_array)[0,1])}
+        return {"prediction": float(websitePipeline.predict_proba(input_array))}
     except Exception as e:
         print(f"Error occurred: {e}", flush=True)
         return {"error": str(e)}
