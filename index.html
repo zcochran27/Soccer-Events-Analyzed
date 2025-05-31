@@ -54,11 +54,13 @@
                         </select>
         
                         <button id="undoBtn">Undo last pass</button>
-                        <button id="shootBtn">Shoot!</button>
                         <button id="predictBtn">Predict Play Probability</button>
                     </div>
-                    <p id="predictionResult"></p>
-                    <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+                    <div id="prediction-container">
+                        <svg id="circleChart" width="200" height="200"></svg>
+                        <p id="predictionResult"></p>
+                        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+                    </div>
                 </div>
             </div>
             <div class="graphic-item" id="graphic-item-5">

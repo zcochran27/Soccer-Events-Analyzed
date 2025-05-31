@@ -1,3 +1,4 @@
+import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 const canvas = document.getElementById("pitchCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -286,6 +287,7 @@ canvas.addEventListener("click", (event) => {
       clickPhase = 2; // return to dashed line phase
       break;
   }
+  updatePredictBtn();
 });
 
 function drawEventFromStats(event, index) {
@@ -370,56 +372,60 @@ document.getElementById("undoBtn").addEventListener("click", () => {
   lastEndPos = collectedStats.at(-1).end;
 });
 
-document.getElementById("shootBtn").addEventListener("click", () => {
-  if (shotTaken) {
-    shotTaken = false;
-    drawPitch();
-    collectedStats.forEach(drawEventFromStats);
-    drawDribbles();
-    document.getElementById("shootBtn").textContent = "Shoot!";
-    predictBtn.classList.remove("active");
-    predictBtn.disabled = true;
-    return;
-  }
-  if (collectedStats.length === 0) {
-    alert("Add at least one event before shooting!");
-    return;
-  }
-  if (clickPhase === 3) {
-    console.log("popping dribble");
-    dribbles.pop();
-    drawPitch();
-    collectedStats.forEach(drawEventFromStats);
-    drawDribbles();
-    clickPhase = 2;
-  }
-  shotTaken = true;
-  const lastEnd = collectedStats[collectedStats.length - 1].end;
-  const [lx, ly] = scaleToCanvas(...lastEnd);
-  const [gx, gy] = scaleToCanvas(...goalCoords);
+// document.getElementById("shootBtn").addEventListener("click", () => {
+//   if (shotTaken) {
+//     shotTaken = false;
+//     drawPitch();
+//     collectedStats.forEach(drawEventFromStats);
+//     drawDribbles();
+//     document.getElementById("shootBtn").textContent = "Shoot!";
+//     predictBtn.classList.remove("active");
+//     predictBtn.disabled = true;
+//     return;
+//   }
+//   if (collectedStats.length === 0) {
+//     alert("Add at least one event before shooting!");
+//     return;
+//   }
+//   if (clickPhase === 3) {
+//     console.log("popping dribble");
+//     dribbles.pop();
+//     drawPitch();
+//     collectedStats.forEach(drawEventFromStats);
+//     drawDribbles();
+//     clickPhase = 2;
+//   }
+//   shotTaken = true;
+//   const lastEnd = collectedStats[collectedStats.length - 1].end;
+//   const [lx, ly] = scaleToCanvas(...lastEnd);
+//   const [gx, gy] = scaleToCanvas(...goalCoords);
 
-  ctx.save();
-  ctx.setLineDash([6, 4]);
-  ctx.beginPath();
-  ctx.moveTo(lx, ly);
-  ctx.lineTo(gx, gy);
-  ctx.strokeStyle = "green";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.restore();
+//   ctx.save();
+//   ctx.setLineDash([6, 4]);
+//   ctx.beginPath();
+//   ctx.moveTo(lx, ly);
+//   ctx.lineTo(gx, gy);
+//   ctx.strokeStyle = "green";
+//   ctx.lineWidth = 2;
+//   ctx.stroke();
+//   ctx.setLineDash([]);
+//   ctx.restore();
 
-  const midX = (lx + gx) / 2;
-  const midY = (ly + gy) / 2;
-  ctx.fillStyle = "green";
-  ctx.font = "16px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("Shot!", midX, midY - 10);
+//   const midX = (lx + gx) / 2;
+//   const midY = (ly + gy) / 2;
+//   ctx.fillStyle = "green";
+//   ctx.font = "16px Arial";
+//   ctx.textAlign = "center";
+//   ctx.fillText("Shot!", midX, midY - 10);
 
-  document.getElementById("shootBtn").textContent = "Undo Shot";
-  predictBtn.classList.add("active");
-  predictBtn.disabled = false;
-});
+//   document.getElementById("shootBtn").textContent = "Undo Shot";
+//   predictBtn.classList.add("active");
+//   predictBtn.disabled = false;
+// });
+function getPercentile(value) {
+  const index = predDist.filter(x => x < value).length;
+  return index / predDist.length;
+}
 
 document.getElementById("predictBtn").addEventListener("click", async () => {
   if (collectedStats.length === 0) {
@@ -442,7 +448,6 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
   resultBox.innerText = "";
   spinner.style.display = "block"; 
   try {
-    console.log("fetching");
     const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -451,7 +456,9 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
 
     const result = await response.json();
     if (result.prediction !== undefined) {
-      resultBox.innerText =`Prediction: ${result.prediction.toFixed(4)}`;
+      resultBox.innerText =`Probability of Scoring Off Sequence: ${result.prediction.toFixed(4)}`;
+      drawDoughnutChart(getPercentile(result.prediction));
+      console.log(getPercentile(result.prediction));
     } else {
       resultBox.innerText =`Error: ${result.error}`;
     } 
@@ -460,13 +467,13 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
   } finally {
     spinner.style.display = "none";
     collectedStats = collectedStats.reverse();
-    console.log(collectedStats);
   }
+  
 });
 
 function updatePredictBtn() {
   const predictBtn = document.getElementById("predictBtn");
-  if (collectedStats.length >= 5) {
+  if (collectedStats.length > 0) {
     predictBtn.classList.add("active");
     predictBtn.disabled = false;
   } else {
@@ -474,7 +481,52 @@ function updatePredictBtn() {
     predictBtn.disabled = true;
   }
 }
+const predDist = await fetch("predDist.json").then(res => res.json());
+predDist.sort((a, b) => a - b);
 
+function drawDoughnutChart(percentile) {
+  const width = 200;
+  const height = 200;
+  const radius = 80;
+  const thickness = 15;
+
+  const svg = d3.select("#circleChart")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("visibility", "visible");
+    svg.selectAll("*").remove();
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+  // Background arc
+  const backgroundArc = d3.arc()
+    .innerRadius(radius - thickness)
+    .outerRadius(radius)
+    .startAngle(0)
+    .endAngle(2 * Math.PI);
+
+  g.append("path")
+    .attr("d", backgroundArc)
+    .attr("fill", "#eee");
+
+  // Foreground arc (progress)
+  const foregroundArc = d3.arc()
+    .innerRadius(radius - thickness)
+    .outerRadius(radius)
+    .startAngle(0)
+    .endAngle(2 * Math.PI * percentile);
+
+  g.append("path")
+    .attr("d", foregroundArc)
+    .attr("fill", "#4caf50");
+
+  // Center text
+  g.append("text")
+    .attr("class", "percent-text")
+    .text(`Top: ${Math.round(percentile * 100)}%`);
+}
+d3.select("#circleChart").attr("visibility", "hidden");
 drawPitch();
 updatePredictBtn();
 
