@@ -1,5 +1,143 @@
-
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
+import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
+
+
+// const playerContainer = document.querySelector('.player');
+//   if (playerContainer) {
+//     const ytDiv = document.createElement('div');
+//     ytDiv.id = 'yt-player';
+//     playerContainer.appendChild(ytDiv);
+//   }
+
+  // Load YouTube iframe API
+  function handleStep(stepIndex, element) {
+    // Remove active classes from all graphics
+    document.querySelectorAll('.graphic-item').forEach(item =>
+      item.classList.remove('active')
+    );
+  
+    // Add active class to the matched graphic
+    const graphicToShow = document.getElementById(`graphic-item-${stepIndex + 1}`);
+    if (graphicToShow) {
+      graphicToShow.classList.add('active');
+    }
+  
+    // Remove active from all steps, add to current
+    document.querySelectorAll('.step').forEach(step =>
+      step.classList.remove('active')
+    );
+    element.classList.add('active');
+  
+    // Your custom logic for step 0 (e.g., start video)
+    if (stepIndex === 0) {
+      startVideoLoop?.();
+    } else {
+      stopVideoLoop?.();
+    }
+  }
+
+  window.onYouTubeIframeAPIReady = function() {
+    console.log('YouTube Iframe API ready, creating player');
+    player = new YT.Player('yt-player', {
+      height: 315,
+      width: 560,
+      videoId: '8nQRnTSDwLs',
+      playerVars: {
+        start: 311,
+        end: 322,
+        autoplay: 0,
+        controls: 0,
+        modestbranding: 1,
+        mute: 1,
+      },
+      events: {
+        'startVideoLoop': startVideoLoop,
+        'stopVideoLoop': stopVideoLoop
+      }
+    });
+  };
+
+  // Load YouTube iframe API
+  const tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+
+  // Create YouTube player container
+  const playerContainer = document.querySelector('.player');
+  if (playerContainer && !document.getElementById('yt-player')) {
+    const ytDiv = document.createElement('div');
+    ytDiv.id = 'yt-player';
+    playerContainer.appendChild(ytDiv);
+  }
+
+  let player;
+  let checkInterval = null;
+  const VIDEO_STEP_INDEX = 0; // step-1 => graphic-item-1
+
+  function startVideoLoop() {
+    if (!player) return;
+    player.seekTo(311);
+    player.playVideo();
+    clearInterval(checkInterval);
+    checkInterval = setInterval(() => {
+      if (player.getCurrentTime() >= 322) {
+        player.seekTo(311);
+      }
+    }, 500);
+  }
+
+  function stopVideoLoop() {
+    if (player) {
+      player.pauseVideo();
+      clearInterval(checkInterval);
+    }
+  }
+
+const scroller = scrollama();
+
+  // Set up Scrollama
+  scroller
+    .setup({
+      step: ".step",
+      offset: 0.3,
+      debug: false,
+    })
+    .onStepEnter(response => {
+      const stepIndex = Array.from(document.querySelectorAll('.step')).indexOf(response.element);
+
+      // Remove 'active' from all graphic-items
+      document.querySelectorAll('.graphic-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Add 'active' class to the matching graphic-item
+      const graphicToShow = document.getElementById(`graphic-item-${stepIndex + 1}`);
+      if (graphicToShow) {
+        graphicToShow.classList.add('active');
+      }
+
+      // Optional: Highlight current step
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      response.element.classList.add('active');
+
+      if (stepIndex === VIDEO_STEP_INDEX) {
+        startVideoLoop();
+      } else {
+        stopVideoLoop();
+      }
+
+    });
+
+  // Recalculate dimensions on resize
+  window.addEventListener('resize', scroller.resize);
+  window.addEventListener('load', () => {
+    const firstStep = document.querySelector('.step');
+    if (firstStep) {
+      scroller.resize();
+      handleStep(0, firstStep);
+    }
+  });
+
 
 const lamineChanceLast5 = await fetch("lamine_chance_last_5.json");
 const passes = await lamineChanceLast5.json();
@@ -203,7 +341,45 @@ try {
   const lamineOptionsData = await lamineOptions.json();
   const endPoints = Object.values(lamineOptionsData).map(d => d.end);
 const startPoint = lamineOptionsData.option1.start;
+const defs2 = svg2.append("defs");
+passesV2.forEach((d, i) => {
+  const color = d.outcome === 1.0 ? "green" : "red";
+  const strokeWidth = 1.2 + i * 0.1; // adjust multiplier as needed
 
+  defs2.append("marker")
+    .attr("id", `arrow2-${i}`)
+    .attr("viewBox", "0 0 10 10")
+    .attr("refX", 2)
+    .attr("refY", 5)
+    .attr("markerWidth", strokeWidth) // scale arrow size with stroke
+    .attr("markerHeight", strokeWidth)
+    .attr("orient", "auto")
+    .attr("markerUnits", "strokeWidth")
+    .append("path")
+    .attr("d", "M 0 0 L 10 5 L 0 10 z")
+    .attr("fill", color);
+});
+defs2.append("marker")
+      .attr("id", "arrow2green")
+      .attr("viewBox", "0 0 10 10")
+      .attr("refX", 2).attr("refY", 5)
+      .attr("markerWidth", 4).attr("markerHeight", 4)
+      .attr("orient", "auto")
+      .attr("markerUnits", "userSpaceOnUse")
+      .append("path")
+      .attr("d", "M 0 0 L 10 5 L 0 10 z")
+      .attr("fill", "green");
+  
+    defs2.append("marker")
+      .attr("id", "arrow2red")
+      .attr("viewBox", "0 0 10 10")
+      .attr("refX", 2).attr("refY", 5)
+      .attr("markerWidth", 4).attr("markerHeight", 4)
+      .attr("orient", "auto")
+      .attr("markerUnits", "userSpaceOnUse")
+      .append("path")
+      .attr("d", "M 0 0 L 10 5 L 0 10 z")
+      .attr("fill", "red");
 drawFootballPitch(svg2);
 
 const tooltip2 = d3.select("body")
@@ -227,7 +403,7 @@ svg2.selectAll(".pass")
     .attr("y2", d => d.end[1])
     .attr("stroke", d => d.outcome === 1.0 ? "green" : "red")
     .attr("stroke-width", (d, i) => .5 + i * .2)
-    .attr("marker-end", (d, i) => `url(#arrow-${i})`)
+    .attr("marker-end", (d, i) => `url(#arrow2-${i})`)
 
 
 svg2.append("circle")
@@ -262,7 +438,7 @@ svg2.selectAll(".option-circle")
       .attr("y2", d[1])
       .attr("stroke", 'green')
       .attr("stroke-width", (d, i) => .5 + 5 * .2)
-      .attr("marker-end", "url(#arrowgreen)");
+      .attr("marker-end", "url(#arrow2green)");
     if (passesV2.length === 5) {
         passesV2 = passesV2.slice(0,4)
     }

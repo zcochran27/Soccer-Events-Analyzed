@@ -119,3 +119,45 @@ svg {
   text-align: center;
   dominant-baseline: middle;
 }
+.scrolly {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.left-column {
+  width: 50%;
+  padding: 2rem;
+}
+
+.right-column {
+  width: 50%;
+  position: relative;
+}
+
+.graphic {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+}
+
+.graphic-item {
+  display: none;
+  font-size: 5rem;
+  transition: opacity 0.5s;
+}
+
+.graphic-item.active {
+  display: block;
+}
+.step {
+  margin: 0 0 80vh 0;
+  padding: 2rem;
+  border: 1px solid #ccc;
+}
