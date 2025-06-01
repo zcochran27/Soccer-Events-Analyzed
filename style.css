@@ -60,3 +60,104 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+html, body {
+  height: 100%;
+}
+
+#main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* horizontal centering */
+  justify-content: center;   /* vertical centering */
+  height: 100vh;             /* full viewport height */
+  gap: 20px;     
+  margin: 400px;
+            /* spacing between controls and heatmap */
+}
+#controls {
+  display: flex;
+  align-items: center;  /* vertically center items */
+  gap: 10px;            /* space between controls */
+  flex-wrap: wrap;      /* wrap if too wide */
+  justify-content: center; /* center horizontally */
+  margin-top: 10px;
+}
+
+svg {
+  border: 1px solid #ccc;
+}
+.line { 
+  stroke: black; stroke-width: 0.2; fill: none; 
+}
+.pass {
+  fill: none;
+}
+.dribble {
+  stroke: gray;
+  stroke-width: .5;
+  stroke-dasharray: 1, 1; /* 4px dash, 2px gap */
+  fill: none;
+}
+
+.center-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.center-container h3 {
+  max-width: 800px; /* Optional: keeps text from stretching too far */
+}
+#sequence-header {
+  font-family: 'Arial', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  fill: #333; /* dark gray */
+  text-align: center;
+  dominant-baseline: middle;
+}
+.scrolly {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.left-column {
+  width: 50%;
+  padding: 2rem;
+}
+
+.right-column {
+  width: 50%;
+  position: relative;
+}
+
+.graphic {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+}
+
+.graphic-item {
+  display: none;
+  font-size: 5rem;
+  transition: opacity 0.5s;
+}
+
+.graphic-item.active {
+  display: block;
+}
+.step {
+  margin: 0 0 80vh 0;
+  padding: 2rem;
+  border: 1px solid #ccc;
+}
