@@ -858,128 +858,7 @@ const stagePreds = d3.rollup(
   d => d.competition_stage,
 );
 let clickedStage = "";
-// function createPieChart() {
-//   d3.select("#pie-chart").selectAll("*").remove(); // clear old
 
-//   const stageData = Array.from(stagePreds, ([stage, value]) => ({ stage, value }));
-//   const pieChart = d3.select("#pie-chart");
-//   const chartRect = pieChart.node().getBoundingClientRect();
-//   const pieWidth = 0.8 * chartRect.width;
-//   const pieHeight = 0.5 * chartRect.height;
-//   const radius = Math.min(pieWidth, pieHeight) / 3;
-//   const itemsPerRow = 3;
-//   const itemSpacing = 150;
-//   const legendWidth = itemsPerRow * itemSpacing;
-//   const centerX = (pieWidth - legendWidth) / 2;
-//   const padding = 60;
-//   const totalWidth = pieWidth + 2 * padding;
-//   const totalHeight = pieHeight + 200;
-
-
-//   const svg = pieChart
-//     .append("svg")
-//     .attr("width", pieWidth)
-//     .attr("height", pieHeight + 200); 
-
-//   const pieSvg = svg
-//     .append("g")
-//     .attr("transform", `translate(${pieWidth / 2 }, ${pieHeight / 2})`);
-
-//   const color = d3.scaleOrdinal()
-//     .domain(stageData.map(d => d.stage))
-//     .range(d3.schemeCategory10);
-
-//   const pie = d3.pie().value(d => d.value);
-//   const arc = d3.arc().innerRadius(0).outerRadius(radius);
-
-//   const arcs = pieSvg.selectAll("g")
-//     .data(pie(stageData))
-//     .enter()
-//     .append("g")
-//     .attr("class", "arc");
-
-//   arcs.append("path")
-//     .attr("d", arc)
-//     .attr("fill", d => color(d.data.stage))
-//     .attr("stroke", "white")
-//     .style("stroke-width", "2px")
-//     .on("click", (event, d) => {
-//       // First reset all slices to default state
-//       arcs.selectAll("path")
-//         .classed("active", false)
-//         .transition()
-//         .duration(200)
-//         .attr("transform", null);
-
-//       if (clickedStage === d.data.stage) {
-//         clickedStage = "";
-//         updateBarChart("");
-//       } else {
-//         clickedStage = d.data.stage;
-        
-//         // Then animate the clicked slice
-//         const [x, y] = arc.centroid(d);
-//         const offset = 20;
-//         const angle = Math.atan2(y, x);
-//         const dx = Math.cos(angle) * offset;
-//         const dy = Math.sin(angle) * offset;
-
-//         d3.select(event.currentTarget)
-//           .classed("active", true)
-//           .transition()
-//           .duration(200)
-//           .attr("transform", `translate(${dx}, ${dy}) scale(1.15)`);
-
-//         updateBarChart(clickedStage);
-//       }
-//     });
-
-  // Add legend
-  // const legend = svg.append("g")
-  //   .attr("id", "pie-legend")
-  //   .attr("transform", `translate(${centerX}, ${pieHeight + 20})`);    
-  // const legendItems = legend.selectAll(".legend-item")
-  //   .data(stageData)
-  //   .enter()
-  //   .append("g")
-  //   .attr("class", "legend-item")
-  //   .attr("transform", (d, i) => `translate(${(i % 3) * 150}, ${Math.floor(i / 3) * 24})`); // 3 items per row
-
-  // legendItems.append("rect")
-  //   .attr("width", 16)
-  //   .attr("height", 16)
-  //   .attr("fill", d => color(d.stage));
-
-  // legendItems.append("text")
-  //   .attr("x", 22)
-  //   .attr("y", 13)
-  //   .text(d => d.stage)
-  //   .style("font-size", "14px");
-
-
-  
-//   const legend = svg.append("g")
-//   .attr("id", "pie-legend")
-//   .attr("transform", `translate(${pieWidth + 30}, 20)`); // right of pie
-
-// const legendItems = legend.selectAll(".legend-item")
-//   .data(stageData)
-//   .enter()
-//   .append("g")
-//   .attr("class", "legend-item")
-//   .attr("transform", (d, i) => `translate(0, ${i * 24})`); // VERTICAL spacing
-
-// legendItems.append("rect")
-//   .attr("width", 16)
-//   .attr("height", 16)
-//   .attr("fill", d => color(d.stage));
-
-// legendItems.append("text")
-//   .attr("x", 22)
-//   .attr("y", 13)
-//   .text(d => d.stage)
-//   .style("font-size", "14px");
-// }
 function createPieChart() {
   d3.select("#pie-chart").selectAll("*").remove(); // clear old
 
@@ -989,10 +868,10 @@ function createPieChart() {
   const pieWidth = 0.5 * chartRect.width; // Pie takes half width
   const legendWidth = 200;                // Width reserved for legend
   const svgWidth = pieWidth + legendWidth + 60; // Add some spacing
-  const pieHeight = 0.6 * chartRect.height;
+  const pieHeight = 0.8 * chartRect.height;
   const svgHeight = pieHeight;
 
-  const radius = Math.min(pieWidth, pieHeight) / 3;
+  const radius = Math.min(pieWidth, pieHeight) / 2.5;
 
   const svg = pieChart
     .append("svg")
@@ -1002,7 +881,7 @@ function createPieChart() {
   // Position pie in the left half
   const pieSvg = svg
     .append("g")
-    .attr("transform", `translate(${pieWidth / 2}, ${pieHeight / 2})`);
+    .attr("transform", `translate(${pieWidth / 2 + 40}, ${pieHeight / 2})`);
 
   const color = d3.scaleOrdinal()
     .domain(stageData.map(d => d.stage))
@@ -1053,28 +932,6 @@ function createPieChart() {
       }
     });
 
-  // Add legend to the right of the pie
-  // const legend = svg.append("g")
-  //   .attr("id", "pie-legend")
-  //   .attr("transform", `translate(${pieWidth + 30}, 20)`); // 30px gap from pie
-
-  // const legendItems = legend.selectAll(".legend-item")
-  //   .data(stageData)
-  //   .enter()
-  //   .append("g")
-  //   .attr("class", "legend-item")
-  //   .attr("transform", (d, i) => `translate(0, ${i * 24})`); // vertical list
-
-  // legendItems.append("rect")
-  //   .attr("width", 16)
-  //   .attr("height", 16)
-  //   .attr("fill", d => color(d.stage));
-
-  // legendItems.append("text")
-  //   .attr("x", 22)
-  //   .attr("y", 13)
-  //   .text(d => d.stage)
-  //   .style("font-size", "14px");
   const legendItemHeight = 24;
 const legendHeight = stageData.length * legendItemHeight;
 
@@ -1088,7 +945,7 @@ const legendItems = legend.selectAll(".legend-item")
   .enter()
   .append("g")
   .attr("class", "legend-item")
-  .attr("transform", (d, i) => `translate(0, ${i * legendItemHeight})`);
+  .attr("transform", (d, i) => `translate(60, ${i * legendItemHeight})`);
 
 legendItems.append("rect")
   .attr("width", 16)
