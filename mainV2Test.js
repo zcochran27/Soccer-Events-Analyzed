@@ -489,7 +489,7 @@ function drawDoughnutChart(percentile) {
   const height = 200;
   const radius = 80;
   const thickness = 15;
-
+  d3.select("#prediction-container").style("visibility", "visible");
   const svg = d3.select("#circleChart")
     .attr("width", width)
     .attr("height", height)
@@ -527,6 +527,7 @@ function drawDoughnutChart(percentile) {
     .text(`Top: ${Math.round(percentile * 100)}%`);
 }
 d3.select("#circleChart").attr("visibility", "hidden");
+d3.select("#prediction-container").style("visibility", "hidden");
 drawPitch();
 updatePredictBtn();
 

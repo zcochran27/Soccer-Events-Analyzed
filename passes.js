@@ -310,6 +310,78 @@ svg1.selectAll(".pass")
   .on("mouseout", () => {
     tooltip1.style("opacity", 0);
   });
+  const pathPoints = passes.flatMap(pass => [pass.start, pass.end]);
+
+// Convert [x, y] pairs to {x, y} objects
+const points = pathPoints.map(([x, y]) => ({ x, y }));
+console.log(points);
+
+// Append ball image
+const BALL_SIZE = 6; // adjust to suit scale
+const ball = svg1.append("image")
+  .attr("href", "assets/Soccerball.png")
+  .attr("width", BALL_SIZE)
+  .attr("height", BALL_SIZE)
+  .attr("x", -BALL_SIZE / 2)
+  .attr("y", -BALL_SIZE / 2)
+
+// Define line generator
+// const line = d3.line()
+//   .x(d => d.x)
+//   .y(d => d.y)
+//   .curve(d3.curveLinear);
+
+// // Append path
+// const path = svg1.append("path")
+//   .datum(points)
+//   .attr("d", line)
+//   .attr("fill", "none")
+//   .attr("stroke", "none");
+// // Animate the ball along the path
+// function animateBall() {
+//   const totalLength = path.node().getTotalLength();
+
+//   ball
+//     .attr("transform", "translate(0,0)")
+//     .transition()
+//     .duration(7000)
+//     .ease(d3.easeLinear)
+//     .attrTween("transform", function() {
+//       return function(t) {
+//         const point = path.node().getPointAtLength(t * totalLength);
+//         return `translate(${point.x},${point.y})`;
+//       };
+//     });
+// }
+
+//   animateBall(); // call once
+// const segments = [];
+// for (let i = 0; i < pathPoints.length - 1; i += 2) {
+//   segments.push([pathPoints[i], pathPoints[i + 1]]);
+// }
+function animateSegments(index = 0) {
+  if (index >= points.length - 1) return; // stop at last segment
+
+  const start = points[index];
+  const end = points[index + 1];
+  const duration = (index / 2 % 2 === 0) ? 1000 : 1500;  // Alternate speed per segment
+  const easefn = index % 2 === 0 ? d3.easeLinear : d3.easeCubicInOut;
+
+  ball
+    .attr("x", start.x - BALL_SIZE / 2)
+    .attr("y", start.y - BALL_SIZE / 2)
+    .transition(easefn)
+    .duration(duration)
+    .attr("x", end.x - BALL_SIZE / 2)
+    .attr("y", end.y - BALL_SIZE / 2)
+    .on("end", () => animateSegments(index + 1));
+}
+animateSegments();
+
+  // Optional: loop every 5 seconds
+  setInterval(animateSegments, 18000);
+
+
 const reversedPasses = passes.reverse();
 const passesFormatted = reversedPasses.flatMap(({ start, end, type, outcome, height}) => [
 start[0], start[1],
