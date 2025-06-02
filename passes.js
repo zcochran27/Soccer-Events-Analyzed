@@ -404,7 +404,7 @@ try {
 
   const result = await response.json();
   if (result.prediction !== undefined) {
-    resultBox.innerText = `The pass sequence xG for this play is ${result.prediction.toFixed(4)}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
+    resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${100*result.prediction.toFixed(4)}%. From now on we will be refering to this probability as pass sequence xG. This probability is extremely low and is testiment to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.<br><br>Try clicking the different options below to see how the pass sequence xG changes!<br></br>Does this match your intuition? What do you think was the best passing option for this play?`;
   } else {
     resultBox.innerText = `Error: ${result.error}`;
   }
@@ -561,7 +561,7 @@ svg2.selectAll(".option-circle")
         tooltip2
           .style("opacity", 1)
           .html(`
-                        Pass sequence xG: ${result.prediction.toFixed(4)}.      
+                        Pass sequence xG: ${(100*result.prediction.toFixed(4)).toFixed(2)}%.      
                     `)
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY + 10) + "px");

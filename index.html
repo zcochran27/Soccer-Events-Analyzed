@@ -13,8 +13,11 @@
 </head>
 
 <body>
-    <h1 class="title">Pass Sequences in Soccer</h1>
-    <p class="subtitle">Let's explore how different pass sequences can lead to different outcomes.</p>
+    <h1 class="title">Stockfish for Soccer?</h1>
+    <p class="subtitle">Passing in soccer has never been so easy.</p>
+    <p class="into-paragraph">We have created a machine learning model using XGBoost that can take in a sequence of passes and predict the probability of a goal being scored involving those passes. 
+        This model has been trained on data from 2015/2016 seasons across the 5 biggest european leagues (La Liga, Premier League, Bundesliga, Serie A, and Ligue 1). 
+        The model has been extensively trained on 1823 games and resulted in 1.8 million passing sequences. In this article we will use our model to analyze passing sequences from the 2024 UEFA Euro Tournament.</p>
 
     <div class ="scrolly">
         <div class='graphic'>
@@ -98,16 +101,23 @@
 
         <div class="article">
             <div class="step" id="step-1">
-                <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA
-                    Euros Semi-Final between Spain and France.</h2>
+                <h2>Lets start by looking at the goal of tournament. This goal was scored by Lamine Yamal in the 2024 UEFA
+                    Euros Semi-Final between Spain and France. There is no doubt that it was an incredible finish, but how good was the pass sequence that led to his shot?</h2>
+                <h2>In the next sections we will dive into this chance and see how we can use our model to analyze the pass sequence.</h2>
             </div>
             <div class="step" id="step-2">
-                <h3>In this clip, we see a couple of passes before the shot is taken and the goal is scored. Let's take a look
-                    at the whole sequence of passes that led to the goal. Hover over each pass to see more details. </h3>
+                <h2>How do we define a pass sequence? <br></br>
+                    A pass sequence can be defined as a sequential list of passes where each pass has a set of features. Some of the features include start and end location, pass type, pass height. 
+                    Using these features we can visually represent the sequence in 2D by plotting each pass as an arrow and making its size proportional to its position in the sequence. We can additionally color code the pass by it's outcome.</h2>
+                <h2>Try hovering over the passes to see more details!</h2>
+                <br></br>
+                <h2>What do you think is the probability of this pass sequence leads to a goal?</h2>
             </div>
             <div class="step" id="step-3">
-                <h3 style="text-align: center" id="yamalChancexG">The pass sequence xG for this play is Loading... But what would
-                    have happened if the the last pass was played differently? Click the options below to explore.</h3>
+                <h3 style="text-align: center" id="yamalChancexG">The probability of this pass sequence leading to a goal is Loading... From now on we will be refering to this probability as pass sequence xG. 
+                    This probability is extremely low and is testiment to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.
+                <br><br>
+                Try clicking the different options below to see how the pass sequence xG changes!</h3>
             </div>
             <div class="step" id="step-4">
                 <h1 style="text-align: center;">Pass Sequence Game</h1>
@@ -128,68 +138,7 @@
             <div class="step" id="step-9">
                 <h2 style="text-align: center">Now let's take a look at the last pass of each possession to see how that affects the probability of a goal.</h2>
             </div>
-
         </div>
-
-        <!-- <div class="center-container">
-            <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA
-                Euros Semi-Final between Spain and France.</h2>
-            <div id="player"></div>
-            <h3>In this clip, we see a couple of passes before the shot is taken and the goal is scored. Let's take a look
-                at the whole sequence of passes that led to the goal. Hover over each pass to see more details. </h3>
-        </div>
-        <svg id="pitch1" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg> -->
-        <!-- <h3 style="text-align: center" id="yamalChancexG">The pass sequence xG for this play is Loading... But what would
-            have happened if the the last pass was played differently? Click the options below to explore.</h3>
-        <svg id="pitch2" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg> -->
-
-        <!-- <h1 style="text-align: center;">Pass Sequence Game</h1>
-        <h2 style="text-align: center">Try to get the highest probability possible!</h2>
-        <!-- Put the clip embedding and explainations here -->
-
-
-        <!-- <div id="main-container">
-            <div class="canvas-container">
-                <canvas id="pitchCanvas" width="720" height="480"></canvas>
-            </div> -->
-            <!-- <div id="controls">
-                <label for="passType">Select Pass Type:</label>
-                <select id="passType" name="passType">
-                    <option value="normal">Normal Pass</option>
-                    <option value="Cross">Cross</option>
-                    <option value="Through Ball">Through Ball</option>
-                    <option value="Cut-back">Cut Back</option>
-                    <option value="Switch">Switch</option>
-                    <option value="Throw-in">Throw-in</option>
-                    <option value="Corner">Corner</option>
-                    <option value="Free Kick">Free Kick</option>
-                    <option value="Goal Kick">Goal Kick</option>
-                </select>
-
-                <label for="passHeight">Select Pass Height:</label>
-                <select id="passHeight" name="passHeight">
-                    <option value="Ground">Ground Pass</option>
-                    <option value="Low">Low Pass</option>
-                    <option value="High">High Pass</option>
-                </select>
-
-                <button id="undoBtn">Undo last pass</button>
-                <button id="shootBtn">Shoot!</button>
-                <button id="predictBtn">Predict Play Probability</button>
-            </div>
-            <p id="predictionResult"></p>
-            <div id="loadingSpinner" class="spinner" style="display: none;"></div> -->
-            
-
-            <!-- <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
-            <div id="heatmap"></div>
-            <script src="goals/goals.js"></script>
-        </div> -->
-        <!-- <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal. Try and spot the pattern!</h2>
-        <div id="pitch3-container">
-            <h3 id="sequence-header"></h3>
-            <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-        </div> -->
     </div>
 </body>
 
