@@ -1130,21 +1130,40 @@ const sortedPreds = matchedRowsFull
 let matchedRows = matchedRowsFull;
 let start = 0.45;
 let end = 0.55;
+let globalType = "";
+let globalHeight = "";
 
-function updatePasses(lower, upper, rows) {
+const uniquePassTypes = Array.from(new Set(matchedRowsFull.map(d => d.type)));
+
+  // 2. Define global color scale based on all types (fixed order)
+  const color = d3.scaleOrdinal()
+    .domain(uniquePassTypes)
+    .range(d3.schemeCategory10);
+const passHeightCategories = Array.from(new Set(matchedRowsFull.map(d => d.pass_height)));
+    const heightColor = d3.scaleOrdinal()
+    .domain(passHeightCategories)
+    .range(d3.schemeCategory10);
+
+function updatePasses(lower, upper, type, height) {
   pitch4.selectAll("*").remove();
   drawFootballPitch(pitch4);
 
   const lowerPredThreshold = d3.quantileSorted(sortedPreds, lower);
   const upperPredThreshold = d3.quantileSorted(sortedPreds, upper);
   // Filter based on thresholds
-  const filteredRows = rows.filter(
+  matchedRows = matchedRowsFull.filter(
     d => d.sequence_pred >= lowerPredThreshold && d.sequence_pred <= upperPredThreshold
   );
+  if (globalType !== "") {
+    matchedRows = matchedRows.filter(d => d.type === globalType);
+  }
+  if (globalHeight !== "") {
+    matchedRows = matchedRows.filter(d => d.pass_height === globalHeight);
+  }
 
   // Draw passes
   pitch4.selectAll("line")
-    .data(filteredRows)
+    .data(matchedRows)
     .enter()
     .append("line")
     .attr("x1", d => d.x1)
@@ -1182,7 +1201,10 @@ const brush = d3.brushX()
     if (selection) {
       start = x.invert(selection[0]);
       end = x.invert(selection[1]);
-      updatePasses(start, end, matchedRows);
+
+      updatePasses(start, end, globalType, globalHeight);
+      createPassTypePieChart();
+      createPassHeightPieChart();
     }
   });
 
@@ -1191,48 +1213,12 @@ svg.append("g")
   .call(brush)
   .call(brush.move, [0.45, 0.55].map(x)); // Initial range: 10%–90%
 
-//Log scale labels
-
-// const minValue = sortedPreds[0]; // Adjust based on your actual data (must be > 0)
-// console.log(minValue)
-// const maxValue = 1;
-
-// const x = d3.scaleLog()
-//   .domain([minValue, maxValue])
-//   .range([0, width]);
-
-// // Draw axis (log-friendly)
-// svg.append("g")
-//   .attr("transform", `translate(0,${height / 2})`)
-//   .call(d3.axisBottom(x)
-//     .ticks(10, ".2") // Use appropriate format for small values
-//   );
-
-// // Brush setup
-// const brush = d3.brushX()
-//   .extent([[0, 0], [width, height]])
-//   .on("brush end", ({ selection }) => {
-//     if (selection) {
-//       const [start, end] = selection.map(x.invert); // Convert from px to log values
-//       console.log("Log-scale selected range:", [start, end]);
-//       updatePasses(start, end);
-//     }
-//   });
-
-// svg.append("g")
-//   .attr("class", "brush")
-//   .call(brush)
-//   .call(brush.move, [x(0.01), x(0.8)]); // Initial range mapped through x()
-
-
-let clickedPassType = "";
-
 function createPassTypePieChart() {
   d3.select("#pass-type-pie-chart").selectAll("*").remove(); // clear previous chart
 
   // Count pass types
   const passTypeCounts = d3.rollup(
-    matchedRowsFull,
+    matchedRows,
     v => v.length,
     d => d.type
   );
@@ -1242,7 +1228,7 @@ function createPassTypePieChart() {
   // Dimensions
   const pieWidth = 200;
   const pieHeight = 200;
-  const legendWidth = 150;
+  const legendWidth = 120;
   const radius = Math.min(pieWidth, pieHeight) / 2.2;
 
   const svg = d3.select("#pass-type-pie-chart")
@@ -1254,9 +1240,9 @@ function createPassTypePieChart() {
     .attr("transform", `translate(${pieWidth / 2}, ${pieHeight / 2})`);
 
   // Color scale
-  const color = d3.scaleOrdinal()
-    .domain(passTypeData.map(d => d.type))
-    .range(d3.schemeCategory10);
+  // const color = d3.scaleOrdinal()
+  //   .domain(passTypeData.map(d => d.type))
+  //   .range(d3.schemeCategory10);
 
   // Pie generator
   const pie = d3.pie().value(d => d.count);
@@ -1279,7 +1265,7 @@ function createPassTypePieChart() {
       .attr("stroke", "white")
       .style("stroke-width", "2px")
       .on("mouseover", function () {
-        if (clickedPassType !== d.data.type) {
+        if (globalType !== d.data.type) {
           const [x, y] = arc.centroid(d);
           d3.select(this)
             .transition()
@@ -1288,7 +1274,7 @@ function createPassTypePieChart() {
         }
       })
       .on("mouseout", function () {
-        if (clickedPassType !== d.data.type) {
+        if (globalType !== d.data.type) {
           d3.select(this)
             .transition()
             .duration(200)
@@ -1310,12 +1296,13 @@ function createPassTypePieChart() {
       .duration(200)
       .attr("transform", null);
 
-    if (clickedPassType === type) {
-      clickedPassType = "";
-      matchedRows = matchedRowsFull;
-      updatePasses(start, end, matchedRows);
+    if (globalType === type) {
+      globalType = "";
+      updatePasses(start, end, globalType, globalHeight);
+      createPassTypePieChart();
+      createPassHeightPieChart();
     } else {
-      clickedPassType = type;
+      globalType = type;
 
       const [x, y] = arc.centroid(d);
       const offset = 20;
@@ -1328,8 +1315,9 @@ function createPassTypePieChart() {
         .transition()
         .duration(200)
         .attr("transform", `translate(${dx}, ${dy}) scale(1.1)`);
-      matchedRows = matchedRowsFull.filter(d => d.type === type);
-      updatePasses(start, end, matchedRows);
+      updatePasses(start, end, globalType, globalHeight);
+      createPassTypePieChart();
+      createPassHeightPieChart();
     }
   }
 
@@ -1363,3 +1351,149 @@ function createPassTypePieChart() {
 }
 // Call the function to create pie chart
 createPassTypePieChart();
+
+function createPassHeightPieChart() {
+  d3.select("#pass-height-pie-chart").selectAll("*").remove();
+
+  const passHeightCounts = d3.rollup(
+    matchedRows,
+    v => v.length,
+    d => d.pass_height
+  );
+  const passHeightData = Array.from(passHeightCounts, ([height, count]) => ({ height, count }));
+
+  const pieWidth = 200;
+  const pieHeight = 200;
+  const legendWidth = 120;
+  const radius = Math.min(pieWidth, pieHeight) / 2.2;
+  const legendItemHeight = 20;
+  const legendHeight = passHeightData.length * legendItemHeight;
+  const legendYOffset = (pieHeight - legendHeight) / 2;
+
+  const svg = d3.select("#pass-height-pie-chart")
+    .append("svg")
+    .attr("width", pieWidth + legendWidth)
+    .attr("height", pieHeight);
+
+  const pieSvg = svg.append("g")
+    .attr("transform", `translate(${pieWidth / 2}, ${pieHeight / 2})`);
+
+  const pie = d3.pie().value(d => d.count);
+  const arc = d3.arc().innerRadius(0).outerRadius(radius);
+  const arcs = pieSvg.selectAll(".arc")
+    .data(pie(passHeightData))
+    .enter()
+    .append("g")
+    .attr("class", "arc");
+
+  const pathMap = new Map();
+
+  arcs.each(function (d) {
+    const path = d3.select(this)
+      .append("path")
+      .attr("d", arc(d))
+      .attr("fill", heightColor(d.data.height))
+      .attr("stroke", "white")
+      .style("stroke-width", "2px")
+      .on("mouseover", function () {
+        if (globalHeight !== d.data.height) {
+          const [x, y] = arc.centroid(d);
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", `translate(${x * 0.1}, ${y * 0.1})`);
+        }
+      })
+      .on("mouseout", function () {
+        if (globalHeight !== d.data.height) {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", null);
+        }
+      })
+      .on("click", function (event, d) {
+        handleClick(d.data.height, d, this);
+      });
+
+    pathMap.set(d.data.height, path);
+  });
+
+  function handleClick(height, d, element) {
+    arcs.selectAll("path")
+      .classed("active", false)
+      .transition()
+      .duration(200)
+      .attr("transform", null);
+
+    if (globalHeight === height) {
+      globalHeight = "";
+    } else {
+      globalHeight = height;
+
+      const [x, y] = arc.centroid(d);
+      const angle = Math.atan2(y, x);
+      const dx = Math.cos(angle) * 20;
+      const dy = Math.sin(angle) * 20;
+
+      d3.select(element)
+        .classed("active", true)
+        .transition()
+        .duration(200)
+        .attr("transform", `translate(${dx}, ${dy}) scale(1.1)`);
+    }
+
+    // Apply filter with both height and type
+    let filtered = matchedRowsFull.filter(d =>
+      d.sequence_pred >= d3.quantileSorted(sortedPreds, start) &&
+      d.sequence_pred <= d3.quantileSorted(sortedPreds, end)
+    );
+
+    if (globalType !== "") {
+      filtered = filtered.filter(d => d.type === globalType);
+      updatePasses(start, end, globalType, globalHeight);
+      createPassTypePieChart();
+      createPassHeightPieChart();
+    }
+    if (globalHeight !== "") {
+      filtered = filtered.filter(d => d.height === globalHeight);
+      updatePasses(start, end, globalType, globalHeight);
+      createPassTypePieChart();
+      createPassHeightPieChart();
+    }
+
+    updatePasses(start, end, globalType, globalHeight);
+    createPassTypePieChart();
+    createPassHeightPieChart();
+  }
+
+  // Legend
+  const legend = svg.append("g")
+    .attr("class", "legend")
+    .attr("transform", `translate(${pieWidth + 20}, ${legendYOffset})`);
+
+  const legendItems = legend.selectAll(".legend-item")
+    .data(pie(passHeightData))
+    .enter()
+    .append("g")
+    .attr("class", "legend-item")
+    .attr("transform", (d, i) => `translate(0, ${i * legendItemHeight})`)
+    .style("cursor", "pointer")
+    .on("click", (event, d) => {
+      const path = pathMap.get(d.data.height);
+      handleClick(d.data.height, d, path.node());
+    });
+
+  legendItems.append("rect")
+    .attr("width", 12)
+    .attr("height", 12)
+    .attr("fill", d => heightColor(d.data.height));
+
+  legendItems.append("text")
+    .attr("x", 16)
+    .attr("y", 6)
+    .attr("dy", "0.35em")
+    .text(d => `${d.data.height} (${d.data.count})`)
+    .style("font-size", "12px");
+}
+createPassHeightPieChart();

@@ -361,3 +361,11 @@ body {
   stroke: #333;
   stroke-width: 2px;
 }
+#pie-containers {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  justify-content: space-around;
+  align-items: center;
+}
