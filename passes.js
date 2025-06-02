@@ -1204,6 +1204,31 @@ function updatePasses(lower, upper, type, height) {
     .attr("opacity", 0.4);
 }
 
+let animationInterval;
+
+function animateBrushRight(step = 0.01, delay = 500) {
+  if (animationInterval) clearInterval(animationInterval);
+
+  animationInterval = setInterval(() => {
+    const brushNode = svg.select(".brush").node();
+    const currentSelection = d3.brushSelection(brushNode);
+
+    if (!currentSelection) return;
+
+    let [startPx, endPx] = currentSelection;
+    let startVal = x.invert(startPx) + step;
+    let endVal = x.invert(endPx) + step;
+
+    // If we've reached or exceeded 1, reset to start
+    if (endVal >= 1) {
+      startVal = 0;
+      endVal = 0.1; // Width of the brush window (adjustable)
+    }
+
+    svg.select(".brush").call(brush.move, [x(startVal), x(endVal)]);
+  }, delay);
+}
+
 // // Slider config
 const margin = { top: 20, right: 50, bottom: 20, left: 50 };
 const width = 500 - margin.left - margin.right;
@@ -1226,6 +1251,10 @@ svg.append("g")
 
 const brush = d3.brushX()
   .extent([[0, 0], [width, height]])
+  .on("start", () => {
+    // Stop animation if brush is manually interacted with
+    clearInterval(animationInterval);
+  })
   .on("brush end", ({ selection }) => {
     if (selection) {
       start = x.invert(selection[0]);
@@ -1235,6 +1264,7 @@ const brush = d3.brushX()
       createPassTypePieChart();
       createPassHeightPieChart();
       drawAccuracyChart(accuracy);
+      //clearInterval(animationInterval);
     }
   });
 
@@ -1575,3 +1605,186 @@ function drawAccuracyChart(percentile) {
     .style("font-size", "15px");
 }
 drawAccuracyChart(accuracy);
+
+
+animateBrushRight();
+
+
+const allPassMetaData = euroSequences.map(getPassLocationsWithMetadata);
+// Get first pass from each sequence by taking first object in each list
+const firstPassMetaData = allPassMetaData.map(sequence => sequence[0]);
+const secondPassMetaData = allPassMetaData.map(sequence => sequence[1]);
+const thirdPassMetaData = allPassMetaData.map(sequence => sequence[2]);
+const fourthPassMetaData = allPassMetaData.map(sequence => sequence[3]);
+const fifthPassMetaData = allPassMetaData.map(sequence => sequence[4]);
+
+// Calculate average sequence_pred for each pass position
+const firstPassAvgPred = d3.mean(firstPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
+const secondPassAvgPred = d3.mean(secondPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
+const thirdPassAvgPred = d3.mean(thirdPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
+const fourthPassAvgPred = d3.mean(fourthPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
+const fifthPassAvgPred = d3.mean(fifthPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
+
+// Create bar chart for pass position averages
+const passPositionData = [
+  { position: "First Pass", avg: firstPassAvgPred },
+  { position: "Second Pass", avg: secondPassAvgPred },
+  { position: "Third Pass", avg: thirdPassAvgPred }, 
+  { position: "Fourth Pass", avg: fourthPassAvgPred },
+  { position: "Fifth Pass", avg: fifthPassAvgPred }
+].filter(d => !isNaN(d.avg)); // Filter out any NaN values
+
+const barMargin = {top: 20, right: 20, bottom: 30, left: 40};
+const barWidth = 500 - barMargin.left - barMargin.right;
+const barHeight = 400 - barMargin.top - barMargin.bottom;
+
+const barSvg = d3.select("#pass-position-chart")
+  .append("svg")
+  .attr("width", barWidth + barMargin.left + barMargin.right)
+  .attr("height", barHeight + barMargin.top + barMargin.bottom)
+  .append("g")
+  .attr("transform", `translate(${barMargin.left},${barMargin.top})`);
+
+const xPassPosition = d3.scaleBand()
+  .range([0, barWidth])
+  .domain(passPositionData.map(d => d.position))
+  .padding(0.1);
+
+const yPassPosition = d3.scaleLinear()
+  .range([barHeight, 0])
+  .domain([0, d3.max(passPositionData, d => d.avg)]);
+
+barSvg.append("g")
+  .attr("transform", `translate(0,${barHeight})`)
+  .call(d3.axisBottom(xPassPosition));
+
+barSvg.append("g")
+  .call(d3.axisLeft(yPassPosition));
+
+barSvg.selectAll("rect")
+  .data(passPositionData)
+  .enter()
+  .append("rect")
+  .attr("x", d => xPassPosition(d.position))
+  .attr("y", d => yPassPosition(d.avg))
+  .attr("width", xPassPosition.bandwidth())
+  .attr("height", d => barHeight - yPassPosition(d.avg))
+  .attr("fill", "#4caf50");
+
+// Add title
+barSvg.append("text")
+  .attr("x", barWidth/2)
+  .attr("y", 0)
+  .attr("text-anchor", "middle")
+  .style("font-size", "14px")
+  .text("Average Prediction by Pass Position");
+
+  const allPassMetaDataWithPosition = allPassMetaData.flat().map((pass, idx, arr) => {
+    const positionIndex = idx % 5;
+    return {
+      ...pass,
+      position: ["First Pass", "Second Pass", "Third Pass", "Fourth Pass", "Fifth Pass"][positionIndex]
+    };
+  });
+  const marginStacked = { top: 60, right: 140, bottom: 60, left: 40 };
+  const widthStacked = 500 - marginStacked.left - marginStacked.right;
+  const heightStacked = 400 - marginStacked.top - marginStacked.bottom;
+  
+  const passPositions = ["First Pass", "Second Pass", "Third Pass", "Fourth Pass", "Fifth Pass"];
+  const passTypes = Array.from(new Set(allPassMetaDataWithPosition.map(d => d.type)));
+  
+  // Color
+  const colorStacked = d3.scaleOrdinal()
+    .domain(passPositions)
+    .range(d3.schemeTableau10);
+  
+  // Aggregate
+  const grouped = d3.group(allPassMetaDataWithPosition, d => d.type, d => d.position);
+  const data = Array.from(grouped, ([type, positionMap]) => {
+    const obj = { type };
+    passPositions.forEach(pos => {
+      const entries = positionMap.get(pos) || [];
+      const total = d3.sum(entries, d => d.sequence_pred || 1);
+      obj[pos] = total;
+    });
+    return obj;
+  });
+  
+  const totalByType = data.map(d => {
+    const total = passPositions.reduce((sum, pos) => sum + d[pos], 0);
+    passPositions.forEach(pos => d[pos] = d[pos] / (total || 1)); // normalize
+    return d;
+  });
+  
+  // Stack
+  const stack = d3.stack().keys(passPositions);
+  const series = stack(totalByType);
+  
+  // Scales
+  const xStacked = d3.scaleBand()
+    .domain(totalByType.map(d => d.type))
+    .range([0, widthStacked])
+    .padding(0.2);
+  
+  const yStacked = d3.scaleLinear()
+    .domain([0, 1])
+    .range([heightStacked, 0]);
+  
+  // SVG
+  const svgStacked = d3.select("#pass-position-chart")
+    .append("svg")
+    .attr("width", widthStacked + marginStacked.left + marginStacked.right)
+    .attr("height", heightStacked + marginStacked.top + marginStacked.bottom)
+    .append("g")
+    .attr("transform", `translate(${marginStacked.left},${marginStacked.top})`);
+  
+  // Bars
+  svgStacked.selectAll("g.layer")
+    .data(series)
+    .enter()
+    .append("g")
+    .attr("class", "layer")
+    .attr("fill", d => colorStacked(d.key))
+    .selectAll("rect")
+    .data(d => d)
+    .enter()
+    .append("rect")
+    .attr("x", d => xStacked(d.data.type))
+    .attr("y", d => yStacked(d[1]))
+    .attr("height", d => yStacked(d[0]) - yStacked(d[1]))
+    .attr("width", xStacked.bandwidth());
+  
+  // Axes
+  svgStacked.append("g")
+  .attr("transform", `translate(0,${heightStacked})`)
+  .call(d3.axisBottom(xStacked))
+  .selectAll("text")
+  .attr("transform", "rotate(-30)")  // Angle of rotation
+  .style("text-anchor", "end")
+  .attr("dx", "-0.8em")              // Horizontal adjustment
+  .attr("dy", "0.15em"); 
+  
+  svgStacked.append("g")
+    .call(d3.axisLeft(yStacked).tickFormat(d3.format(".0%")));
+  
+  // Legend
+  const legendStacked = svgStacked.append("g")
+    .attr("transform", `translate(${widthStacked + 20}, 0)`);
+  
+  legendStacked.selectAll("rect")
+    .data(passPositions)
+    .enter()
+    .append("rect")
+    .attr("y", (d, i) => i * 20)
+    .attr("width", 10)
+    .attr("height", 10)
+    .attr("fill", d => colorStacked(d));
+  
+  legendStacked.selectAll("text")
+    .data(passPositions)
+    .enter()
+    .append("text")
+    .attr("x", 15)
+    .attr("y", (d, i) => i * 20 + 9)
+    .text(d => d)
+    .style("font-size", "12px");
