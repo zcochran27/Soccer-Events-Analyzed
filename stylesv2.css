@@ -119,7 +119,8 @@ body {
 /* Pitch SVGs */
 #pitch1,
 #pitch2,
-#pitch3 {
+#pitch3,
+#pitch4 {
   width: 100%;
   height: auto;
   max-height: 90vh;
@@ -342,4 +343,21 @@ body {
   border-radius: 3px;
   flex-shrink: 0;
   border: 1px solid #ccc;
+}
+#pitch4 {
+  max-width:700px;
+}
+.legend-item text {
+  cursor: pointer;
+  transition: fill 0.2s, font-weight 0.2s;
+}
+
+.legend-item text:hover {
+  fill: #007acc;      /* A blue hover color */
+  font-weight: bold;  /* Emphasize on hover */
+  text-decoration: underline;
+}
+.legend-item:hover rect {
+  stroke: #333;
+  stroke-width: 2px;
 }

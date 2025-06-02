@@ -729,7 +729,6 @@ function updatePassDisplay() {
 
   // Update sequence header
   const currentSequence = topTenSequencePasses[currentSequenceIndex][0];
-  console.log(topTenSequencePasses[currentSequenceIndex]);
   d3.select("#sequence-header")
     .html(`Team: ${currentSequence.team}<br>Sequence Probability: ${(currentSequence.sequence_pred * 100).toFixed(2)}%`);
 
@@ -823,7 +822,6 @@ controlsContainer.append("button")
 updatePassDisplay();
 
 
-console.log(euroSequences)
 
 
 let filteredEuroSequences = euroSequences;
@@ -849,8 +847,6 @@ const teamSums = Array.from(teamsPreds.entries()).map(([team, possessions]) => {
     sumPred: d3.sum(possessionValues)
   };
 });
-console.log(teamAverages);
-console.log(teamSums);
 
 const stagePreds = d3.rollup(
   euroSequences,
@@ -1105,3 +1101,265 @@ window.addEventListener('resize', () => {
   updateBarChart("");
   createPieChart();
 });
+
+// Create a new SVG for the pass visualization
+const pitch4 = d3.select("#pitch4");
+// Clear any existing elements
+pitch4.selectAll("*").remove();
+drawFootballPitch(pitch4);
+
+// Get the best sequence for each possession
+const teamsLastPreds = d3.rollup(
+  filteredEuroSequences,
+  v => d3.max(v, d => d.sequence_pred),
+  d => d.match_id,
+  d => d.possession
+);
+
+// All rows with max prediction for each possession
+const matchedRowsFull = filteredEuroSequences.filter(d => {
+  const matchMap = teamsLastPreds.get(d.match_id);
+  if (!matchMap) return false;
+
+  const maxPred = matchMap.get(d.possession);
+  return d.sequence_pred === maxPred;
+});
+const sortedPreds = matchedRowsFull
+    .map(d => parseFloat(d.sequence_pred))
+      .sort(d3.ascending);
+let matchedRows = matchedRowsFull;
+let start = 0.45;
+let end = 0.55;
+
+function updatePasses(lower, upper, rows) {
+  pitch4.selectAll("*").remove();
+  drawFootballPitch(pitch4);
+
+  const lowerPredThreshold = d3.quantileSorted(sortedPreds, lower);
+  const upperPredThreshold = d3.quantileSorted(sortedPreds, upper);
+  // Filter based on thresholds
+  const filteredRows = rows.filter(
+    d => d.sequence_pred >= lowerPredThreshold && d.sequence_pred <= upperPredThreshold
+  );
+
+  // Draw passes
+  pitch4.selectAll("line")
+    .data(filteredRows)
+    .enter()
+    .append("line")
+    .attr("x1", d => d.x1)
+    .attr("y1", d => d.y1)
+    .attr("x2", d => d.x2)
+    .attr("y2", d => d.y2)
+    .attr("stroke", d => parseInt(d.outcome) === 1 ? "#00FF00" : "#FF0000")
+    .attr("stroke-width", 0.3)
+    .attr("opacity", 0.4);
+}
+
+// // Slider config
+const margin = { top: 20, right: 50, bottom: 20, left: 50 };
+const width = 500 - margin.left - margin.right;
+const height = 80;
+
+const svg = d3.select("#slider-container")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height)
+  .append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
+
+const x = d3.scaleLinear()
+  .domain([0, 1])
+  .range([0, width]);
+
+svg.append("g")
+  .attr("transform", `translate(0,${height / 2})`)
+  .call(d3.axisBottom(x).ticks(10).tickFormat(d3.format(".0%")));
+
+const brush = d3.brushX()
+  .extent([[0, 0], [width, height]])
+  .on("brush end", ({ selection }) => {
+    if (selection) {
+      start = x.invert(selection[0]);
+      end = x.invert(selection[1]);
+      updatePasses(start, end, matchedRows);
+    }
+  });
+
+svg.append("g")
+  .attr("class", "brush")
+  .call(brush)
+  .call(brush.move, [0.45, 0.55].map(x)); // Initial range: 10%–90%
+
+//Log scale labels
+
+// const minValue = sortedPreds[0]; // Adjust based on your actual data (must be > 0)
+// console.log(minValue)
+// const maxValue = 1;
+
+// const x = d3.scaleLog()
+//   .domain([minValue, maxValue])
+//   .range([0, width]);
+
+// // Draw axis (log-friendly)
+// svg.append("g")
+//   .attr("transform", `translate(0,${height / 2})`)
+//   .call(d3.axisBottom(x)
+//     .ticks(10, ".2") // Use appropriate format for small values
+//   );
+
+// // Brush setup
+// const brush = d3.brushX()
+//   .extent([[0, 0], [width, height]])
+//   .on("brush end", ({ selection }) => {
+//     if (selection) {
+//       const [start, end] = selection.map(x.invert); // Convert from px to log values
+//       console.log("Log-scale selected range:", [start, end]);
+//       updatePasses(start, end);
+//     }
+//   });
+
+// svg.append("g")
+//   .attr("class", "brush")
+//   .call(brush)
+//   .call(brush.move, [x(0.01), x(0.8)]); // Initial range mapped through x()
+
+
+let clickedPassType = "";
+
+function createPassTypePieChart() {
+  d3.select("#pass-type-pie-chart").selectAll("*").remove(); // clear previous chart
+
+  // Count pass types
+  const passTypeCounts = d3.rollup(
+    matchedRowsFull,
+    v => v.length,
+    d => d.type
+  );
+
+  const passTypeData = Array.from(passTypeCounts, ([type, count]) => ({ type, count }));
+
+  // Dimensions
+  const pieWidth = 200;
+  const pieHeight = 200;
+  const legendWidth = 150;
+  const radius = Math.min(pieWidth, pieHeight) / 2.2;
+
+  const svg = d3.select("#pass-type-pie-chart")
+    .append("svg")
+    .attr("width", pieWidth + legendWidth)
+    .attr("height", pieHeight);
+
+  const pieSvg = svg.append("g")
+    .attr("transform", `translate(${pieWidth / 2}, ${pieHeight / 2})`);
+
+  // Color scale
+  const color = d3.scaleOrdinal()
+    .domain(passTypeData.map(d => d.type))
+    .range(d3.schemeCategory10);
+
+  // Pie generator
+  const pie = d3.pie().value(d => d.count);
+  const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+  const arcs = pieSvg.selectAll(".arc")
+    .data(pie(passTypeData))
+    .enter()
+    .append("g")
+    .attr("class", "arc");
+
+  const pathMap = new Map(); // Map passType → path element for linking with legend
+
+  // Draw pie slices
+  arcs.each(function (d) {
+    const path = d3.select(this)
+      .append("path")
+      .attr("d", arc(d))
+      .attr("fill", color(d.data.type))
+      .attr("stroke", "white")
+      .style("stroke-width", "2px")
+      .on("mouseover", function () {
+        if (clickedPassType !== d.data.type) {
+          const [x, y] = arc.centroid(d);
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", `translate(${x * 0.1}, ${y * 0.1})`);
+        }
+      })
+      .on("mouseout", function () {
+        if (clickedPassType !== d.data.type) {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", null);
+        }
+      })
+      .on("click", function (event, d) {
+        handleClick(d.data.type, d, this); // <- Fix here
+      });
+  
+    pathMap.set(d.data.type, path);
+  });
+
+  function handleClick(type, d, element) {
+    // Reset all
+    arcs.selectAll("path")
+      .classed("active", false)
+      .transition()
+      .duration(200)
+      .attr("transform", null);
+
+    if (clickedPassType === type) {
+      clickedPassType = "";
+      matchedRows = matchedRowsFull;
+      updatePasses(start, end, matchedRows);
+    } else {
+      clickedPassType = type;
+
+      const [x, y] = arc.centroid(d);
+      const offset = 20;
+      const angle = Math.atan2(y, x);
+      const dx = Math.cos(angle) * offset;
+      const dy = Math.sin(angle) * offset;
+
+      d3.select(element)
+        .classed("active", true)
+        .transition()
+        .duration(200)
+        .attr("transform", `translate(${dx}, ${dy}) scale(1.1)`);
+      matchedRows = matchedRowsFull.filter(d => d.type === type);
+      updatePasses(start, end, matchedRows);
+    }
+  }
+
+  // Create legend
+  const legend = svg.append("g")
+    .attr("class", "legend")
+    .attr("transform", `translate(${pieWidth + 20}, 20)`);
+
+  const legendItems = legend.selectAll(".legend-item")
+    .data(pie(passTypeData)) // use pie() output to keep 'd' structure aligned
+    .enter()
+    .append("g")
+    .attr("class", "legend-item")
+    .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+    .style("cursor", "pointer")
+    .on("click", (event, d) => {
+      const path = pathMap.get(d.data.type);
+      handleClick(d.data.type, d, path.node());
+    });
+
+  legendItems.append("rect")
+    .attr("width", 12)
+    .attr("height", 12)
+    .attr("fill", d => color(d.data.type));
+
+  legendItems.append("text")
+    .attr("x", 16)
+    .attr("y", 10)
+    .text(d => `${d.data.type} (${d.data.count})`)
+    .style("font-size", "12px");
+}
+// Call the function to create pie chart
+createPassTypePieChart();
