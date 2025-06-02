@@ -125,6 +125,10 @@ scroller
     } else {
       stopVideoLoop();
     }
+    if (stepIndex === 7){
+      createPieChart();
+      updateBarChart("");
+    }
 
   });
 
@@ -417,13 +421,9 @@ async function sendApiRequest(passesFormatted) {
     });
 
     const result = await response.json();
-    if (result.prediction !== undefined) {
-      resultBox.innerText = `The pass sequence xG for this play is ${result.prediction.toFixed(4)}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
-    } else {
-      resultBox.innerText = `Error: ${result.error}`;
-    }
+    return result;
   } catch (error) {
-    resultBox.innerText = `Fetch error: ${error}`;
+    return error;
   }
 }
 setInterval(sendApiRequest, 10 * 60 * 1000);
