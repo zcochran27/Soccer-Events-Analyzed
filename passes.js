@@ -1610,35 +1610,38 @@ drawAccuracyChart(accuracy);
 animateBrushRight();
 
 
-const allPassMetaData = euroSequences.map(getPassLocationsWithMetadata);
+
+console.log(euroSequences)
+const onePassSequences = euroSequences.filter(sequence => sequence.prev_pass1_x1 === "")
+const twoPassSequences  =euroSequences.filter(sequence => sequence.prev_pass1_x1 !== "" && sequence.prev_pass2_x1 === "")
+const threePassSequences = euroSequences.filter(sequence => sequence.prev_pass2_x1 !== "" && sequence.prev_pass3_x1 === "")
+const fourPassSequences = euroSequences.filter(sequence => sequence.prev_pass3_x1 !== "" && sequence.prev_pass4_x1 === "")
+const fivePassSequences = euroSequences.filter(sequence => sequence.prev_pass4_x1 !== "")
 // Get first pass from each sequence by taking first object in each list
-const firstPassMetaData = allPassMetaData.map(sequence => sequence[0]);
-const secondPassMetaData = allPassMetaData.map(sequence => sequence[1]);
-const thirdPassMetaData = allPassMetaData.map(sequence => sequence[2]);
-const fourthPassMetaData = allPassMetaData.map(sequence => sequence[3]);
-const fifthPassMetaData = allPassMetaData.map(sequence => sequence[4]);
 
 // Calculate average sequence_pred for each pass position
-const firstPassAvgPred = d3.mean(firstPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
-const secondPassAvgPred = d3.mean(secondPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
-const thirdPassAvgPred = d3.mean(thirdPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
-const fourthPassAvgPred = d3.mean(fourthPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
-const fifthPassAvgPred = d3.mean(fifthPassMetaData.filter(d => d !== undefined), d => d.sequence_pred);
+const firstPassAvgPred = d3.mean(onePassSequences.filter(d => d !== undefined), d => d.sequence_pred);
+const secondPassAvgPred = d3.mean(twoPassSequences.filter(d => d !== undefined), d => d.sequence_pred);
+const thirdPassAvgPred = d3.mean(threePassSequences.filter(d => d !== undefined), d => d.sequence_pred);
+const fourthPassAvgPred = d3.mean(fourPassSequences.filter(d => d !== undefined), d => d.sequence_pred);
+const fifthPassAvgPred = d3.mean(fivePassSequences.filter(d => d !== undefined), d => d.sequence_pred);
+
+const allPassMetaData = fivePassSequences.map(getPassLocationsWithMetadata);
 
 // Create bar chart for pass position averages
 const passPositionData = [
-  { position: "First Pass", avg: firstPassAvgPred },
-  { position: "Second Pass", avg: secondPassAvgPred },
-  { position: "Third Pass", avg: thirdPassAvgPred }, 
-  { position: "Fourth Pass", avg: fourthPassAvgPred },
-  { position: "Fifth Pass", avg: fifthPassAvgPred }
+  { position: "One Pass", avg: firstPassAvgPred },
+  { position: "Two Passes", avg: secondPassAvgPred },
+  { position: "Three Passes", avg: thirdPassAvgPred }, 
+  { position: "Four Passes", avg: fourthPassAvgPred },
+  { position: "Five Passes", avg: fifthPassAvgPred }
 ].filter(d => !isNaN(d.avg)); // Filter out any NaN values
 
-const barMargin = {top: 20, right: 20, bottom: 30, left: 40};
-const barWidth = 500 - barMargin.left - barMargin.right;
+const barMargin = {top: 20, right: 20, bottom: 60, left: 40};
+const barWidth = 420 - barMargin.left - barMargin.right;
 const barHeight = 400 - barMargin.top - barMargin.bottom;
 
-const barSvg = d3.select("#pass-position-chart")
+const barSvg = d3.select(".chart-top-left")
   .append("svg")
   .attr("width", barWidth + barMargin.left + barMargin.right)
   .attr("height", barHeight + barMargin.top + barMargin.bottom)
@@ -1654,9 +1657,14 @@ const yPassPosition = d3.scaleLinear()
   .range([barHeight, 0])
   .domain([0, d3.max(passPositionData, d => d.avg)]);
 
-barSvg.append("g")
+  barSvg.append("g")
   .attr("transform", `translate(0,${barHeight})`)
-  .call(d3.axisBottom(xPassPosition));
+  .call(d3.axisBottom(xPassPosition))
+  .selectAll("text")
+  .attr("transform", "rotate(-40)")
+  .style("text-anchor", "end")
+  .attr("dx", "-0.8em")
+  .attr("dy", "0.15em");
 
 barSvg.append("g")
   .call(d3.axisLeft(yPassPosition));
@@ -1683,14 +1691,14 @@ barSvg.append("text")
     const positionIndex = idx % 5;
     return {
       ...pass,
-      position: ["First Pass", "Second Pass", "Third Pass", "Fourth Pass", "Fifth Pass"][positionIndex]
+      position: ["Fourth Previous Pass", "Third Previous Pass", "Second Previous Pass", "Previous Pass", "Last Pass"][positionIndex]
     };
   });
   const marginStacked = { top: 60, right: 140, bottom: 60, left: 40 };
-  const widthStacked = 500 - marginStacked.left - marginStacked.right;
+  const widthStacked = 420 - marginStacked.left - marginStacked.right;
   const heightStacked = 400 - marginStacked.top - marginStacked.bottom;
   
-  const passPositions = ["First Pass", "Second Pass", "Third Pass", "Fourth Pass", "Fifth Pass"];
+  const passPositions = ["Fourth Previous Pass", "Third Previous Pass", "Second Previous Pass", "Previous Pass", "Last Pass"];
   const passTypes = Array.from(new Set(allPassMetaDataWithPosition.map(d => d.type)));
   
   // Color
@@ -1731,12 +1739,19 @@ barSvg.append("text")
     .range([heightStacked, 0]);
   
   // SVG
-  const svgStacked = d3.select("#pass-position-chart")
+  const svgStacked = d3.select(".chart-bottom-right")
     .append("svg")
     .attr("width", widthStacked + marginStacked.left + marginStacked.right)
     .attr("height", heightStacked + marginStacked.top + marginStacked.bottom)
     .append("g")
     .attr("transform", `translate(${marginStacked.left},${marginStacked.top})`);
+  svgStacked.append("text")
+    .attr("x", widthStacked / 2)
+    .attr("y", -20)
+    .attr("text-anchor", "middle")
+    .style("font-size", "16px")
+    .style("font-weight", "bold")
+    .text("Distribution of Pass Types by Pass Position");
   
   // Bars
   svgStacked.selectAll("g.layer")
