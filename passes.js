@@ -1637,7 +1637,7 @@ const passPositionData = [
   { position: "Five Passes", avg: fifthPassAvgPred }
 ].filter(d => !isNaN(d.avg)); // Filter out any NaN values
 
-const barMargin = {top: 20, right: 20, bottom: 60, left: 40};
+const barMargin = {top: 30, right: 20, bottom: 60, left: 40};
 const barWidth = 420 - barMargin.left - barMargin.right;
 const barHeight = 400 - barMargin.top - barMargin.bottom;
 
@@ -1682,10 +1682,11 @@ barSvg.selectAll("rect")
 // Add title
 barSvg.append("text")
   .attr("x", barWidth/2)
-  .attr("y", 0)
+  .attr("y", -10)
   .attr("text-anchor", "middle")
-  .style("font-size", "14px")
-  .text("Average Prediction by Pass Position");
+  .style("font-size", "16px")
+  .style("font-weight", "bold")
+  .text("Average Prediction by Number of Passes in Sequence");
 
   const allPassMetaDataWithPosition = allPassMetaData.flat().map((pass, idx, arr) => {
     const positionIndex = idx % 5;
