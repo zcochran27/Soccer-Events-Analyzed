@@ -1159,6 +1159,7 @@ let start = 0.45;
 let end = 0.55;
 let globalType = "";
 let globalHeight = "";
+let accuracy =0;
 
 const uniquePassTypes = Array.from(new Set(matchedRowsFull.map(d => d.type)));
 
@@ -1187,6 +1188,7 @@ function updatePasses(lower, upper, type, height) {
   if (globalHeight !== "") {
     matchedRows = matchedRows.filter(d => d.pass_height === globalHeight);
   }
+  accuracy = matchedRows.filter(d => parseInt(d.outcome) === 1).length / matchedRows.length;
 
   // Draw passes
   pitch4.selectAll("line")
@@ -1232,6 +1234,7 @@ const brush = d3.brushX()
       updatePasses(start, end, globalType, globalHeight);
       createPassTypePieChart();
       createPassHeightPieChart();
+      drawAccuracyChart(accuracy);
     }
   });
 
@@ -1328,6 +1331,7 @@ function createPassTypePieChart() {
       updatePasses(start, end, globalType, globalHeight);
       createPassTypePieChart();
       createPassHeightPieChart();
+      drawAccuracyChart(accuracy);
     } else {
       globalType = type;
 
@@ -1345,6 +1349,7 @@ function createPassTypePieChart() {
       updatePasses(start, end, globalType, globalHeight);
       createPassTypePieChart();
       createPassHeightPieChart();
+      drawAccuracyChart(accuracy);
     }
   }
 
@@ -1481,17 +1486,20 @@ function createPassHeightPieChart() {
       updatePasses(start, end, globalType, globalHeight);
       createPassTypePieChart();
       createPassHeightPieChart();
+      drawAccuracyChart(accuracy);
     }
     if (globalHeight !== "") {
       filtered = filtered.filter(d => d.height === globalHeight);
       updatePasses(start, end, globalType, globalHeight);
       createPassTypePieChart();
       createPassHeightPieChart();
+      drawAccuracyChart(accuracy);
     }
 
     updatePasses(start, end, globalType, globalHeight);
     createPassTypePieChart();
     createPassHeightPieChart();
+    drawAccuracyChart(accuracy);
   }
 
   // Legend
@@ -1524,3 +1532,46 @@ function createPassHeightPieChart() {
     .style("font-size", "12px");
 }
 createPassHeightPieChart();
+
+function drawAccuracyChart(percentile) {
+  const width = 200;
+  const height = 200;
+  const radius = 80;
+  const thickness = 15;
+  const svg = d3.select("#accuracy-chart")
+    .attr("width", width)
+    .attr("height", height)
+  svg.selectAll("*").remove();
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+  // Background arc
+  const backgroundArc = d3.arc()
+    .innerRadius(radius - thickness)
+    .outerRadius(radius)
+    .startAngle(0)
+    .endAngle(2 * Math.PI);
+
+  g.append("path")
+    .attr("d", backgroundArc)
+    .attr("fill", "#eee");
+
+  // Foreground arc (progress)
+  const foregroundArc = d3.arc()
+    .innerRadius(radius - thickness)
+    .outerRadius(radius)
+    .startAngle(0)
+    .endAngle(2 * Math.PI * percentile);
+
+  g.append("path")
+    .attr("d", foregroundArc)
+    .attr("fill", "#4caf50");
+
+  // Center text
+  g.append("text")
+    .attr("class", "percent-text")
+    .text(`Pass Accuracy: ${Math.round(percentile * 100)}%`)
+    .style("font-size", "15px");
+}
+drawAccuracyChart(accuracy);
