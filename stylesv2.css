@@ -1,5 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
+
+html {
+  font-family: "Lato", sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+.intro {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: url("/assets/bg-soccer.jpeg");
+  background-size: cover;
+  background-position: center;
+  h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    z-index: 1;
+  }
+  p {
+    font-size: 1.5rem;
+    color: #fff;
+    margin-bottom: 2rem;
+    z-index: 1;
+  }
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(18, 87, 8, 0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
+}
+
 #predictBtn {
-  position: static; 
+  position: static;
   padding: 8px 12px;
   background-color: gray;
   color: white;
@@ -16,9 +64,8 @@
   background-color: #28a745;
 }
 
-
 #undoBtn {
-  position: static; 
+  position: static;
   padding: 8px 12px;
   background-color: #e74c3c;
   color: white;
@@ -29,34 +76,34 @@
   z-index: auto;
 }
 
-
 body {
   display: flex;
-  flex-direction: column;  /* stack items vertically */
+  flex-direction: column; /* stack items vertically */
   justify-content: center; /* vertical centering */
-  align-items: center;     /* horizontal centering */
-  min-height: 100vh;       /* full viewport height */
-  margin: 0;               /* remove default margin */
-  padding: 20px;           /* optional padding */
-  box-sizing: border-box;  /* include padding in size */
-  text-align: center;      /* center text inside elements */
+  align-items: center; /* horizontal centering */
+  min-height: 100vh; /* full viewport height */
+  margin: 0; /* remove default margin */
+  /* padding: 20px; optional padding */
+  box-sizing: border-box; /* include padding in size */
+  text-align: center; /* center text inside elements */
 }
 #pitchCanvas {
   width: 100%;
-  height:auto;
+  height: auto;
   aspect-ratio: 3/2;
 }
 
-
-.line { 
-  stroke: black; stroke-width: 0.2; fill: none; 
+.line {
+  stroke: black;
+  stroke-width: 0.2;
+  fill: none;
 }
 .pass {
   fill: none;
 }
 .dribble {
   stroke: gray;
-  stroke-width: .5;
+  stroke-width: 0.5;
   stroke-dasharray: 1, 1; /* 4px dash, 2px gap */
   fill: none;
 }
@@ -97,8 +144,8 @@ body {
   height: 100vh;
   display: flex;
   align-items: center;
-  flex-direction: column;   /* stack graphic-items vertically */
-  justify-content: center; 
+  flex-direction: column; /* stack graphic-items vertically */
+  justify-content: center;
   background: #f3f3f3;
   margin-right: 20px;
 }
@@ -139,16 +186,29 @@ body {
 
 #controls {
   display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
   margin-top: 1rem;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  max-width: 720px;
 }
 
 #controls select,
 #controls button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+  padding: 0.5rem 0.8rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  background-color: white;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease;
 }
 
 #controls button {
@@ -198,14 +258,14 @@ body {
 }
 .player {
   width: 100%;
-  max-width: 1120px;    /* max width to match your JS size */
-  margin: 0 auto;       /* center horizontally */
+  max-width: 1120px; /* max width to match your JS size */
+  margin: 0 auto; /* center horizontally */
   aspect-ratio: 16 / 9; /* maintain 16:9 aspect ratio */
   position: relative;
-  background: #000;     /* black background behind video */
+  background: #000; /* black background behind video */
   overflow: hidden;
-  border-radius: 8px;   /* optional rounded corners */
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border-radius: 8px; /* optional rounded corners */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 #yt-player iframe,
@@ -213,26 +273,26 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100% !important;  /* fill container */
+  width: 100% !important; /* fill container */
   height: 100% !important; /* fill container */
   border: none;
-  border-radius: 8px;       /* match container */
-  pointer-events: auto;     /* allow interactions */
+  border-radius: 8px; /* match container */
+  pointer-events: auto; /* allow interactions */
 }
 .title {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 3rem;       /* Big and bold */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 3rem; /* Big and bold */
   font-weight: 700;
   color: #1a1a1a;
   text-align: center;
   margin-bottom: 0.3em;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1.5rem;
   font-weight: 400;
   color: #555;
@@ -261,14 +321,14 @@ body {
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 12px 16px; 
+  padding: 12px 16px;
   margin: 16px 0;
   gap: 4px;
 }
 #prediction-container > * {
   margin-left: 10 !important;
   margin-right: 0 !important;
-  flex-shrink: 0;  /* prevent shrinking */
+  flex-shrink: 0; /* prevent shrinking */
   max-width: none; /* no max width */
 }
 
@@ -291,12 +351,13 @@ body {
   gap: 1rem;
 }
 
-#bar-chart, #pie-chart {
-  flex: 1;              /* Allow them to grow equally */
-  min-height: 400px; 
-  justify-content: center; 
+#bar-chart,
+#pie-chart {
+  flex: 1; /* Allow them to grow equally */
+  min-height: 400px;
+  justify-content: center;
   min-width: 400px;
-  align-items: center;  /* Ensures visibility on load */
+  align-items: center; /* Ensures visibility on load */
 }
 .arc path:hover {
   opacity: 0.8;
@@ -323,7 +384,7 @@ body {
   border: 1px solid #ddd;
   border-radius: 8px;
   max-width: 300px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   margin-left: auto;
   margin-right: auto;
   align-items: center;
@@ -345,7 +406,7 @@ body {
   border: 1px solid #ccc;
 }
 #pitch4 {
-  max-width:700px;
+  max-width: 700px;
 }
 .legend-item text {
   cursor: pointer;
@@ -353,8 +414,8 @@ body {
 }
 
 .legend-item text:hover {
-  fill: #007acc;      /* A blue hover color */
-  font-weight: bold;  /* Emphasize on hover */
+  fill: #007acc; /* A blue hover color */
+  font-weight: bold; /* Emphasize on hover */
   text-decoration: underline;
 }
 .legend-item:hover rect {
@@ -372,5 +433,5 @@ body {
   margin-left: 1rem;
 }
 #slider-container {
-  margin:3rem;
+  margin: 3rem;
 }

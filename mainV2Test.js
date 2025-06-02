@@ -1,4 +1,4 @@
-import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 const canvas = document.getElementById("pitchCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -8,12 +8,10 @@ const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
 const goalCoords = [120, 40]; // Center of goal on right side
 
-
 let firstClick = true;
 let startPos = [-1, -1];
 let endPos = [-1, -1];
 let shotTaken = false;
-
 
 let collectedStats = []; // Array to store all submitted data
 
@@ -178,6 +176,12 @@ canvas.addEventListener("click", (event) => {
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
+  console.log(
+    `Click at: (${x}, ${y})`,
+    `Canvas size: (${canvasWidth}, ${canvasHeight})`,
+    `event size: (${event.clientX}, ${event.clientY})`,
+    rect
+  );
   const [xPitch, yPitch] = scaleToPitch(x, y);
   if (xPitch < 0 || xPitch > 120 || yPitch < 0 || yPitch > 80) return;
 
@@ -221,7 +225,7 @@ canvas.addEventListener("click", (event) => {
         end: endPos,
         pass_outcome: 1,
         pass_type: passType,
-        pass_height: passHeight
+        pass_height: passHeight,
       });
 
       passNumber++;
@@ -251,7 +255,7 @@ canvas.addEventListener("click", (event) => {
       // Save dribble
       dribbles.push({
         start: lastEndPos,
-        end: [xPitch, yPitch]
+        end: [xPitch, yPitch],
       });
 
       clickPhase = 3;
@@ -278,7 +282,7 @@ canvas.addEventListener("click", (event) => {
         end: endPos,
         pass_outcome: 1,
         pass_type: passType,
-        pass_height: passHeight
+        pass_height: passHeight,
       });
 
       passNumber++;
@@ -339,7 +343,6 @@ function drawDribbles() {
 }
 
 document.getElementById("undoBtn").addEventListener("click", () => {
-
   if (collectedStats.length === 0 && dribbles.length === 0) return;
 
   if (collectedStats.length <= 1) {
@@ -359,7 +362,6 @@ document.getElementById("undoBtn").addEventListener("click", () => {
     passNumber = Math.max(1, passNumber - 1);
     clickPhase = 2;
   }
-  
 
   firstPassComplete = collectedStats.length > 0;
   lastRedDot = null;
@@ -423,7 +425,7 @@ document.getElementById("undoBtn").addEventListener("click", () => {
 //   predictBtn.disabled = false;
 // });
 function getPercentile(value) {
-  const index = predDist.filter(x => x < value).length;
+  const index = predDist.filter((x) => x < value).length;
   return index / predDist.length;
 }
 
@@ -434,41 +436,49 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
   }
   const reversedStats = collectedStats.reverse();
   console.log(reversedStats);
-  const formatted = reversedStats.flatMap(({ start, end, pass_type, pass_height }) => [
-    start[0], start[1],
-    end[0], end[1],
-    1,
-    pass_type,
-    pass_height
-  ]);
+  const formatted = reversedStats.flatMap(
+    ({ start, end, pass_type, pass_height }) => [
+      start[0],
+      start[1],
+      end[0],
+      end[1],
+      1,
+      pass_type,
+      pass_height,
+    ]
+  );
   console.log(formatted);
   const resultBox = document.getElementById("predictionResult");
   const spinner = document.getElementById("loadingSpinner");
 
   resultBox.innerText = "";
-  spinner.style.display = "block"; 
+  spinner.style.display = "block";
   try {
-    const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ features: formatted })
-    });
+    const response = await fetch(
+      "https://soccer-events-analyzed.onrender.com/predict",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ features: formatted }),
+      }
+    );
 
     const result = await response.json();
     if (result.prediction !== undefined) {
-      resultBox.innerText =`Probability of Scoring Off Sequence: ${result.prediction.toFixed(4)}`;
+      resultBox.innerText = `Probability of Scoring Off Sequence: ${result.prediction.toFixed(
+        4
+      )}`;
       drawDoughnutChart(getPercentile(result.prediction));
       console.log(getPercentile(result.prediction));
     } else {
-      resultBox.innerText =`Error: ${result.error}`;
-    } 
+      resultBox.innerText = `Error: ${result.error}`;
+    }
   } catch (error) {
-    resultBox.innerText =`Fetch error: ${error}`;
+    resultBox.innerText = `Fetch error: ${error}`;
   } finally {
     spinner.style.display = "none";
     collectedStats = collectedStats.reverse();
   }
-  
 });
 
 function updatePredictBtn() {
@@ -481,7 +491,7 @@ function updatePredictBtn() {
     predictBtn.disabled = true;
   }
 }
-const predDist = await fetch("predDist.json").then(res => res.json());
+const predDist = await fetch("predDist.json").then((res) => res.json());
 predDist.sort((a, b) => a - b);
 
 function drawDoughnutChart(percentile) {
@@ -490,36 +500,36 @@ function drawDoughnutChart(percentile) {
   const radius = 80;
   const thickness = 15;
   d3.select("#prediction-container").style("visibility", "visible");
-  const svg = d3.select("#circleChart")
+  const svg = d3
+    .select("#circleChart")
     .attr("width", width)
     .attr("height", height)
     .attr("visibility", "visible");
-    svg.selectAll("*").remove();
+  svg.selectAll("*").remove();
 
-  const g = svg.append("g")
+  const g = svg
+    .append("g")
     .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
   // Background arc
-  const backgroundArc = d3.arc()
+  const backgroundArc = d3
+    .arc()
     .innerRadius(radius - thickness)
     .outerRadius(radius)
     .startAngle(0)
     .endAngle(2 * Math.PI);
 
-  g.append("path")
-    .attr("d", backgroundArc)
-    .attr("fill", "#eee");
+  g.append("path").attr("d", backgroundArc).attr("fill", "#eee");
 
   // Foreground arc (progress)
-  const foregroundArc = d3.arc()
+  const foregroundArc = d3
+    .arc()
     .innerRadius(radius - thickness)
     .outerRadius(radius)
     .startAngle(0)
     .endAngle(2 * Math.PI * percentile);
 
-  g.append("path")
-    .attr("d", foregroundArc)
-    .attr("fill", "#4caf50");
+  g.append("path").attr("d", foregroundArc).attr("fill", "#4caf50");
 
   // Center text
   g.append("text")
@@ -528,6 +538,6 @@ function drawDoughnutChart(percentile) {
 }
 d3.select("#circleChart").attr("visibility", "hidden");
 d3.select("#prediction-container").style("visibility", "hidden");
+
 drawPitch();
 updatePredictBtn();
-

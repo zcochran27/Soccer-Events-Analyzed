@@ -1,134 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <script type="module" src="mainV2Test.js"></script>
     <!-- <script src="youtube.js"></script> -->
     <script type="module" src="passes.js"></script>
     <link rel="stylesheet" href="stylesv2.css" />
-    <link rel="stylesheet" href="goals/goals.css">
+    <link rel="stylesheet" href="goals/goals.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>XGBoost Prediction</title>
-</head>
+  </head>
 
-<body>
-    <h1 class="title">Pass Sequences in Soccer</h1>
-    <p class="subtitle">Let's explore how different pass sequences can lead to different outcomes.</p>
+  <body>
+    <div class="intro">
+      <div class="overlay"></div>
+      <h1 class="title">Pass Sequences in Soccer</h1>
+      <p class="subtitle">
+        Let's explore how different pass sequences can lead to different
+        outcomes.
+      </p>
+    </div>
 
-    <div class ="scrolly">
-        <div class='graphic'>
-            <div class="graphic-item" id="graphic-item-1">
-                <div class="player"></div>
-            </div>
-            <div class="graphic-item" id="graphic-item-2">
-                <svg id="pitch1" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-            </div>
-            <div class="graphic-item" id="graphic-item-3">
-                <svg id="pitch2" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-            </div>
-            <div class="graphic-item" id="graphic-item-4">
-                <div id="main-container">
-                    <div class="canvas-container">
-                        <canvas id="pitchCanvas" width="720" height="480"></canvas>
-                    </div>
-                    <div id="controls">
-                        <label for="passType">Select Pass Type:</label>
-                        <select id="passType" name="passType">
-                            <option value="normal">Normal Pass</option>
-                            <option value="Cross">Cross</option>
-                            <option value="Through Ball">Through Ball</option>
-                            <option value="Cut-back">Cut Back</option>
-                            <option value="Switch">Switch</option>
-                            <option value="Throw-in">Throw-in</option>
-                            <option value="Corner">Corner</option>
-                            <option value="Free Kick">Free Kick</option>
-                            <option value="Goal Kick">Goal Kick</option>
-                        </select>
-        
-                        <label for="passHeight">Select Pass Height:</label>
-                        <select id="passHeight" name="passHeight">
-                            <option value="Ground">Ground Pass</option>
-                            <option value="Low">Low Pass</option>
-                            <option value="High">High Pass</option>
-                        </select>
-        
-                        <button id="undoBtn">Undo last pass</button>
-                        <button id="predictBtn">Predict Play Probability</button>
-                    </div>
-                    <div id="prediction-container">
-                        <svg id="circleChart" width="200" height="200"></svg>
-                        <p id="predictionResult"></p>
-                        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="graphic-item" id="graphic-item-5">
-                <div id="pass-position-chart"></div>
-            </div>
-            <div class="graphic-item" id="graphic-item-6">
-                <div id="heatmap"></div>
-                <script src="goals/goals.js"></script>
-            </div>
-            <div class="graphic-item" id="graphic-item-7">
-                <div id="pitch3-container">
-                    <h3 id="sequence-header"></h3>
-                    <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-                </div>
-            </div>
-            <div class="graphic-item" id="graphic-item-8">
-                <div id="chart-container">
-                    <div id="bar-chart"></div>
-                    <div id='pie-chart'></div>
-                </div>
-            </div>
-            <div class="graphic-item" id="graphic-item-9">
-                <svg id ='pitch4' width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-                <div id="slider-container"></div>
-                <div id="pie-containers">
-                    <div id="pass-type-pie-chart"></div>
-                    <div id="pass-height-pie-chart"></div>
-                    <svg id="accuracy-chart"></svg>
-                </div>
-            </div>
+    <div class="scrolly">
+      <div class="graphic">
+        <div class="graphic-item" id="graphic-item-1">
+          <div class="player"></div>
         </div>
-
-        <div class="article">
-            <div class="step" id="step-1">
-                <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA
-                    Euros Semi-Final between Spain and France.</h2>
-            </div>
-            <div class="step" id="step-2">
-                <h3>In this clip, we see a couple of passes before the shot is taken and the goal is scored. Let's take a look
-                    at the whole sequence of passes that led to the goal. Hover over each pass to see more details. </h3>
-            </div>
-            <div class="step" id="step-3">
-                <h3 style="text-align: center" id="yamalChancexG">The pass sequence xG for this play is Loading... But what would
-                    have happened if the the last pass was played differently? Click the options below to explore.</h3>
-            </div>
-            <div class="step" id="step-4">
-                <h1 style="text-align: center;">Pass Sequence Game</h1>
-                <h2 style="text-align: center">Try to get the highest probability possible!</h2>
-            </div>
-            <div class="step" id="step-5">
-                <h2 style="text-align: center">Lets look at the specifics in the order of passes in a sequence.</h2>
-            </div>
-            <div class="step" id="step-6">
-                <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
-            </div>
-            <div class="step" id="step-7">
-                <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal. Try and spot the pattern!</h2>
-            </div>
-            <div class="step" id="step-8">
-                <h2 style="text-align: center">Now let's take a look at the how many goals each team was expected to score given their pass sequences.</h2>
-            </div>
-            <div class="step" id="step-9">
-                <h2 style="text-align: center">Now let's take a look at the last pass of each possession to see how that affects the probability of a goal.</h2>
-            </div>
-
+        <div class="graphic-item" id="graphic-item-2">
+          <svg
+            id="pitch1"
+            width="900"
+            height="600"
+            viewBox="0 0 120 80"
+            preserveAspectRatio="xMidYMid meet"
+          ></svg>
         </div>
+        <div class="graphic-item" id="graphic-item-3">
+          <svg
+            id="pitch2"
+            width="900"
+            height="600"
+            viewBox="0 0 120 80"
+            preserveAspectRatio="xMidYMid meet"
+          ></svg>
+        </div>
+        <div class="graphic-item" id="graphic-item-4">
+          <div id="main-container">
+            <div class="canvas-container">
+              <canvas id="pitchCanvas" width="720" height="480"></canvas>
+            </div>
+            <div id="controls">
+              <label for="passType">Select Pass Type: </label>
+              <select id="passType" name="passType">
+                <option value="normal">Normal Pass</option>
+                <option value="Cross">Cross</option>
+                <option value="Through Ball">Through Ball</option>
+                <option value="Cut-back">Cut Back</option>
+                <option value="Switch">Switch</option>
+                <option value="Throw-in">Throw-in</option>
+                <option value="Corner">Corner</option>
+                <option value="Free Kick">Free Kick</option>
+                <option value="Goal Kick">Goal Kick</option>
+              </select>
 
-        <!-- <div class="center-container">
+              <label for="passHeight">Select Pass Height:</label>
+              <select id="passHeight" name="passHeight">
+                <option value="Ground">Ground Pass</option>
+                <option value="Low">Low Pass</option>
+                <option value="High">High Pass</option>
+              </select>
+
+              <button id="undoBtn">Undo last pass</button>
+              <button id="predictBtn">Predict Play Probability</button>
+            </div>
+            <div id="prediction-container">
+              <svg id="circleChart" width="200" height="200"></svg>
+              <p id="predictionResult"></p>
+              <div
+                id="loadingSpinner"
+                class="spinner"
+                style="display: none"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div class="graphic-item" id="graphic-item-5">
+          <div id="pass-position-chart"></div>
+        </div>
+        <div class="graphic-item" id="graphic-item-6">
+          <div id="heatmap"></div>
+          <script src="goals/goals.js"></script>
+        </div>
+        <div class="graphic-item" id="graphic-item-7">
+          <div id="pitch3-container">
+            <h3 id="sequence-header"></h3>
+            <svg
+              id="pitch3"
+              width="900"
+              height="600"
+              viewBox="0 0 120 80"
+              preserveAspectRatio="xMidYMid meet"
+            ></svg>
+          </div>
+        </div>
+        <div class="graphic-item" id="graphic-item-8">
+          <div id="chart-container">
+            <div id="bar-chart"></div>
+            <div id="pie-chart"></div>
+          </div>
+        </div>
+        <div class="graphic-item" id="graphic-item-9">
+          <svg
+            id="pitch4"
+            width="900"
+            height="600"
+            viewBox="0 0 120 80"
+            preserveAspectRatio="xMidYMid meet"
+          ></svg>
+          <div id="slider-container"></div>
+          <div id="pie-containers">
+            <div id="pass-type-pie-chart"></div>
+            <div id="pass-height-pie-chart"></div>
+            <svg id="accuracy-chart"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="article">
+        <div class="step" id="step-1">
+          <h2>
+            Lets start by looking at a sequence of passes that led to the goal
+            of the tournament from the 2024 UEFA Euros Semi-Final between Spain
+            and France.
+          </h2>
+        </div>
+        <div class="step" id="step-2">
+          <h3>
+            In this clip, we see a couple of passes before the shot is taken and
+            the goal is scored. Let's take a look at the whole sequence of
+            passes that led to the goal. Hover over each pass to see more
+            details.
+          </h3>
+        </div>
+        <div class="step" id="step-3">
+          <h3 style="text-align: center" id="yamalChancexG">
+            The pass sequence xG for this play is Loading... But what would have
+            happened if the the last pass was played differently? Click the
+            options below to explore.
+          </h3>
+        </div>
+        <div class="step" id="step-4">
+          <h1 style="text-align: center">Pass Sequence Game</h1>
+          <h2 style="text-align: center">
+            Try to get the highest probability possible!
+          </h2>
+        </div>
+        <div class="step" id="step-5">
+          <h2 style="text-align: center">
+            Lets look at the specifics in the order of passes in a sequence.
+          </h2>
+        </div>
+        <div class="step" id="step-6">
+          <h2 style="text-align: center">
+            Take a look at this heatmap to see information about important
+            features!
+          </h2>
+        </div>
+        <div class="step" id="step-7">
+          <h2 style="text-align: center">
+            Let's take a look at the top 10 passing sequences that have the
+            highest probability of leading to a goal. Try and spot the pattern!
+          </h2>
+        </div>
+        <div class="step" id="step-8">
+          <h2 style="text-align: center">
+            Now let's take a look at the how many goals each team was expected
+            to score given their pass sequences.
+          </h2>
+        </div>
+        <div class="step" id="step-9">
+          <h2 style="text-align: center">
+            Now let's take a look at the last pass of each possession to see how
+            that affects the probability of a goal.
+          </h2>
+        </div>
+      </div>
+
+      <!-- <div class="center-container">
             <h2>Lets start by looking at a sequence of passes that led to the goal of the tournament from the 2024 UEFA
                 Euros Semi-Final between Spain and France.</h2>
             <div id="player"></div>
@@ -136,20 +194,19 @@
                 at the whole sequence of passes that led to the goal. Hover over each pass to see more details. </h3>
         </div>
         <svg id="pitch1" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg> -->
-        <!-- <h3 style="text-align: center" id="yamalChancexG">The pass sequence xG for this play is Loading... But what would
+      <!-- <h3 style="text-align: center" id="yamalChancexG">The pass sequence xG for this play is Loading... But what would
             have happened if the the last pass was played differently? Click the options below to explore.</h3>
         <svg id="pitch2" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg> -->
 
-        <!-- <h1 style="text-align: center;">Pass Sequence Game</h1>
+      <!-- <h1 style="text-align: center;">Pass Sequence Game</h1>
         <h2 style="text-align: center">Try to get the highest probability possible!</h2>
         <!-- Put the clip embedding and explainations here -->
 
-
-        <!-- <div id="main-container">
+      <!-- <div id="main-container">
             <div class="canvas-container">
                 <canvas id="pitchCanvas" width="720" height="480"></canvas>
             </div> -->
-            <!-- <div id="controls">
+      <!-- <div id="controls">
                 <label for="passType">Select Pass Type:</label>
                 <select id="passType" name="passType">
                     <option value="normal">Normal Pass</option>
@@ -176,18 +233,16 @@
             </div>
             <p id="predictionResult"></p>
             <div id="loadingSpinner" class="spinner" style="display: none;"></div> -->
-            
 
-            <!-- <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
+      <!-- <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
             <div id="heatmap"></div>
             <script src="goals/goals.js"></script>
         </div> -->
-        <!-- <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal. Try and spot the pattern!</h2>
+      <!-- <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal. Try and spot the pattern!</h2>
         <div id="pitch3-container">
             <h3 id="sequence-header"></h3>
             <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
         </div> -->
     </div>
-</body>
-
+  </body>
 </html>
