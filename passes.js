@@ -407,6 +407,26 @@ try {
 } catch (error) {
   resultBox.innerText = `Fetch error: ${error}`;
 }
+async function sendApiRequest(passesFormatted){
+  const resultBox = document.getElementById("yamalChancexG");
+try {
+  const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ features: passesFormatted })
+  });
+
+  const result = await response.json();
+  if (result.prediction !== undefined) {
+    resultBox.innerText = `The pass sequence xG for this play is ${result.prediction.toFixed(4)}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
+  } else {
+    resultBox.innerText = `Error: ${result.error}`;
+  }
+} catch (error) {
+  resultBox.innerText = `Fetch error: ${error}`;
+}
+}
+setInterval(sendApiRequest, 10*60*1000);
 
 const svg2 = d3.select("#pitch2");
 const lamineOptions = await fetch("lamineOptions.json");
