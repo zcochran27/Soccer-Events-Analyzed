@@ -637,6 +637,13 @@ let euroSequences = await d3.csv("europe_sequences_preds.csv").then(function (da
   })
   return updatedData;
 });
+// euroSequences.map(d => {
+//   d.pass_height = parseInt(d.pass_height);
+//   if (d.pass_height === 0) d.pass_height = "Ground";
+//   else if (d.pass_height === 1) d.pass_height = "Low";
+//   else if (d.pass_height === 2) d.pass_height = "High";
+//   return d;
+// });
 const topTenSequences = euroSequences.sort((a, b) => b.sequence_pred - a.sequence_pred).slice(0, 10);
 
 function getPassLocationsWithMetadata(sequence) {
@@ -1190,7 +1197,7 @@ function updatePasses(lower, upper, type, height) {
     .attr("y1", d => d.y1)
     .attr("x2", d => d.x2)
     .attr("y2", d => d.y2)
-    .attr("stroke", d => parseInt(d.outcome) === 1 ? "#00FF00" : "#FF0000")
+    .attr("stroke", d => parseInt(d.outcome) === 1 ? "green" : "red")
     .attr("stroke-width", 0.3)
     .attr("opacity", 0.4);
 }
@@ -1513,7 +1520,7 @@ function createPassHeightPieChart() {
     .attr("x", 16)
     .attr("y", 6)
     .attr("dy", "0.35em")
-    .text(d => `${d.data.height} (${d.data.count})`)
+    .text(d => `${getHeightLabel(parseInt(d.data.height))} (${d.data.count})`)
     .style("font-size", "12px");
 }
 createPassHeightPieChart();
