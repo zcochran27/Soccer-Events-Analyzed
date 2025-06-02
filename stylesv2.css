@@ -368,4 +368,9 @@ body {
   gap: 1rem;
   justify-content: space-around;
   align-items: center;
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+}
+#slider-container {
+  margin:3rem;
 }

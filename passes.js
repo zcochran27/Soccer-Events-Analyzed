@@ -407,26 +407,26 @@ try {
 } catch (error) {
   resultBox.innerText = `Fetch error: ${error}`;
 }
-async function sendApiRequest(passesFormatted){
+async function sendApiRequest(passesFormatted) {
   const resultBox = document.getElementById("yamalChancexG");
-try {
-  const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ features: passesFormatted })
-  });
+  try {
+    const response = await fetch("https://soccer-events-analyzed.onrender.com/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ features: passesFormatted })
+    });
 
-  const result = await response.json();
-  if (result.prediction !== undefined) {
-    resultBox.innerText = `The pass sequence xG for this play is ${result.prediction.toFixed(4)}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
-  } else {
-    resultBox.innerText = `Error: ${result.error}`;
+    const result = await response.json();
+    if (result.prediction !== undefined) {
+      resultBox.innerText = `The pass sequence xG for this play is ${result.prediction.toFixed(4)}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
+    } else {
+      resultBox.innerText = `Error: ${result.error}`;
+    }
+  } catch (error) {
+    resultBox.innerText = `Fetch error: ${error}`;
   }
-} catch (error) {
-  resultBox.innerText = `Fetch error: ${error}`;
 }
-}
-setInterval(sendApiRequest, 10*60*1000);
+setInterval(sendApiRequest, 10 * 60 * 1000);
 
 const svg2 = d3.select("#pitch2");
 const lamineOptions = await fetch("lamineOptions.json");
@@ -593,7 +593,7 @@ let euroSequences = await d3.csv("europe_sequences_preds.csv").then(function (da
     const cut_back = +d.pass_cut_back;
     const switchPass = +d.pass_switch;
     const cross = +d.pass_cross;
-    const through = +d.pass_through;
+    const through = +d.pass_through_ball;
     const throw_in = +d.pass_throw_in;
     const corner = +d.pass_corner;
     const goal_kick = +d.pass_goal_kick;
@@ -610,7 +610,7 @@ let euroSequences = await d3.csv("europe_sequences_preds.csv").then(function (da
       const cut_back_i = +d[`prev_pass${i}_pass_cut_back`];
       const switch_i = +d[`prev_pass${i}_pass_switch`];
       const cross_i = +d[`prev_pass${i}_pass_cross`];
-      const through_i = +d[`prev_pass${i}pass_through`];
+      const through_i = +d[`prev_pass${i}_pass_through_ball`];
 
       if (throw_in_i) d[`prev_pass${i}_type`] = "Throw In";
       else if (corner_i) d[`prev_pass${i}_type`] = "Corner";
@@ -956,30 +956,30 @@ function createPieChart() {
     });
 
   const legendItemHeight = 24;
-const legendHeight = stageData.length * legendItemHeight;
+  const legendHeight = stageData.length * legendItemHeight;
 
-// Position the legend to the right of the pie chart, vertically centered
-const legend = svg.append("g")
-  .attr("id", "pie-legend")
-  .attr("transform", `translate(${pieWidth + 30}, ${(pieHeight / 2) - (legendHeight / 2)})`);
+  // Position the legend to the right of the pie chart, vertically centered
+  const legend = svg.append("g")
+    .attr("id", "pie-legend")
+    .attr("transform", `translate(${pieWidth + 30}, ${(pieHeight / 2) - (legendHeight / 2)})`);
 
-const legendItems = legend.selectAll(".legend-item")
-  .data(stageData)
-  .enter()
-  .append("g")
-  .attr("class", "legend-item")
-  .attr("transform", (d, i) => `translate(60, ${i * legendItemHeight})`);
+  const legendItems = legend.selectAll(".legend-item")
+    .data(stageData)
+    .enter()
+    .append("g")
+    .attr("class", "legend-item")
+    .attr("transform", (d, i) => `translate(60, ${i * legendItemHeight})`);
 
-legendItems.append("rect")
-  .attr("width", 16)
-  .attr("height", 16)
-  .attr("fill", d => color(d.stage));
+  legendItems.append("rect")
+    .attr("width", 16)
+    .attr("height", 16)
+    .attr("fill", d => color(d.stage));
 
-legendItems.append("text")
-  .attr("x", 22)
-  .attr("y", 13)
-  .text(d => d.stage)
-  .style("font-size", "14px");
+  legendItems.append("text")
+    .attr("x", 22)
+    .attr("y", 13)
+    .text(d => d.stage)
+    .style("font-size", "14px");
 }
 
 
@@ -1152,25 +1152,25 @@ const matchedRowsFull = filteredEuroSequences.filter(d => {
   return d.sequence_pred === maxPred;
 });
 const sortedPreds = matchedRowsFull
-    .map(d => parseFloat(d.sequence_pred))
-      .sort(d3.ascending);
+  .map(d => parseFloat(d.sequence_pred))
+  .sort(d3.ascending);
 let matchedRows = matchedRowsFull;
 let start = 0.45;
 let end = 0.55;
 let globalType = "";
 let globalHeight = "";
-let accuracy =0;
+let accuracy = 0;
 
 const uniquePassTypes = Array.from(new Set(matchedRowsFull.map(d => d.type)));
 
-  // 2. Define global color scale based on all types (fixed order)
-  const color = d3.scaleOrdinal()
-    .domain(uniquePassTypes)
-    .range(d3.schemeCategory10);
+// 2. Define global color scale based on all types (fixed order)
+const color = d3.scaleOrdinal()
+  .domain(uniquePassTypes)
+  .range(d3.schemeCategory10);
 const passHeightCategories = Array.from(new Set(matchedRowsFull.map(d => d.pass_height)));
-    const heightColor = d3.scaleOrdinal()
-    .domain(passHeightCategories)
-    .range(d3.schemeCategory10);
+const heightColor = d3.scaleOrdinal()
+  .domain(passHeightCategories)
+  .range(d3.schemeCategory10);
 
 function updatePasses(lower, upper, type, height) {
   pitch4.selectAll("*").remove();
@@ -1314,7 +1314,7 @@ function createPassTypePieChart() {
       .on("click", function (event, d) {
         handleClick(d.data.type, d, this); // <- Fix here
       });
-  
+
     pathMap.set(d.data.type, path);
   });
 
