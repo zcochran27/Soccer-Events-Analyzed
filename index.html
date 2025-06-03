@@ -90,8 +90,15 @@
             </div>
 
             <div class="graphic-item" id="graphic-item-9">
+                <div id="heatmap-container" style="display: flex; align-items: flex-start;">
+                    <svg id="pitch5" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
+                    <svg id="legend" width="150" height="400"></svg>
+                </div>
                 <svg id ='pitch4' width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-                <div id="slider-container"></div>
+                <div id="controls-container">
+                    <button id="toggle-heatmap">Toggle Heatmap</button>
+                    <div id="slider-container"></div>
+                </div>
                 <div id="pie-containers">
                     <div id="pass-type-pie-chart"></div>
                     <div id="pass-height-pie-chart"></div>
