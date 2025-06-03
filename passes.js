@@ -607,10 +607,10 @@ let euroSequences = await d3.csv("europe_sequences_preds.csv").then(function (da
       const corner_i = +d[`prev_pass${i}_pass_corner`];
       const goal_kick_i = +d[`prev_pass${i}_pass_goal_kick`];
       const free_kick_i = +d[`prev_pass${i}_pass_free_kick`];
-      const cut_back_i = +d[`prev_pass${i}_pass_cut_back`];
-      const switch_i = +d[`prev_pass${i}_pass_switch`];
-      const cross_i = +d[`prev_pass${i}_pass_cross`];
-      const through_i = +d[`prev_pass${i}_pass_through_ball`];
+      const cut_back_i = +d[`prev_pass${i}_cut_back`];
+      const switch_i = +d[`prev_pass${i}_switch`];
+      const cross_i = +d[`prev_pass${i}_cross`];
+      const through_i = +d[`prev_pass${i}_through_ball`];
 
       if (throw_in_i) d[`prev_pass${i}_type`] = "Throw In";
       else if (corner_i) d[`prev_pass${i}_type`] = "Corner";
@@ -1688,13 +1688,12 @@ barSvg.append("text")
   .style("font-weight", "bold")
   .text("Average Prediction by Number of Passes in Sequence");
 
-  const allPassMetaDataWithPosition = allPassMetaData.flat().map((pass, idx, arr) => {
-    const positionIndex = idx % 5;
-    return {
+  const allPassMetaDataWithPosition = allPassMetaData.flatMap(seq => 
+    seq.map((pass, i) => ({
       ...pass,
-      position: ["Fourth Previous Pass", "Third Previous Pass", "Second Previous Pass", "Previous Pass", "Last Pass"][positionIndex]
-    };
-  });
+      position: ["Last Pass", "Previous Pass", "Second Previous Pass", "Third Previous Pass", "Fourth Previous Pass"].reverse()[i]
+    }))
+  );
   const marginStacked = { top: 60, right: 140, bottom: 60, left: 40 };
   const widthStacked = 420 - marginStacked.left - marginStacked.right;
   const heightStacked = 400 - marginStacked.top - marginStacked.bottom;
