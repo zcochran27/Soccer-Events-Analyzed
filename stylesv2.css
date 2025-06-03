@@ -91,6 +91,7 @@ body {
   width: 100%;
   height: auto;
   aspect-ratio: 3/2;
+  background: rgb(141, 208, 139);
 }
 
 .line {
@@ -171,6 +172,7 @@ body {
   width: 100%;
   height: auto;
   max-height: 90vh;
+  background-color: rgb(141, 208, 139);
 }
 
 /* Canvas & controls */

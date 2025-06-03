@@ -27,7 +27,7 @@ function drawPitch() {
   const scaleX = canvas.width / fieldWidth;
   const scaleY = canvas.height / fieldHeight;
 
-  ctx.strokeStyle = "#333";
+  ctx.strokeStyle = "#fff";
   ctx.lineWidth = 2;
 
   // Draw outer boundary
@@ -131,6 +131,7 @@ function drawPitch() {
 function drawArrow(fromX, fromY, toX, toY) {
   const headlen = 10;
   const angle = Math.atan2(toY - fromY, toX - fromX);
+  ctx.strokeStyle = "white";
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
   ctx.lineTo(toX, toY);
