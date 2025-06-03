@@ -51,4 +51,5 @@
   #heatmap {
     padding: 2rem;
     flex-grow: 1;
+    display: block;
   }
