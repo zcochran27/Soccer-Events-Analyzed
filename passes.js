@@ -1662,7 +1662,11 @@ const smoothIncomplete = createSmoothedGrid(incompletePasses, gridCols, gridRows
 const difference = smoothComplete.map((col, i) =>
   col.map((val, j) => val - smoothIncomplete[i][j])
 );
-const maxDiff = d3.max(difference.flat().map(Math.abs));
+
+//changing max difference
+//const maxDiff = d3.max(difference.flat().map(Math.abs));
+//constant max difference
+const maxDiff = 4.5;
 
 const colorDiff = d3.scaleDiverging()
   .domain([-maxDiff, 0, maxDiff])
@@ -1728,16 +1732,16 @@ legendG.append("rect")
 // Scale for axis (values along the color bar)
 const legendScale = d3.scaleLinear()
   .domain([-maxDiff, 0, maxDiff])
-  .range([heightHeat, 0]);
+  .range([-heightHeat/4, heightHeat/4]);
 
 // Axis with percentage formatting
 const legendAxis = d3.axisRight(legendScale)
   .ticks(5)
-  .tickFormat(d3.format(".0%"));
+  .tickFormat(d => d === 0 ? `${d.toFixed(1)}` : `${d < 0 ? "+" : "-"}${d.toFixed(1)}`);
 
 // Append axis to legend group, translate right after the color bar
 legendG.append("g")
-  .attr("transform", `translate(${widthHeat},0)`)
+  .attr("transform", `translate(${widthHeat},80)`)
   .call(legendAxis);
 
 // Optional: legend title
