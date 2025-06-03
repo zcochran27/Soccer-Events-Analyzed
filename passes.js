@@ -1136,7 +1136,7 @@ const heatContainer = d3.select("#heatmap-container");
 // Clear any existing elements
 pitch4.selectAll("*").remove();
 drawFootballPitch(pitch4);
-pitch4.style('display', 'none');
+heatContainer.style('display', 'none');
 
 // Get the best sequence for each possession
 const teamsLastPreds = d3.rollup(
