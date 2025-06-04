@@ -3,7 +3,7 @@
   const container = document.getElementById('heatmap');
 
   console.log(document.documentElement);
-
+  const width = '450', height = '300';
   // Tooltip div
   const tooltip2 = document.createElement('div');
   tooltip2.id = 'tooltip';
@@ -13,8 +13,8 @@
   // SVG
   const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg2.id = 'soccer';
-  svg2.setAttribute('width', '960');
-  svg2.setAttribute('height', '630');
+  svg2.setAttribute('width', width);
+  svg2.setAttribute('height', height);
   container.appendChild(svg2);
 
   // Button selection bar
@@ -25,7 +25,6 @@
     { label: 'XG', value: 'shot_data.json' },
     { label: 'Goals', value: 'shots_goals.json' },
     { label: 'Shots Taken', value: 'shots_taken.json' },
-    { label: 'Last Pass', value: 'last_pass.json' }
   ];
 
   buttons.forEach(btn => {
@@ -39,7 +38,7 @@
 
 
 
-const width = 960, height = 630;
+
 const pitchLength = 120, pitchWidth = 80;
 
 const svg = d3.select("#soccer");
@@ -59,7 +58,7 @@ function draw(fdata, tag) {
     z: +raw.z[key]
   }));
 
-  const xBins = 20, yBins = 15;
+  const xBins = 30, yBins = 20;
   const xStep = pitchLength / xBins, yStep = pitchWidth / yBins;
   const grid = Array.from({ length: xBins }, (_, i) =>
     Array.from({ length: yBins }, (_, j) => ({
@@ -218,15 +217,4 @@ buttons2.forEach(button => {
     buttons2.forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
   });
-});
-
-// On page load, simulate clicking the first button (XG)
-window.addEventListener('DOMContentLoaded', () => {
-  const firstButton = document.querySelector('.selection-bar button');
-  if (firstButton) {
-    // Mark button as active visually
-    firstButton.classList.add('active');
-    // Draw initial heatmap with XG data
-    draw(firstButton.getAttribute('data-value'), firstButton.textContent);
-  }
 });

@@ -132,6 +132,10 @@ scroller
     } else {
       stopVideoLoop();
     }
+    if (stepIndex === 7) {
+      createPieChart();
+      updateBarChart("");
+    }
   });
 
 // Recalculate dimensions on resize
@@ -444,9 +448,9 @@ try {
 
   const result = await response.json();
   if (result.prediction !== undefined) {
-    resultBox.innerText = `The pass sequence xG for this play is ${result.prediction.toFixed(
-      4
-    )}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
+    resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${
+      100 * result.prediction.toFixed(4)
+    }%. From now on we will be refering to this probability as pass sequence xG. This probability is extremely low and is testiment to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.<br><br>Try clicking the different options below to see how the pass sequence xG changes!<br></br>Does this match your intuition? What do you think was the best passing option for this play?`;
   } else {
     resultBox.innerText = `Error: ${result.error}`;
   }
@@ -466,15 +470,9 @@ async function sendApiRequest(passesFormatted) {
     );
 
     const result = await response.json();
-    if (result.prediction !== undefined) {
-      resultBox.innerText = `The pass sequence xG for this play is ${result.prediction.toFixed(
-        4
-      )}. But what would have happened if the the last pass was played differently? Click the options below to explore.`;
-    } else {
-      resultBox.innerText = `Error: ${result.error}`;
-    }
+    return result;
   } catch (error) {
-    resultBox.innerText = `Fetch error: ${error}`;
+    return error;
   }
 }
 setInterval(sendApiRequest, 10 * 60 * 1000);
@@ -632,11 +630,13 @@ svg2
           .style("opacity", 1)
           .html(
             `
-                        Pass sequence xG: ${result.prediction.toFixed(4)}.      
+                        Pass sequence xG: ${(
+                          100 * result.prediction.toFixed(4)
+                        ).toFixed(2)}%.      
                     `
           )
-          .style("left", event.clientX + 10 + "px")
-          .style("top", event.clientY + 10 + "px");
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY + 10 + "px");
       } else {
         tooltip2.innerText = `Error: ${result.error}`;
       }
@@ -680,10 +680,10 @@ let euroSequences = await d3
         const corner_i = +d[`prev_pass${i}_pass_corner`];
         const goal_kick_i = +d[`prev_pass${i}_pass_goal_kick`];
         const free_kick_i = +d[`prev_pass${i}_pass_free_kick`];
-        const cut_back_i = +d[`prev_pass${i}_pass_cut_back`];
-        const switch_i = +d[`prev_pass${i}_pass_switch`];
-        const cross_i = +d[`prev_pass${i}_pass_cross`];
-        const through_i = +d[`prev_pass${i}_pass_through_ball`];
+        const cut_back_i = +d[`prev_pass${i}_cut_back`];
+        const switch_i = +d[`prev_pass${i}_switch`];
+        const cross_i = +d[`prev_pass${i}_cross`];
+        const through_i = +d[`prev_pass${i}_through_ball`];
 
         if (throw_in_i) d[`prev_pass${i}_type`] = "Throw In";
         else if (corner_i) d[`prev_pass${i}_type`] = "Corner";
@@ -1749,51 +1749,63 @@ drawAccuracyChart(accuracy);
 
 animateBrushRight();
 
-const allPassMetaData = euroSequences.map(getPassLocationsWithMetadata);
+console.log(euroSequences);
+const onePassSequences = euroSequences.filter(
+  (sequence) => sequence.prev_pass1_x1 === ""
+);
+const twoPassSequences = euroSequences.filter(
+  (sequence) => sequence.prev_pass1_x1 !== "" && sequence.prev_pass2_x1 === ""
+);
+const threePassSequences = euroSequences.filter(
+  (sequence) => sequence.prev_pass2_x1 !== "" && sequence.prev_pass3_x1 === ""
+);
+const fourPassSequences = euroSequences.filter(
+  (sequence) => sequence.prev_pass3_x1 !== "" && sequence.prev_pass4_x1 === ""
+);
+const fivePassSequences = euroSequences.filter(
+  (sequence) => sequence.prev_pass4_x1 !== ""
+);
 // Get first pass from each sequence by taking first object in each list
-const firstPassMetaData = allPassMetaData.map((sequence) => sequence[0]);
-const secondPassMetaData = allPassMetaData.map((sequence) => sequence[1]);
-const thirdPassMetaData = allPassMetaData.map((sequence) => sequence[2]);
-const fourthPassMetaData = allPassMetaData.map((sequence) => sequence[3]);
-const fifthPassMetaData = allPassMetaData.map((sequence) => sequence[4]);
 
 // Calculate average sequence_pred for each pass position
 const firstPassAvgPred = d3.mean(
-  firstPassMetaData.filter((d) => d !== undefined),
+  onePassSequences.filter((d) => d !== undefined),
   (d) => d.sequence_pred
 );
 const secondPassAvgPred = d3.mean(
-  secondPassMetaData.filter((d) => d !== undefined),
+  twoPassSequences.filter((d) => d !== undefined),
   (d) => d.sequence_pred
 );
 const thirdPassAvgPred = d3.mean(
-  thirdPassMetaData.filter((d) => d !== undefined),
+  threePassSequences.filter((d) => d !== undefined),
   (d) => d.sequence_pred
 );
 const fourthPassAvgPred = d3.mean(
-  fourthPassMetaData.filter((d) => d !== undefined),
+  fourPassSequences.filter((d) => d !== undefined),
   (d) => d.sequence_pred
 );
 const fifthPassAvgPred = d3.mean(
-  fifthPassMetaData.filter((d) => d !== undefined),
+  fivePassSequences.filter((d) => d !== undefined),
   (d) => d.sequence_pred
 );
 
+const allPassMetaData = fivePassSequences.map(getPassLocationsWithMetadata);
+
 // Create bar chart for pass position averages
 const passPositionData = [
-  { position: "First Pass", avg: firstPassAvgPred },
-  { position: "Second Pass", avg: secondPassAvgPred },
-  { position: "Third Pass", avg: thirdPassAvgPred },
-  { position: "Fourth Pass", avg: fourthPassAvgPred },
-  { position: "Fifth Pass", avg: fifthPassAvgPred },
+  { position: "One Pass", avg: firstPassAvgPred },
+  { position: "Two Passes", avg: secondPassAvgPred },
+  { position: "Three Passes", avg: thirdPassAvgPred },
+  { position: "Four Passes", avg: fourthPassAvgPred },
+  { position: "Five Passes", avg: fifthPassAvgPred },
 ].filter((d) => !isNaN(d.avg)); // Filter out any NaN values
 
-const barMargin = { top: 20, right: 20, bottom: 30, left: 40 };
-const barWidth = 500 - barMargin.left - barMargin.right;
+const barMargin = { top: 30, right: 20, bottom: 60, left: 40 };
+const barWidth = 420 - barMargin.left - barMargin.right;
 const barHeight = 400 - barMargin.top - barMargin.bottom;
 
 const barSvg = d3
-  .select("#pass-position-chart")
+  .select(".chart-top-left")
   .append("svg")
   .attr("width", barWidth + barMargin.left + barMargin.right)
   .attr("height", barHeight + barMargin.top + barMargin.bottom)
@@ -1814,7 +1826,12 @@ const yPassPosition = d3
 barSvg
   .append("g")
   .attr("transform", `translate(0,${barHeight})`)
-  .call(d3.axisBottom(xPassPosition));
+  .call(d3.axisBottom(xPassPosition))
+  .selectAll("text")
+  .attr("transform", "rotate(-40)")
+  .style("text-anchor", "end")
+  .attr("dx", "-0.8em")
+  .attr("dy", "0.15em");
 
 barSvg.append("g").call(d3.axisLeft(yPassPosition));
 
@@ -1833,36 +1850,34 @@ barSvg
 barSvg
   .append("text")
   .attr("x", barWidth / 2)
-  .attr("y", 0)
+  .attr("y", -10)
   .attr("text-anchor", "middle")
-  .style("font-size", "14px")
-  .text("Average Prediction by Pass Position");
+  .style("font-size", "16px")
+  .style("font-weight", "bold")
+  .text("Average Prediction by Number of Passes in Sequence");
 
-const allPassMetaDataWithPosition = allPassMetaData
-  .flat()
-  .map((pass, idx, arr) => {
-    const positionIndex = idx % 5;
-    return {
-      ...pass,
-      position: [
-        "First Pass",
-        "Second Pass",
-        "Third Pass",
-        "Fourth Pass",
-        "Fifth Pass",
-      ][positionIndex],
-    };
-  });
+const allPassMetaDataWithPosition = allPassMetaData.flatMap((seq) =>
+  seq.map((pass, i) => ({
+    ...pass,
+    position: [
+      "Last Pass",
+      "Previous Pass",
+      "Second Previous Pass",
+      "Third Previous Pass",
+      "Fourth Previous Pass",
+    ].reverse()[i],
+  }))
+);
 const marginStacked = { top: 60, right: 140, bottom: 60, left: 40 };
-const widthStacked = 500 - marginStacked.left - marginStacked.right;
+const widthStacked = 420 - marginStacked.left - marginStacked.right;
 const heightStacked = 400 - marginStacked.top - marginStacked.bottom;
 
 const passPositions = [
-  "First Pass",
-  "Second Pass",
-  "Third Pass",
-  "Fourth Pass",
-  "Fifth Pass",
+  "Fourth Previous Pass",
+  "Third Previous Pass",
+  "Second Previous Pass",
+  "Previous Pass",
+  "Last Pass",
 ];
 const passTypes = Array.from(
   new Set(allPassMetaDataWithPosition.map((d) => d.type))
@@ -1911,12 +1926,20 @@ const yStacked = d3.scaleLinear().domain([0, 1]).range([heightStacked, 0]);
 
 // SVG
 const svgStacked = d3
-  .select("#pass-position-chart")
+  .select(".chart-bottom-right")
   .append("svg")
   .attr("width", widthStacked + marginStacked.left + marginStacked.right)
   .attr("height", heightStacked + marginStacked.top + marginStacked.bottom)
   .append("g")
   .attr("transform", `translate(${marginStacked.left},${marginStacked.top})`);
+svgStacked
+  .append("text")
+  .attr("x", widthStacked / 2)
+  .attr("y", -20)
+  .attr("text-anchor", "middle")
+  .style("font-size", "16px")
+  .style("font-weight", "bold")
+  .text("Distribution of Pass Types by Pass Position");
 
 // Bars
 svgStacked
