@@ -125,7 +125,7 @@ scroller
     } else {
       stopVideoLoop();
     }
-    if (stepIndex === 7){
+    if (stepIndex === 3){
       createPieChart();
       updateBarChart("");
     }
@@ -857,7 +857,8 @@ const teamsPreds = d3.rollup(
   euroSequences,
   v => d3.max(v, d => d.sequence_pred), // Get max pred for each possession
   d => d.team,
-  d => d.possession // Group by team and possession
+  d => d.possession, // Group by team and possession
+  d => d.match_id
 );
 // Calculate mean of possession max predictions per team
 const teamAverages = Array.from(teamsPreds.entries()).map(([team, possessions]) => {
@@ -999,20 +1000,29 @@ function updateBarChart(stage) {
     filteredEuroSequences = filteredEuroSequences.filter(d => d.competition_stage === stage);
   }
   filteredEuroSequences = filteredEuroSequences.sort((a, b) => a.sequence_pred - b.sequence_pred);
+  console.log(filteredEuroSequences)
   const teamsPreds = d3.rollup(
     filteredEuroSequences,
     v => d3.max(v, d => d.sequence_pred), // Get max pred for each possession
     d => d.team,
-    d => d.possession // Group by team and possession
+    d => d.possession, // Group by team and possession
+    d => d.match_id
   );
+  console.log(teamsPreds)
   // Calculate mean of possession max predictions per team
   const teamAverages = Array.from(teamsPreds.entries()).map(([team, possessions]) => {
-    const possessionValues = Array.from(possessions.values());
+    const allPreds = [];
+    for (const matchMap of possessions.values()) {
+      for (const pred of matchMap.values()) {
+        allPreds.push(pred);
+      }
+    }
     return {
-      team: team,
-      avgPred: d3.mean(possessionValues)
+      team,
+      avgPred: d3.mean(allPreds)
     };
   });
+  console.log(teamAverages)
   const teamSums = Array.from(teamsPreds.entries()).map(([team, possessions]) => {
     const possessionValues = Array.from(possessions.values());
     return {
@@ -1020,7 +1030,7 @@ function updateBarChart(stage) {
       sumPred: d3.sum(possessionValues)
     };
   });
-  teamSums.sort((a, b) => b.sumPred - a.sumPred);
+  teamAverages.sort((a, b) => b.avgPred - a.avgPred);
   // Clear existing chart
   d3.select("#bar-chart").selectAll("*").remove();
 
@@ -1045,12 +1055,12 @@ function updateBarChart(stage) {
   // Create scales
   const x = d3.scaleBand()
     .range([0, barWidth])
-    .domain(teamSums.map(d => d.team))
+    .domain(teamAverages.map(d => d.team))
     .padding(0.2);
 
   const y = d3.scaleLinear()
     .range([barHeight, 0])
-    .domain([0, d3.max(teamSums, d => d.sumPred)]);
+    .domain([0, d3.max(teamAverages, d => d.avgPred)]);
 
   // Add X axis
   barSvg.append("g")
@@ -1066,12 +1076,12 @@ function updateBarChart(stage) {
 
   // Add bars
   barSvg.selectAll("rect")
-    .data(teamSums)
+    .data(teamAverages)
     .join("rect")
     .attr("x", d => x(d.team))
-    .attr("y", d => y(d.sumPred))
+    .attr("y", d => y(d.avgPred))
     .attr("width", x.bandwidth())
-    .attr("height", d => barHeight - y(d.sumPred))
+    .attr("height", d => barHeight - y(d.avgPred))
     .attr("fill", "#69b3a2");
 
   // Add title
@@ -1816,7 +1826,6 @@ animateBrushRight();
 
 
 
-console.log(euroSequences)
 const onePassSequences = euroSequences.filter(sequence => sequence.prev_pass1_x1 === "")
 const twoPassSequences  =euroSequences.filter(sequence => sequence.prev_pass1_x1 !== "" && sequence.prev_pass2_x1 === "")
 const threePassSequences = euroSequences.filter(sequence => sequence.prev_pass2_x1 !== "" && sequence.prev_pass3_x1 === "")
