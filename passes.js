@@ -1091,7 +1091,7 @@ function updateBarChart(stage) {
     .attr("y", 0)
     .attr("text-anchor", "middle")
     .style("font-size", "16px")
-    .text("Total Expected Goals from Pass Sequences by Team");
+    .text("Average Expected Goals per Possession from Pass Sequences by Team");
 
   // Add Y axis label
   barSvg.append("text")
