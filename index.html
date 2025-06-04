@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="stylesv2.css" />
     <link rel="stylesheet" href="goals/goals.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <meta charset="UTF-8" />
-    <title>XGBoost Prediction</title>
-  </head>
+    <meta charset="UTF-8">
+    <title>Stockfish for Soccer?</title>
+</head>
 
   <body>
     <div class="intro">
@@ -32,7 +32,13 @@
             <div class="graphic-item" id="graphic-item-3">
                 <svg id="pitch2" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
-            <div class="graphic-item" id="graphic-item-4">
+            <div class="graphic-item" id="graphic-item-4"> <!--if you move this step you must change the index in the scrollama on step or else the graphs will not show-->
+                <div id="chart-container">
+                    <div id="bar-chart"></div>
+                    <div id='pie-chart'></div>
+                </div>
+            </div>
+            <div class="graphic-item" id="graphic-item-5">
                 <div id="main-container">
                     <div class="canvas-container">
                         <canvas id="pitchCanvas" width="720" height="480"></canvas>
@@ -68,35 +74,36 @@
                     </div>
                 </div>
             </div>
-            <div class="graphic-item" id="graphic-item-5">
+            <div class="graphic-item" id="graphic-item-6">
                 <div id="pass-position-chart" class="diagonal-container">
                     <div class="chart chart-top-left"></div>   <!-- First chart (e.g., Stacked Bar) -->
                     <div class="chart chart-bottom-right"></div> <!-- Second chart (e.g., Prediction Bar) -->
                   </div>
             </div>
-            <div class="graphic-item" id="graphic-item-6">
+            <div class="graphic-item" id="graphic-item-7">
                 <div id="heatmap"></div>
                 <script src="goals/goals.js"></script>
             </div>
-            <div class="graphic-item" id="graphic-item-7">
-                <div id="pitch3-container">
-                    <h3 id="sequence-header"></h3>
-                    <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-                </div>
-            </div>
             <div class="graphic-item" id="graphic-item-8">
-                <div id="chart-container">
-                    <div id="bar-chart"></div>
-                    <div id='pie-chart'></div>
+                <div id="heatmap-container" style="display: flex; align-items: flex-start;">
+                    <svg id="pitch5" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
+                    <svg id="legend" width="150" height="400"></svg>
                 </div>
-            </div>
-            <div class="graphic-item" id="graphic-item-9">
                 <svg id ='pitch4' width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
-                <div id="slider-container"></div>
+                <div id="controls-container">
+                    <button id="toggle-heatmap">Toggle Heatmap</button>
+                    <div id="slider-container"></div>
+                </div>
                 <div id="pie-containers">
                     <div id="pass-type-pie-chart"></div>
                     <div id="pass-height-pie-chart"></div>
                     <svg id="accuracy-chart"></svg>
+                </div>
+            </div>
+            <div class="graphic-item" id="graphic-item-9">
+                <div id="pitch3-container">
+                    <h3 id="sequence-header"></h3>
+                    <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
                 </div>
             </div>
         </div>
@@ -104,41 +111,51 @@
         <div class="article">
             <div class="step" id="step-1">
                 <h2>Lets start by looking at the goal of tournament. This goal was scored by Lamine Yamal in the 2024 UEFA
-                    Euros Semi-Final between Spain and France. There is no doubt that it was an incredible finish, but how good was the pass sequence that led to his shot?</h2>
+                    Euros Semi-Final between Spain and France. It was undoubtedly an incredible finish, but how good was the pass sequence that led to his shot?</h2>
                 <h2>In the next sections we will dive into this chance and see how we can use our model to analyze the pass sequence.</h2>
             </div>
             <div class="step" id="step-2">
-                <h2>How do we define a pass sequence? <br></br>
-                    A pass sequence can be defined as a sequential list of passes where each pass has a set of features. Some of the features include start and end location, pass type, pass height. 
+                <h1>How do we define a pass sequence?</h1> <br></br>
+                    <h2>A pass sequence can be defined as a sequential list of passes where each pass has a set of features. Some of the features include start and end location, pass type, pass height. 
                     Using these features we can visually represent the sequence in 2D by plotting each pass as an arrow and making its size proportional to its position in the sequence. We can additionally color code the pass by it's outcome.</h2>
                 <h2>Try hovering over the passes to see more details!</h2>
                 <br></br>
                 <h2>What do you think is the probability of this pass sequence leads to a goal?</h2>
             </div>
             <div class="step" id="step-3">
-                <h3 style="text-align: center" id="yamalChancexG">The probability of this pass sequence leading to a goal is Loading... From now on we will be refering to this probability as pass sequence xG. 
-                    This probability is extremely low and is testiment to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.
+                <h3 style="text-align: center" id="yamalChancexG">The probability of this pass sequence leading to a goal is Loading... From now on, we will be refering to this probability as pass sequence xG. 
+                    This probability is extremely low and is a testament to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.
                 <br><br>
                 Try clicking the different options below to see how the pass sequence xG changes!</h3>
             </div>
             <div class="step" id="step-4">
-                <h1 style="text-align: center;">Pass Sequence Game</h1>
-                <h2 style="text-align: center">Try to get the highest probability possible!</h2>
+                <h2 style="text-align: center">Now let's take a look at the how many goals each team was expected to score given their pass sequences.</h2>
+                <br></br>
+                <h2>As we can see, Spain had the highest pass sequence xG out of all teams. This was likely a major contributor to their success, as they won the entire tournament!</h2>
             </div>
             <div class="step" id="step-5">
-                <h2 style="text-align: center">Lets look at the specifics in the order of passes in a sequence.</h2>
+                <h1 style="text-align: center;">Pass Sequence Game</h1>
+                <h2 style="text-align: center">Based on what you know so far, try out our pass sequence game and try to get the highest probability possible!</h2>
             </div>
             <div class="step" id="step-6">
-                <h2 style="text-align: center">Take a look at this heatmap to see information about important features!</h2>
+                <h2 style="text-align: center">Lets look at the specifics in the order of passes in a sequence.</h2>
+                <h3>Based on all of the inputs into our model, passing sequences with 5 passes have the highest probability of success.</h3>
             </div>
             <div class="step" id="step-7">
-                <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal. Try and spot the pattern!</h2>
+                <h2 style="text-align: center">Take a look at this heatmap to see information about shots and goals!</h2>
+                <h3>A majority of shots are taken from inside the box or just outside the 18-yard box, particularly from the central areas. Most goals are scored from inside the 18-yard box, with the highest xG coming from shots near the goal. </h3>
             </div>
             <div class="step" id="step-8">
-                <h2 style="text-align: center">Now let's take a look at the how many goals each team was expected to score given their pass sequences.</h2>
+                <h2 style="text-align: center">Now let's take a look at the last pass of each possession to see how that affects the probability of a goal.</h2>
+                <h3>The nearer a pass is towards the goal, the more likely it is to result in a goal. We can also see that many goals with high probabilities come from passes that are played from just outside the 18-yard box, leading to the inside of the box.</h3>
             </div>
             <div class="step" id="step-9">
-                <h2 style="text-align: center">Now let's take a look at the last pass of each possession to see how that affects the probability of a goal.</h2>
+                <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal.</h2>
+                <h3>As we can see, the final pass of almost every sequence is going into the box, and is either a cross or a ground pass.</h3>
+            </div>
+            <div class="step" id="step-10">
+                <h1 style="text-align: center;">Pass Sequence Game pt. 2</h1>
+                <h2 style="text-align: center">Given all the insights we've gathered, how would you approach creating a successful pass sequence? Try out our game again and see if you can improve your score!</h2>
             </div>
         </div>
     </div>

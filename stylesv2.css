@@ -168,7 +168,8 @@ body {
 #pitch1,
 #pitch2,
 #pitch3,
-#pitch4 {
+#pitch4,
+#pitch5 {
   width: 100%;
   height: auto;
   max-height: 90vh;
@@ -251,9 +252,9 @@ body {
 
 /* Heatmap placeholder */
 #heatmap {
-  width: 100%;
+  width: 90%;
   height: 500px;
-  background: #eee;
+  background: #f3f3f3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -410,6 +411,9 @@ body {
 #pitch4 {
   max-width: 700px;
 }
+#pitch5 {
+  max-width: 700px;
+}
 .legend-item text {
   cursor: pointer;
   transition: fill 0.2s, font-weight 0.2s;
@@ -438,7 +442,7 @@ body {
   margin: 3rem;
 }
 .diagonal-container {
-  display: grid;
+  display: block;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   width: 100%;
@@ -466,4 +470,12 @@ body {
   margin-top: 0;
   margin-bottom: 2rem;
   font-style: italic;
+}
+#controls-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  margin-left: 1rem;
 }

@@ -132,9 +132,10 @@ scroller
     } else {
       stopVideoLoop();
     }
-    if (stepIndex === 7) {
+    if (stepIndex === 3) {
       createPieChart();
       updateBarChart("");
+      console.log("step 3");
     }
   });
 
@@ -941,7 +942,8 @@ const teamsPreds = d3.rollup(
   euroSequences,
   (v) => d3.max(v, (d) => d.sequence_pred), // Get max pred for each possession
   (d) => d.team,
-  (d) => d.possession // Group by team and possession
+  (d) => d.possession, // Group by team and possession
+  (d) => d.match_id
 );
 // Calculate mean of possession max predictions per team
 const teamAverages = Array.from(teamsPreds.entries()).map(
@@ -1097,22 +1099,31 @@ function updateBarChart(stage) {
   filteredEuroSequences = filteredEuroSequences.sort(
     (a, b) => a.sequence_pred - b.sequence_pred
   );
+  console.log(filteredEuroSequences);
   const teamsPreds = d3.rollup(
     filteredEuroSequences,
     (v) => d3.max(v, (d) => d.sequence_pred), // Get max pred for each possession
     (d) => d.team,
-    (d) => d.possession // Group by team and possession
+    (d) => d.possession, // Group by team and possession
+    (d) => d.match_id
   );
+  console.log(teamsPreds);
   // Calculate mean of possession max predictions per team
   const teamAverages = Array.from(teamsPreds.entries()).map(
     ([team, possessions]) => {
-      const possessionValues = Array.from(possessions.values());
+      const allPreds = [];
+      for (const matchMap of possessions.values()) {
+        for (const pred of matchMap.values()) {
+          allPreds.push(pred);
+        }
+      }
       return {
-        team: team,
-        avgPred: d3.mean(possessionValues),
+        team,
+        avgPred: d3.mean(allPreds),
       };
     }
   );
+  console.log(teamAverages);
   const teamSums = Array.from(teamsPreds.entries()).map(
     ([team, possessions]) => {
       const possessionValues = Array.from(possessions.values());
@@ -1122,7 +1133,7 @@ function updateBarChart(stage) {
       };
     }
   );
-  teamSums.sort((a, b) => b.sumPred - a.sumPred);
+  teamAverages.sort((a, b) => b.avgPred - a.avgPred);
   // Clear existing chart
   d3.select("#bar-chart").selectAll("*").remove();
 
@@ -1149,13 +1160,13 @@ function updateBarChart(stage) {
   const x = d3
     .scaleBand()
     .range([0, barWidth])
-    .domain(teamSums.map((d) => d.team))
+    .domain(teamAverages.map((d) => d.team))
     .padding(0.2);
 
   const y = d3
     .scaleLinear()
     .range([barHeight, 0])
-    .domain([0, d3.max(teamSums, (d) => d.sumPred)]);
+    .domain([0, d3.max(teamAverages, (d) => d.avgPred)]);
 
   // Add X axis
   barSvg
@@ -1172,12 +1183,12 @@ function updateBarChart(stage) {
   // Add bars
   barSvg
     .selectAll("rect")
-    .data(teamSums)
+    .data(teamAverages)
     .join("rect")
     .attr("x", (d) => x(d.team))
-    .attr("y", (d) => y(d.sumPred))
+    .attr("y", (d) => y(d.avgPred))
     .attr("width", x.bandwidth())
-    .attr("height", (d) => barHeight - y(d.sumPred))
+    .attr("height", (d) => barHeight - y(d.avgPred))
     .attr("fill", "#69b3a2");
 
   // Add title
@@ -1187,7 +1198,7 @@ function updateBarChart(stage) {
     .attr("y", 0)
     .attr("text-anchor", "middle")
     .style("font-size", "16px")
-    .text("Total Expected Goals from Pass Sequences by Team");
+    .text("Average Expected Goals per Possession from Pass Sequences by Team");
 
   // Add Y axis label
   barSvg
@@ -1239,9 +1250,12 @@ window.addEventListener("resize", () => {
 
 // Create a new SVG for the pass visualization
 const pitch4 = d3.select("#pitch4");
+const svgHeat = d3.select("#pitch5");
+const heatContainer = d3.select("#heatmap-container");
 // Clear any existing elements
 pitch4.selectAll("*").remove();
 drawFootballPitch(pitch4);
+heatContainer.style("display", "none");
 
 // Get the best sequence for each possession
 const teamsLastPreds = d3.rollup(
@@ -1385,6 +1399,7 @@ const brush = d3
       createPassTypePieChart();
       createPassHeightPieChart();
       drawAccuracyChart(accuracy);
+      createHeatmap();
       //clearInterval(animationInterval);
     }
   });
@@ -1489,6 +1504,7 @@ function createPassTypePieChart() {
       createPassTypePieChart();
       createPassHeightPieChart();
       drawAccuracyChart(accuracy);
+      createHeatmap();
     } else {
       globalType = type;
 
@@ -1507,6 +1523,7 @@ function createPassTypePieChart() {
       createPassTypePieChart();
       createPassHeightPieChart();
       drawAccuracyChart(accuracy);
+      createHeatmap();
     }
   }
 
@@ -1654,6 +1671,7 @@ function createPassHeightPieChart() {
       createPassTypePieChart();
       createPassHeightPieChart();
       drawAccuracyChart(accuracy);
+      createHeatmap();
     }
     if (globalHeight !== "") {
       filtered = filtered.filter((d) => d.height === globalHeight);
@@ -1661,12 +1679,14 @@ function createPassHeightPieChart() {
       createPassTypePieChart();
       createPassHeightPieChart();
       drawAccuracyChart(accuracy);
+      createHeatmap();
     }
 
     updatePasses(start, end, globalType, globalHeight);
     createPassTypePieChart();
     createPassHeightPieChart();
     drawAccuracyChart(accuracy);
+    createHeatmap();
   }
 
   // Legend
@@ -1703,6 +1723,232 @@ function createPassHeightPieChart() {
     .style("font-size", "12px");
 }
 createPassHeightPieChart();
+
+function createHeatmap() {
+  svgHeat.selectAll("*").remove();
+  drawFootballPitch(svgHeat);
+  const svgWidthHeat = +svgHeat.attr("width");
+  const svgHeightHeat = +svgHeat.attr("height");
+
+  // Dimensions of the pitch
+  const pitchWidth = 120;
+  const pitchHeight = 80;
+
+  // Grid
+  const gridCols = 60; // more = smoother
+  const gridRows = 40;
+  const cellWidth = pitchWidth / gridCols;
+  const cellHeight = pitchHeight / gridRows;
+
+  const completePasses = matchedRows.filter((d) => parseInt(d.outcome) === 1);
+  const incompletePasses = matchedRows.filter((d) => parseInt(d.outcome) !== 1);
+
+  function createSmoothedGrid(
+    data,
+    cols,
+    rows,
+    pitchWidth,
+    pitchHeight,
+    kernel
+  ) {
+    const grid = Array.from({ length: cols }, () =>
+      Array.from({ length: rows }, () => 0)
+    );
+
+    data.forEach((d) => {
+      const col = Math.floor((d.x2 / pitchWidth) * cols);
+      const row = Math.floor((d.y2 / pitchHeight) * rows);
+      if (col >= 0 && col < cols && row >= 0 && row < rows) {
+        grid[col][row]++;
+      }
+    });
+
+    return convolve(grid, kernel);
+  }
+
+  // Gaussian kernel
+  function gaussianKernel(size, sigma) {
+    const kernel = [];
+    const mean = size / 2;
+    let sum = 0;
+    for (let i = 0; i < size; i++) {
+      kernel[i] = [];
+      for (let j = 0; j < size; j++) {
+        const val = Math.exp(
+          -0.5 *
+            (Math.pow((i - mean) / sigma, 2) + Math.pow((j - mean) / sigma, 2))
+        );
+        kernel[i][j] = val;
+        sum += val;
+      }
+    }
+    return kernel.map((row) => row.map((v) => v / sum));
+  }
+
+  // Convolution
+  function convolve(grid, kernel) {
+    const size = kernel.length;
+    const half = Math.floor(size / 2);
+    const result = Array.from({ length: gridCols }, () =>
+      Array.from({ length: gridRows }, () => 0)
+    );
+
+    for (let x = 0; x < gridCols; x++) {
+      for (let y = 0; y < gridRows; y++) {
+        let sum = 0;
+        for (let i = 0; i < size; i++) {
+          for (let j = 0; j < size; j++) {
+            const xi = x + i - half;
+            const yj = y + j - half;
+            if (xi >= 0 && xi < gridCols && yj >= 0 && yj < gridRows) {
+              sum += grid[xi][yj] * kernel[i][j];
+            }
+          }
+        }
+        result[x][y] = sum;
+      }
+    }
+    return result;
+  }
+
+  const kernel = gaussianKernel(7, 1.5);
+  const smoothComplete = createSmoothedGrid(
+    completePasses,
+    gridCols,
+    gridRows,
+    pitchWidth,
+    pitchHeight,
+    kernel
+  );
+  const smoothIncomplete = createSmoothedGrid(
+    incompletePasses,
+    gridCols,
+    gridRows,
+    pitchWidth,
+    pitchHeight,
+    kernel
+  );
+  const difference = smoothComplete.map((col, i) =>
+    col.map((val, j) => val - smoothIncomplete[i][j])
+  );
+
+  //changing max difference
+  //const maxDiff = d3.max(difference.flat().map(Math.abs));
+  //constant max difference
+  const maxDiff = 4.5;
+
+  const colorDiff = d3
+    .scaleDiverging()
+    .domain([-maxDiff, 0, maxDiff])
+    .interpolator(d3.interpolateRdYlGn);
+
+  // Draw
+  svgHeat
+    .selectAll("rect.heatmap-cell")
+    .data(
+      difference.flatMap((col, i) =>
+        col.map((value, j) => ({ x: i, y: j, value }))
+      )
+    )
+    .join("rect")
+    .attr("class", "heatmap-cell")
+    .attr("x", (d) => d.x * cellWidth)
+    .attr("y", (d) => d.y * cellHeight)
+    .attr("width", cellWidth)
+    .attr("height", cellHeight)
+    .attr("fill", (d) => colorDiff(d.value))
+    .attr("fill-opacity", 0.85);
+
+  const svgLegend = d3.select("#legend");
+
+  // Clear previous content
+  svgLegend.selectAll("*").remove();
+
+  const legendWidth = +svgLegend.attr("width");
+  const legendHeight = +svgLegend.attr("height");
+
+  const marginHeat = { top: 20, right: 60, bottom: 20, left: 40 };
+  const widthHeat = legendWidth - marginHeat.left - marginHeat.right;
+  const heightHeat = legendHeight - marginHeat.top - marginHeat.bottom;
+
+  const legendG = svgLegend
+    .append("g")
+    .attr("transform", `translate(${marginHeat.left},${marginHeat.top})`);
+
+  // Create a defs and linearGradient for the color bar
+  const defsHeat = svgLegend.append("defs");
+
+  const gradientHeat = defsHeat
+    .append("linearGradient")
+    .attr("id", "legend-gradient")
+    .attr("x1", "0%")
+    .attr("y1", "100%") // vertical bottom
+    .attr("x2", "0%")
+    .attr("y2", "0%"); // vertical top
+
+  // Generate stops for gradient, e.g. 10 stops
+  const stopsCount = 10;
+  for (let i = 0; i <= stopsCount; i++) {
+    const t = i / stopsCount;
+    const value = -maxDiff + t * (2 * maxDiff);
+    gradientHeat
+      .append("stop")
+      .attr("offset", `${t * 100}%`)
+      .attr("stop-color", colorDiff(value));
+  }
+
+  // Draw the color bar rectangle using the gradient
+  legendG
+    .append("rect")
+    .attr("width", widthHeat)
+    .attr("height", heightHeat)
+    .style("fill", "url(#legend-gradient)")
+    .style("stroke", "black")
+    .style("stroke-width", 0.5);
+
+  // Scale for axis (values along the color bar)
+  const legendScale = d3
+    .scaleLinear()
+    .domain([-maxDiff, 0, maxDiff])
+    .range([-heightHeat / 4, heightHeat / 4]);
+
+  // Axis with percentage formatting
+  const legendAxis = d3
+    .axisRight(legendScale)
+    .ticks(5)
+    .tickFormat((d) =>
+      d === 0 ? `${d.toFixed(1)}` : `${d < 0 ? "+" : "-"}${d.toFixed(1)}`
+    );
+
+  // Append axis to legend group, translate right after the color bar
+  legendG
+    .append("g")
+    .attr("transform", `translate(${widthHeat},80)`)
+    .call(legendAxis);
+
+  // Optional: legend title
+  legendG
+    .append("text")
+    .attr("x", widthHeat / 2)
+    .attr("y", -10)
+    .attr("text-anchor", "middle")
+    .style("font-weight", "bold")
+    .style("font-size", "12px")
+    .text("Comp - Incomp");
+}
+
+createHeatmap();
+const toggleButton = document.getElementById("toggle-heatmap");
+
+toggleButton.addEventListener("click", () => {
+  if (heatContainer.style("display") === "none") {
+    heatContainer.style("display", "flex");
+    pitch4.style("display", "none");
+  } else {
+    heatContainer.style("display", "none");
+    pitch4.style("display", "inline");
+  }
+});
 
 function drawAccuracyChart(percentile) {
   const width = 200;
@@ -1749,7 +1995,6 @@ drawAccuracyChart(accuracy);
 
 animateBrushRight();
 
-console.log(euroSequences);
 const onePassSequences = euroSequences.filter(
   (sequence) => sequence.prev_pass1_x1 === ""
 );
