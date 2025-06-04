@@ -128,6 +128,7 @@ scroller
     if (stepIndex === 3){
       createPieChart();
       updateBarChart("");
+      console.log("step 3")
     }
 
   });
