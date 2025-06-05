@@ -3,9 +3,9 @@ import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
 
 
 const intro = document.querySelector(".intro");
-introElement.style.backgroundImage = 'url("assets/bg-soccer.jpeg")';
-introElement.style.backgroundSize = 'cover';          // optional, but usually needed
-introElement.style.backgroundPosition = 'center'; 
+intro.style.backgroundImage = 'url("assets/bg-soccer.jpeg")';
+intro.style.backgroundSize = 'cover';          // optional, but usually needed
+intro.style.backgroundPosition = 'center'; 
 // Load YouTube iframe API
 function handleStep(stepIndex, element) {
   // Remove active classes from all graphics

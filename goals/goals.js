@@ -3,7 +3,7 @@
   const container = document.getElementById('heatmap');
 
   console.log(document.documentElement);
-  const width = '450', height = '300';
+  const width = '720', height = '480';
   // Tooltip div
   const tooltip2 = document.createElement('div');
   tooltip2.id = 'tooltip';
