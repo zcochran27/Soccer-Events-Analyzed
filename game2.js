@@ -1,5 +1,4 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
-const canvas = document.getElementById("pitchCanvas");
+const canvas = document.getElementById("pitchCanvas2");
 const ctx = canvas.getContext("2d");
 
 const pitchWidth = 120;
@@ -214,8 +213,8 @@ canvas.addEventListener("click", (event) => {
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
       ctx.fillText("pass " + passNumber, (sx1 + cx) / 2, (sy1 + cy) / 2 - 10);
-      passType = document.getElementById("passType").value;
-      passHeight = document.getElementById("passHeight").value;
+      passType = document.getElementById("passType2").value;
+      passHeight = document.getElementById("passHeight2").value;
       collectedStats.push({
         start: startPos,
         end: endPos,
@@ -270,8 +269,8 @@ canvas.addEventListener("click", (event) => {
       ctx.textAlign = "center";
       ctx.fillText("pass " + passNumber, (sx3 + cx) / 2, (sy3 + cy) / 2 - 10);
 
-      passType = document.getElementById("passType").value;
-      passHeight = document.getElementById("passHeight").value;
+      passType = document.getElementById("passType2").value;
+      passHeight = document.getElementById("passHeight2").value;
 
       collectedStats.push({
         start: startPos,
@@ -338,7 +337,7 @@ function drawDribbles() {
   });
 }
 
-document.getElementById("undoBtn").addEventListener("click", () => {
+document.getElementById("undoBtn2").addEventListener("click", () => {
   if (collectedStats.length === 0 && dribbles.length === 0) return;
 
   if (collectedStats.length <= 1) {
@@ -370,167 +369,62 @@ document.getElementById("undoBtn").addEventListener("click", () => {
   lastEndPos = collectedStats.at(-1).end;
 });
 
-// document.getElementById("shootBtn").addEventListener("click", () => {
-//   if (shotTaken) {
-//     shotTaken = false;
-//     drawPitch();
-//     collectedStats.forEach(drawEventFromStats);
-//     drawDribbles();
-//     document.getElementById("shootBtn").textContent = "Shoot!";
-//     predictBtn.classList.remove("active");
-//     predictBtn.disabled = true;
-//     return;
-//   }
-//   if (collectedStats.length === 0) {
-//     alert("Add at least one event before shooting!");
-//     return;
-//   }
-//   if (clickPhase === 3) {
-//     console.log("popping dribble");
-//     dribbles.pop();
-//     drawPitch();
-//     collectedStats.forEach(drawEventFromStats);
-//     drawDribbles();
-//     clickPhase = 2;
-//   }
-//   shotTaken = true;
-//   const lastEnd = collectedStats[collectedStats.length - 1].end;
-//   const [lx, ly] = scaleToCanvas(...lastEnd);
-//   const [gx, gy] = scaleToCanvas(...goalCoords);
 
-//   ctx.save();
-//   ctx.setLineDash([6, 4]);
-//   ctx.beginPath();
-//   ctx.moveTo(lx, ly);
-//   ctx.lineTo(gx, gy);
-//   ctx.strokeStyle = "green";
-//   ctx.lineWidth = 2;
-//   ctx.stroke();
-//   ctx.setLineDash([]);
-//   ctx.restore();
-
-//   const midX = (lx + gx) / 2;
-//   const midY = (ly + gy) / 2;
-//   ctx.fillStyle = "green";
-//   ctx.font = "16px Arial";
-//   ctx.textAlign = "center";
-//   ctx.fillText("Shot!", midX, midY - 10);
-
-//   document.getElementById("shootBtn").textContent = "Undo Shot";
-//   predictBtn.classList.add("active");
-//   predictBtn.disabled = false;
-// });
-function getPercentile(value) {
-  const index = predDist.filter((x) => x < value).length;
-  return index / predDist.length;
-}
-
-document.getElementById("predictBtn").addEventListener("click", async () => {
-  if (collectedStats.length === 0) {
-    alert("Please create at least one pass before predicting.");
-    return;
-  }
-  const reversedStats = collectedStats.reverse();
-  const formatted = reversedStats.flatMap(
-    ({ start, end, pass_type, pass_height }) => [
-      start[0],
-      start[1],
-      end[0],
-      end[1],
-      1,
-      pass_type,
-      pass_height,
-    ]
-  );
-  const resultBox = document.getElementById("predictionResult");
-  const spinner = document.getElementById("loadingSpinner");
-
-  resultBox.innerText = "";
-  spinner.style.display = "block";
-  try {
-    const response = await fetch(
-      "https://soccer-events-analyzed.onrender.com/predict",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ features: formatted }),
-      }
-    );
-
-    const result = await response.json();
-    if (result.prediction !== undefined) {
-      resultBox.innerText = `Probability of Scoring Off Sequence: ${result.prediction.toFixed(
-        4
-      )}`;
-      drawDoughnutChart(getPercentile(result.prediction));
-    } else {
-      resultBox.innerText = `Error: ${result.error}`;
+document.getElementById("predictBtn2").addEventListener("click", async () => {
+    if (collectedStats.length === 0) {
+      alert("Please create at least one pass before predicting.");
+      return;
     }
-  } catch (error) {
-    resultBox.innerText = `Fetch error: ${error}`;
-  } finally {
-    spinner.style.display = "none";
-    collectedStats = collectedStats.reverse();
+    const reversedStats = collectedStats.reverse();
+    const formatted = reversedStats.flatMap(
+      ({ start, end, pass_type, pass_height }) => [
+        start[0],
+        start[1],
+        end[0],
+        end[1],
+        1,
+        pass_type,
+        pass_height,
+      ]
+    );
+    const resultBox = document.getElementById("predictionResult2");
+  
+    resultBox.innerText = "";
+    try {
+      const response = await fetch(
+        "https://soccer-events-analyzed.onrender.com/predict",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ features: formatted }),
+        }
+      );
+  
+      const result = await response.json();
+      if (result.prediction !== undefined) {
+        resultBox.innerText = `Probability of Scoring Off Sequence: ${result.prediction.toFixed(
+          4
+        )}`;
+      } else {
+        resultBox.innerText = `Error: ${result.error}`;
+      }
+    } catch (error) {
+      resultBox.innerText = `Fetch error: ${error}`;
+    } finally {
+      collectedStats = collectedStats.reverse();
+    }
+  });
+  
+  function updatePredictBtn() {
+    const predictBtn = document.getElementById("predictBtn2");
+    if (collectedStats.length > 0) {
+      predictBtn.classList.add("active");
+      predictBtn.disabled = false;
+    } else {
+      predictBtn.classList.remove("active");
+      predictBtn.disabled = true;
+    }
   }
-});
 
-function updatePredictBtn() {
-  const predictBtn = document.getElementById("predictBtn");
-  if (collectedStats.length > 0) {
-    predictBtn.classList.add("active");
-    predictBtn.disabled = false;
-  } else {
-    predictBtn.classList.remove("active");
-    predictBtn.disabled = true;
-  }
-}
-const predDist = await fetch("predDist.json").then((res) => res.json());
-predDist.sort((a, b) => a - b);
-
-function drawDoughnutChart(percentile) {
-  const width = 200;
-  const height = 200;
-  const radius = 80;
-  const thickness = 15;
-  d3.select("#prediction-container").style("visibility", "visible");
-  const svg = d3
-    .select("#circleChart")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("visibility", "visible");
-  svg.selectAll("*").remove();
-
-  const g = svg
-    .append("g")
-    .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-  // Background arc
-  const backgroundArc = d3
-    .arc()
-    .innerRadius(radius - thickness)
-    .outerRadius(radius)
-    .startAngle(0)
-    .endAngle(2 * Math.PI);
-
-  g.append("path").attr("d", backgroundArc).attr("fill", "#eee");
-
-  // Foreground arc (progress)
-  const foregroundArc = d3
-    .arc()
-    .innerRadius(radius - thickness)
-    .outerRadius(radius)
-    .startAngle(0)
-    .endAngle(2 * Math.PI * percentile);
-
-  g.append("path").attr("d", foregroundArc).attr("fill", "#4caf50");
-
-  // Center text
-  g.append("text")
-    .attr("class", "percent-text")
-    .text(`Top: ${Math.round(percentile * 100)}%`);
-}
-d3.select("#circleChart").attr("visibility", "hidden");
-d3.select("#prediction-container").style("visibility", "hidden");
-
-drawPitch();
-updatePredictBtn();
+  drawPitch();
+  updatePredictBtn();

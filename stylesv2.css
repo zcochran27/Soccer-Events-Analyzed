@@ -46,7 +46,7 @@ html {
   }
 }
 
-#predictBtn {
+#predictBtn, #predictBtn2 {
   position: static;
   padding: 8px 12px;
   background-color: gray;
@@ -60,11 +60,11 @@ html {
   z-index: auto;
 }
 
-#predictBtn.active {
+#predictBtn.active, #predictBtn2.active {
   background-color: #28a745;
 }
 
-#undoBtn {
+#undoBtn, #undoBtn2 {
   position: static;
   padding: 8px 12px;
   background-color: #e74c3c;
@@ -87,7 +87,7 @@ body {
   box-sizing: border-box; /* include padding in size */
   text-align: center; /* center text inside elements */
 }
-#pitchCanvas {
+#pitchCanvas, #pitchCanvas2 {
   width: 100%;
   height: auto;
   aspect-ratio: 3/2;

@@ -4,6 +4,7 @@
     <script type="module" src="mainV2Test.js"></script>
     <!-- <script src="youtube.js"></script> -->
     <script type="module" src="passes.js"></script>
+    <script type="module" src="game2.js"></script>
     <link rel="stylesheet" href="stylesv2.css" />
     <link rel="stylesheet" href="goals/goals.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -109,6 +110,38 @@
                     <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
                 </div>
             </div>
+            <div class="graphic-item" id="graphic-item-11">
+                <div id="main-container">
+                    <div class="canvas-container">
+                        <canvas id="pitchCanvas2" width="720" height="480"></canvas>
+                    </div>
+                    <div id="controls">
+                        <label for="passType">Select Pass Type:</label>
+                        <select id="passType2" name="passType">
+                            <option value="normal">Normal Pass</option>
+                            <option value="Cross">Cross</option>
+                            <option value="Through Ball">Through Ball</option>
+                            <option value="Cut-back">Cut Back</option>
+                            <option value="Switch">Switch</option>
+                            <option value="Throw-in">Throw-in</option>
+                            <option value="Corner">Corner</option>
+                            <option value="Free Kick">Free Kick</option>
+                            <option value="Goal Kick">Goal Kick</option>
+                        </select>
+        
+                        <label for="passHeight">Select Pass Height:</label>
+                        <select id="passHeight2" name="passHeight">
+                            <option value="Ground">Ground Pass</option>
+                            <option value="Low">Low Pass</option>
+                            <option value="High">High Pass</option>
+                        </select>
+        
+                        <button id="undoBtn2">Undo last pass</button>
+                        <button id="predictBtn2">Predict Play Probability</button>
+                    </div>
+                    <div id="prediction-container2"><p id="predictionResult2"></p></div>
+                </div>
+            </div>
         </div>
 
         <div class="article">
@@ -139,6 +172,13 @@
             <div class="step" id="step-5">
                 <h1 style="text-align: center;">Pass Sequence Game</h1>
                 <h2 style="text-align: center">Based on what you know so far, try out our pass sequence game and try to get the highest probability possible!</h2>
+                <br></br>
+                <h2>Instructions: </h2>
+                <h3>1. Select the pass type, pass height, and then click on the pitch to set the starting position of the ball.</h3>
+                <h3>2. Click again to set the end position of the pass.</h3>
+                <h3>3. Repeat steps 1 and 2 to create a sequence of passes.</h3>
+                <h3>4. Once you have created a sequence, click the "Predict Play Probability" button to see the probability of the pass sequence leading to a goal.</h3>
+                <h3>5. Repeat steps 1-4 to try to get the highest probability possible!</h3>
             </div>
             <div class="step" id="step-6">
                 <h2 style="text-align: center">Lets look at the specifics in the order of passes in a sequence.</h2>

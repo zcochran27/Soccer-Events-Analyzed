@@ -100,7 +100,7 @@ const scroller = scrollama();
 scroller
   .setup({
     step: ".step",
-    offset: 0.3,
+    offset: 0.5,
     debug: false,
   })
   .onStepEnter((response) => {
@@ -127,10 +127,13 @@ scroller
       .forEach((el) => el.classList.remove("active"));
     response.element.classList.add("active");
 
+    const graphicItem1 = document.getElementById("graphic-item-1");
     if (stepIndex === VIDEO_STEP_INDEX) {
+      graphicItem1.style.display = "block";
       startVideoLoop();
     } else {
       stopVideoLoop();
+      graphicItem1.style.display = "none";
     }
     if (stepIndex === 3) {
       createPieChart();
@@ -374,40 +377,6 @@ const ball = svg1
   .attr("x", -BALL_SIZE / 2)
   .attr("y", -BALL_SIZE / 2);
 
-// Define line generator
-// const line = d3.line()
-//   .x(d => d.x)
-//   .y(d => d.y)
-//   .curve(d3.curveLinear);
-
-// // Append path
-// const path = svg1.append("path")
-//   .datum(points)
-//   .attr("d", line)
-//   .attr("fill", "none")
-//   .attr("stroke", "none");
-// // Animate the ball along the path
-// function animateBall() {
-//   const totalLength = path.node().getTotalLength();
-
-//   ball
-//     .attr("transform", "translate(0,0)")
-//     .transition()
-//     .duration(7000)
-//     .ease(d3.easeLinear)
-//     .attrTween("transform", function() {
-//       return function(t) {
-//         const point = path.node().getPointAtLength(t * totalLength);
-//         return `translate(${point.x},${point.y})`;
-//       };
-//     });
-// }
-
-//   animateBall(); // call once
-// const segments = [];
-// for (let i = 0; i < pathPoints.length - 1; i += 2) {
-//   segments.push([pathPoints[i], pathPoints[i + 1]]);
-// }
 function animateSegments(index = 0) {
   if (index >= points.length - 1) return; // stop at last segment
 
@@ -2264,8 +2233,8 @@ const binnedPasses = Array.from({ length: xBins }, () =>
 
 flat_passes.forEach(pass => {
   const [x, y] = pass.start;
-  const xi = Math.floor(x / binWidth);
-  const yi = Math.floor(y / binHeight);
+  const xi = Math.min(Math.floor(x / binWidth), xBins - 1);
+  const yi = Math.min(Math.floor(y / binHeight), yBins - 1);
 
   if (xi >= 0 && xi < xBins && yi >= 0 && yi < yBins) {
     binnedPasses[xi][yi].push(pass);
