@@ -2240,3 +2240,200 @@ legendStacked
   .attr("y", (d, i) => i * 20 + 9)
   .text((d) => d)
   .style("font-size", "12px");
+
+
+const flat_passes = euroSequences.map(getPassLocationsWithMetadata).flat();
+const pitch6 = d3.select("#pitch6");
+drawFootballPitch(pitch6);
+
+const fieldWidth = 120;
+const fieldHeight = 80;
+const xBins = 12;
+const yBins = 8;
+const binWidth = fieldWidth / xBins;   // 10
+const binHeight = fieldHeight / yBins;
+const binnedPasses = Array.from({ length: xBins }, () =>
+  Array.from({ length: yBins }, () => [])
+);
+
+flat_passes.forEach(pass => {
+  const [x, y] = pass.start;
+  const xi = Math.floor(x / binWidth);
+  const yi = Math.floor(y / binHeight);
+
+  if (xi >= 0 && xi < xBins && yi >= 0 && yi < yBins) {
+    binnedPasses[xi][yi].push(pass);
+  }
+});
+const bestPassTypePerBin = [];
+
+for (let xi = 0; xi < xBins; xi++) {
+  bestPassTypePerBin[xi] = [];
+  for (let yi = 0; yi < yBins; yi++) {
+    const passes = binnedPasses[xi][yi];
+    const predSums = {};
+    const counts = {};
+
+    // Accumulate sequence_pred per pass type
+    passes.forEach(p => {
+      const type = p.type;
+      const pred = parseFloat(p.sequence_pred);
+
+      if (!isNaN(pred)) {
+        predSums[type] = (predSums[type] || 0) + pred;
+        counts[type] = (counts[type] || 0) + 1;
+      }
+    });
+
+    // Compute mean sequence_pred for each type
+    let maxType = null;
+    let maxMean = -Infinity;
+
+    for (const type in predSums) {
+      const mean = predSums[type] / counts[type];
+      if (mean > maxMean) {
+        maxMean = mean;
+        maxType = type;
+      }
+    }
+
+    bestPassTypePerBin[xi][yi] = maxType;
+  }
+}
+
+console.log(bestPassTypePerBin);
+
+const passTypeColor = d3.scaleOrdinal()
+.domain([
+  "Pass", "Through Ball", "Switch", "Cross", "Free Kick", "Cut Back", "Corner", "Throw In"
+])
+.range(d3.schemeCategory10);
+
+const cellWidth = 120 / xBins;
+const cellHeight = 80 / yBins;
+
+//now computing the angle and distance for best type passes
+
+const angleDistanceStats = Array.from({ length: xBins }, () =>
+  Array.from({ length: yBins }, () => ({
+    weightedAngle: 0,
+    weightedDistance: 0,
+    totalWeight: 0
+  }))
+);
+
+// Utility: angle in radians and Euclidean distance
+function getAngleAndDistance(start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const distance = Math.sqrt(dx ** 2 + dy ** 2);
+  const angle = Math.atan2(dy, dx); // radians
+  return { distance, angle };
+}
+
+// Compute weighted stats
+flat_passes.forEach(pass => {
+  const [x, y] = pass.start;
+  const binX = Math.floor(x / binWidth);
+  const binY = Math.floor(y / binHeight);
+  if (binX < 0 || binX >= xBins || binY < 0 || binY >= yBins) return;
+
+  const bestType = bestPassTypePerBin[binX]?.[binY];
+  if (!bestType || pass.type !== bestType) return;
+
+  const { distance, angle } = getAngleAndDistance(pass.start, pass.end);
+  const weight = parseFloat(pass.sequence_pred ?? 0);
+  if (isNaN(weight) || weight <= 0) return;
+
+  const bin = angleDistanceStats[binX][binY];
+  bin.weightedDistance += distance * weight;
+  bin.weightedAngle += angle * weight;
+  bin.totalWeight += weight;
+});
+
+// Normalize
+for (let xi = 0; xi < xBins; xi++) {
+  for (let yi = 0; yi < yBins; yi++) {
+    const bin = angleDistanceStats[xi][yi];
+    if (bin.totalWeight > 0) {
+      bin.avgDistance = bin.weightedDistance / bin.totalWeight;
+      bin.avgAngle = bin.weightedAngle / bin.totalWeight;
+    } else {
+      bin.avgDistance = 0;
+      bin.avgAngle = 0;
+    }
+  }
+}
+pitch6.append("defs")
+  .append("marker")
+  .attr("id", "arrow")
+  .attr("viewBox", "0 -5 10 10")
+  .attr("refX", 1)            // smaller refX shifts the arrowhead closer to the line end
+  .attr("refY", 0)
+  .attr("markerWidth", 1.5)     // smaller width
+  .attr("markerHeight", 1.5)    // smaller height
+  .attr("orient", "auto")
+  .append("path")
+  .attr("d", "M0,-5L10,0L0,5")
+  .attr("fill", "black");
+
+for (let xi = 0; xi < xBins; xi++) {
+  for (let yi = 0; yi < yBins; yi++) {
+    const type = bestPassTypePerBin[xi]?.[yi] || "Unknown";
+
+    pitch6.append("rect")
+      .attr("x", xi * cellWidth)
+      .attr("y", yi * cellHeight)
+      .attr("width", cellWidth)
+      .attr("height", cellHeight)
+      .attr("fill", passTypeColor(type))
+      .attr('opacity', 0.5)
+      .attr("class", "bin-cell");
+
+    pitch6.append("text")
+      .attr("x", xi * cellWidth + cellWidth / 2)
+      .attr("y", yi * cellHeight + cellHeight / 2)
+      .text(type) // first word only to avoid overflow
+      .attr('font-size', '1px')
+      .attr("class", "bin-label");
+  }
+}
+
+for (let xi = 0; xi < xBins; xi++) {
+  for (let yi = 0; yi < yBins; yi++) {
+    const bin = angleDistanceStats[xi][yi];
+    if (bin.totalWeight === 0) continue;
+
+    const centerX = xi * binWidth + binWidth / 2;
+    const centerY = yi * binHeight + binHeight / 2;
+    const unscaledLen = bin.avgDistance;
+
+    const dxTrue = Math.cos(bin.avgAngle) * unscaledLen;
+    const dyTrue = Math.sin(bin.avgAngle) * unscaledLen;
+
+    // Hover-visible unnormalized arrow (initially hidden)
+    const hoverArrow = pitch6.append("line")
+      .attr("x1", centerX)
+      .attr("y1", centerY)
+      .attr("x2", centerX + dxTrue)
+      .attr("y2", centerY + dyTrue)
+      .attr("stroke", "black")
+      .attr("stroke-width", 1.5)
+      .attr("marker-end", "url(#arrow)")
+      .style("display", "none");
+
+    // Transparent rect for hover
+    pitch6.append("rect")
+      .attr("x", xi * binWidth)
+      .attr("y", yi * binHeight)
+      .attr("width", binWidth)
+      .attr("height", binHeight)
+      .attr("fill", "transparent")
+      .on("mouseover", () => {
+        hoverArrow.style("display", "inline");
+      })
+      .on("mouseout", () => {
+        hoverArrow.style("display", "none");
+      });
+  }
+}

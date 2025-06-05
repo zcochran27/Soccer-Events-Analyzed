@@ -479,3 +479,10 @@ body {
   margin-bottom: 1rem;
   margin-left: 1rem;
 }
+.bin-label {
+  font-size: 1.5px;
+  text-anchor: middle;
+  dominant-baseline: central;  /* 👈 Key for vertical centering */
+  fill: white;
+  pointer-events: none;
+}
