@@ -76,16 +76,18 @@
                 </div>
             </div>
             <div class="graphic-item" id="graphic-item-6">
-                <div id="pass-position-chart" class="diagonal-container">
                     <div class="chart chart-top-left"></div>   <!-- First chart (e.g., Stacked Bar) -->
-                    <div class="chart chart-bottom-right"></div> <!-- Second chart (e.g., Prediction Bar) -->
-                  </div>
             </div>
             <div class="graphic-item" id="graphic-item-7">
+                    <div class="chart chart-bottom-right"></div> <!-- Second chart (e.g., Prediction Bar) -->
+                
+            </div>
+
+            <div class="graphic-item" id="graphic-item-8">
                 <div id="heatmap"></div>
                 <script src="goals/goals.js"></script>
             </div>
-            <div class="graphic-item" id="graphic-item-8">
+            <div class="graphic-item" id="graphic-item-9">
                 <div id="heatmap-container" style="display: flex; align-items: flex-start;">
                     <svg id="pitch5" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
                     <svg id="legend" width="150" height="400"></svg>
@@ -101,16 +103,16 @@
                     <svg id="accuracy-chart"></svg>
                 </div>
             </div>
-            <div class="graphic-item" id="graphic-item-9">
+            <div class="graphic-item" id="graphic-item-10">
                 <svg id="pitch6" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
-            <div class="graphic-item" id="graphic-item-10">
+            <div class="graphic-item" id="graphic-item-11">
                 <div id="pitch3-container">
                     <h3 id="sequence-header"></h3>
                     <svg id="pitch3" width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
                 </div>
             </div>
-            <div class="graphic-item" id="graphic-item-11">
+            <div class="graphic-item" id="graphic-item-12">
                 <div id="main-container">
                     <div class="canvas-container">
                         <canvas id="pitchCanvas2" width="720" height="480"></canvas>
@@ -181,14 +183,18 @@
                 <h3>5. Repeat steps 1-4 to try to get the highest probability possible!</h3>
             </div>
             <div class="step" id="step-6">
+                <h2 style="text-align: center">You may be thinking that you only need one pass to score a goal. However, taking a look at the pass sequences we can see that on average having a sequence of 5 passes generally has a higher pass sequence xG.</h2>
+                <h3>This leads us to believe that the context of the passes are important and that passes where the last few passes were good can set up a "last pass" in a good position to make an assist that leads to a goal.</h3>
+            </div>
+            <div class="step" id="step-7">
                 <h2 style="text-align: center">Lets look at the specifics in the order of passes in a sequence.</h2>
                 <h3>Based on all of the inputs into our model, passing sequences with 5 passes have the highest probability of success.</h3>
             </div>
-            <div class="step" id="step-7">
+            <div class="step" id="step-8">
                 <h2 style="text-align: center">Take a look at this heatmap to see information about shots and goals!</h2>
                 <h3>A majority of shots are taken from inside the box or just outside the 18-yard box, particularly from the central areas. Most goals are scored from inside the 18-yard box, with the highest xG coming from shots near the goal. </h3>
             </div>
-            <div class="step" id="step-8">
+            <div class="step" id="step-9">
                 <h2 style="text-align: center">The last pass of a sequence is the most important in influencing the probability of a goal. Here we take a look at all the last passes of a sequence from the 2024 UEFA Euro Tournament.</h2>
                 <h2>Adjust the slider to control the percentile of the sequence xG for the last passes displayed. Toggle the heatmap mode to see the distribution of pass end locations. Does this heatmap look familiar? Lastly, Click on the pie charts to further filter by pass type and pass height.</h2>
                 <h3>Try and answer these questions: </h3>
@@ -196,17 +202,17 @@
                 <h3>2. What height should you be passing the ball from the middle of the pitch? What about from the wings?</h3>
                 <h3>3. What area should you be passing the ball to in order to maximize the probability of a goal?</h3>
             </div>
-            <div class="step" id="step-9">
+            <div class="step" id="step-10">
                 <h2 style="text-align: center">Now that you have explored how the last pass affects the probability of a goal, we can look to see what types of passes should be performed at each location of the pitch in order to maximize the probability of a goal. 
                     <b>Hover</b> over each cell to see the best pass type for that location and what a good pass from that location would look like.<br></br>Looking at this we can separate the pitch naturally into three parts: the defensive third, the middle third, and the attacking third. 
                     We can see that the main goal of passes in the defensive third should be switches to open up the defense and create gaps in the midfield. Then moving on into the midfield the goal is to penetrate the defense through the use of through balls and get the ball to just around the top of the box.
                     Finally, in the attacking third along the wings a team should focus on cut-backs and crosses to get the ball into the box for goal scoring opportunities.</h2>
             </div>
-            <div class="step" id="step-10">
+            <div class="step" id="step-11">
                 <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal.</h2>
                 <h3>As we can see, the final pass of almost every sequence is going into the box, and is either a cross or a ground pass.</h3>
             </div>
-            <div class="step" id="step-11">
+            <div class="step" id="step-12">
                 <h1 style="text-align: center;">Pass Sequence Game pt. 2</h1>
                 <h2 style="text-align: center">Given all the insights we've gathered, how would you approach creating a successful pass sequence? Try out our game again and see if you can improve your score!</h2>
             </div>

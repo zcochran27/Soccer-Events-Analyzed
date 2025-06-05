@@ -138,11 +138,11 @@ scroller
       updateBarChart("");
       console.log("step 3");
     }
-    const graphicItem8 = document.getElementById("graphic-item-8");
-    if (stepIndex === 7) {
-      graphicItem8.style.display = "block";
+    const graphicItem9 = document.getElementById("graphic-item-9");
+    if (stepIndex === 8) {
+      graphicItem9.style.display = "block";
     }else{
-      graphicItem8.style.display = "none";
+      graphicItem9.style.display = "none";
     }
   });
 
