@@ -1,13 +1,11 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
 
-// const playerContainer = document.querySelector('.player');
-//   if (playerContainer) {
-//     const ytDiv = document.createElement('div');
-//     ytDiv.id = 'yt-player';
-//     playerContainer.appendChild(ytDiv);
-//   }
 
+const intro = document.querySelector(".intro");
+introElement.style.backgroundImage = 'url("assets/bg-soccer.jpeg")';
+introElement.style.backgroundSize = 'cover';          // optional, but usually needed
+introElement.style.backgroundPosition = 'center'; 
 // Load YouTube iframe API
 function handleStep(stepIndex, element) {
   // Remove active classes from all graphics
