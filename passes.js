@@ -534,7 +534,7 @@ drawFootballPitch(svg2);
 const tooltip2 = d3
   .select("#graphic-item-3")
   .append("div")
-  .style("position", "absolute")
+  .style("position", "fixed")
   .style("background", "rgba(0,0,0,0.7)")
   .style("color", "white")
   .style("padding", "6px")
@@ -616,6 +616,7 @@ svg2
           getHeightLabel(height),
         ]
       );
+      console.log(passesFormattedV2);
       const response = await fetch(
         "https://soccer-events-analyzed.onrender.com/predict",
         {
@@ -626,6 +627,7 @@ svg2
       );
 
       const result = await response.json();
+      console.log(result);
       if (result.prediction !== undefined) {
         tooltip2
           .style("opacity", 1)
@@ -636,13 +638,14 @@ svg2
                         ).toFixed(2)}%.      
                     `
           )
-          .style("left", event.pageX + 10 + "px")
-          .style("top", event.pageY + 10 + "px");
+          .style("left", `${event.clientX + 10}px`)
+          .style("top", `${event.clientY + 10}px`);
+        console.log(tooltip2)
       } else {
-        tooltip2.innerText = `Error: ${result.error}`;
+        tooltip2.html(`Error: ${result.error}`);
       }
     } catch (error) {
-      tooltip2.innerText = `Fetch error: ${error}`;
+      tooltip2.html(`Fetch error: ${error}`);
     }
     passesV2 = passesV2.reverse();
   });
@@ -1099,7 +1102,6 @@ function updateBarChart(stage) {
   filteredEuroSequences = filteredEuroSequences.sort(
     (a, b) => a.sequence_pred - b.sequence_pred
   );
-  console.log(filteredEuroSequences);
   const teamsPreds = d3.rollup(
     filteredEuroSequences,
     (v) => d3.max(v, (d) => d.sequence_pred), // Get max pred for each possession
@@ -1107,7 +1109,6 @@ function updateBarChart(stage) {
     (d) => d.possession, // Group by team and possession
     (d) => d.match_id
   );
-  console.log(teamsPreds);
   // Calculate mean of possession max predictions per team
   const teamAverages = Array.from(teamsPreds.entries()).map(
     ([team, possessions]) => {
@@ -1123,7 +1124,6 @@ function updateBarChart(stage) {
       };
     }
   );
-  console.log(teamAverages);
   const teamSums = Array.from(teamsPreds.entries()).map(
     ([team, possessions]) => {
       const possessionValues = Array.from(possessions.values());
@@ -2300,8 +2300,6 @@ for (let xi = 0; xi < xBins; xi++) {
     bestPassTypePerBin[xi][yi] = maxType;
   }
 }
-
-console.log(bestPassTypePerBin);
 
 const passTypeColor = d3.scaleOrdinal()
 .domain([
