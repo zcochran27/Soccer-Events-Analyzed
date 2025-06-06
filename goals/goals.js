@@ -218,3 +218,6 @@ buttons2.forEach(button => {
     button.classList.add('active');
   });
 });
+document.addEventListener("DOMContentLoaded", function () {
+  buttons2[0].click();
+});
