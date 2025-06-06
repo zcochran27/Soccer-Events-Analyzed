@@ -1,5 +1,56 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
+let euroSequences = await d3
+  .csv("europe_sequences_preds.csv")
+  .then(function (data) {
+    const updatedData = data.map((d) => {
+      // Convert strings to numbers if needed
+      const cut_back = +d.pass_cut_back;
+      const switchPass = +d.pass_switch;
+      const cross = +d.pass_cross;
+      const through = +d.pass_through_ball;
+      const throw_in = +d.pass_throw_in;
+      const corner = +d.pass_corner;
+      const goal_kick = +d.pass_goal_kick;
+      const free_kick = +d.pass_free_kick;
+
+      // Combine into a single string label
+
+      for (let i = 1; i <= 4; i++) {
+        const throw_in_i = +d[`prev_pass${i}_pass_throw_in`];
+        const corner_i = +d[`prev_pass${i}_pass_corner`];
+        const goal_kick_i = +d[`prev_pass${i}_pass_goal_kick`];
+        const free_kick_i = +d[`prev_pass${i}_pass_free_kick`];
+        const cut_back_i = +d[`prev_pass${i}_cut_back`];
+        const switch_i = +d[`prev_pass${i}_switch`];
+        const cross_i = +d[`prev_pass${i}_cross`];
+        const through_i = +d[`prev_pass${i}_through_ball`];
+
+        if (throw_in_i) d[`prev_pass${i}_type`] = "Throw In";
+        else if (corner_i) d[`prev_pass${i}_type`] = "Corner";
+        else if (goal_kick_i) d[`prev_pass${i}_type`] = "Goal Kick";
+        else if (free_kick_i) d[`prev_pass${i}_type`] = "Free Kick";
+        else if (through_i) d[`prev_pass${i}_type`] = "Through Ball";
+        else if (cut_back_i) d[`prev_pass${i}_type`] = "Cut Back";
+        else if (switch_i) d[`prev_pass${i}_type`] = "Switch";
+        else if (cross_i) d[`prev_pass${i}_type`] = "Cross";
+        else d[`prev_pass${i}_type`] = "Pass";
+      }
+
+      if (throw_in) d.type = "Throw In";
+      else if (corner) d.type = "Corner";
+      else if (goal_kick) d.type = "Goal Kick";
+      else if (free_kick) d.type = "Free Kick";
+      else if (through) d.type = "Through Ball";
+      else if (cut_back) d.type = "Cut Back";
+      else if (switchPass) d.type = "Switch";
+      else if (cross) d.type = "Cross";
+      else d.type = "Pass";
+
+      return d;
+    });
+    return updatedData;
+  });
 
 
 const intro = document.querySelector(".intro");
@@ -36,7 +87,6 @@ function handleStep(stepIndex, element) {
 }
 
 window.onYouTubeIframeAPIReady = function () {
-  console.log("YouTube Iframe API ready, creating player");
   player = new YT.Player("yt-player", {
     height: 315,
     width: 560,
@@ -157,7 +207,6 @@ scroller
       //createPieChart();
       updateBarChart("");
       createStageLegend(euroSequences);
-      console.log("step 3");
     } else {
       graphicItem4.style.display = "none";
     }
@@ -401,7 +450,6 @@ const pathPoints = passes.flatMap((pass) => [pass.start, pass.end]);
 
 // Convert [x, y] pairs to {x, y} objects
 const points = pathPoints.map(([x, y]) => ({ x, y }));
-console.log(points);
 
 // Append ball image
 const BALL_SIZE = 6; // adjust to suit scale
@@ -674,57 +722,6 @@ svg2
   .attr("fill", "black")
   .style("pointer-events", "none");
 
-let euroSequences = await d3
-  .csv("europe_sequences_preds.csv")
-  .then(function (data) {
-    const updatedData = data.map((d) => {
-      // Convert strings to numbers if needed
-      const cut_back = +d.pass_cut_back;
-      const switchPass = +d.pass_switch;
-      const cross = +d.pass_cross;
-      const through = +d.pass_through_ball;
-      const throw_in = +d.pass_throw_in;
-      const corner = +d.pass_corner;
-      const goal_kick = +d.pass_goal_kick;
-      const free_kick = +d.pass_free_kick;
-
-      // Combine into a single string label
-
-      for (let i = 1; i <= 4; i++) {
-        const throw_in_i = +d[`prev_pass${i}_pass_throw_in`];
-        const corner_i = +d[`prev_pass${i}_pass_corner`];
-        const goal_kick_i = +d[`prev_pass${i}_pass_goal_kick`];
-        const free_kick_i = +d[`prev_pass${i}_pass_free_kick`];
-        const cut_back_i = +d[`prev_pass${i}_cut_back`];
-        const switch_i = +d[`prev_pass${i}_switch`];
-        const cross_i = +d[`prev_pass${i}_cross`];
-        const through_i = +d[`prev_pass${i}_through_ball`];
-
-        if (throw_in_i) d[`prev_pass${i}_type`] = "Throw In";
-        else if (corner_i) d[`prev_pass${i}_type`] = "Corner";
-        else if (goal_kick_i) d[`prev_pass${i}_type`] = "Goal Kick";
-        else if (free_kick_i) d[`prev_pass${i}_type`] = "Free Kick";
-        else if (through_i) d[`prev_pass${i}_type`] = "Through Ball";
-        else if (cut_back_i) d[`prev_pass${i}_type`] = "Cut Back";
-        else if (switch_i) d[`prev_pass${i}_type`] = "Switch";
-        else if (cross_i) d[`prev_pass${i}_type`] = "Cross";
-        else d[`prev_pass${i}_type`] = "Pass";
-      }
-
-      if (throw_in) d.type = "Throw In";
-      else if (corner) d.type = "Corner";
-      else if (goal_kick) d.type = "Goal Kick";
-      else if (free_kick) d.type = "Free Kick";
-      else if (through) d.type = "Through Ball";
-      else if (cut_back) d.type = "Cut Back";
-      else if (switchPass) d.type = "Switch";
-      else if (cross) d.type = "Cross";
-      else d.type = "Pass";
-
-      return d;
-    });
-    return updatedData;
-  });
 // euroSequences.map(d => {
 //   d.pass_height = parseInt(d.pass_height);
 //   if (d.pass_height === 0) d.pass_height = "Ground";
@@ -2214,7 +2211,6 @@ const fifthPassAvgPred = d3.mean(
   fivePassSequences.filter((d) => d !== undefined),
   (d) => d.sequence_pred
 );
-console.log(firstPassAvgPred, secondPassAvgPred, thirdPassAvgPred, fourthPassAvgPred, fifthPassAvgPred);
 
 const allPassMetaData = fivePassSequences.map(getPassLocationsWithMetadata);
 

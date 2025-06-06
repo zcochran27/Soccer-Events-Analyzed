@@ -1,8 +1,6 @@
 
   
   const container = document.getElementById('heatmap');
-
-  console.log(document.documentElement);
   const width = '720', height = '480';
   // Tooltip div
   const tooltip2 = document.createElement('div');
@@ -100,7 +98,6 @@ function draw(fdata, tag) {
 
   cmap = grid.flat().map(d => ((d.z - minn)/(maxx-minn)) * 0.7 - 0.3);
   
-  console.log(cmap);
   const color = d3.scaleSequential()
     .domain(d3.extent(cmap))
     .interpolator(d3.interpolateGreens);
