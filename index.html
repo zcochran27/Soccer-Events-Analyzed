@@ -185,12 +185,18 @@
                 <h3>5. Repeat steps 1-4 to try to get the highest probability possible!</h3>
             </div>
             <div class="step" id="step-6">
-                <h2 style="text-align: center">You may be thinking that you only need one pass to score a goal. However, taking a look at the pass sequences we can see that on average having a sequence of 5 passes generally has a higher pass sequence xG.</h2>
-                <h3>This leads us to believe that the context of the passes are important and that sequences where the last few passes were good can set up a "last pass" in a good position to create a goal.</h3>
+                <h2 style="text-align: center">Counter attacks have been a major talking point lately in soccer. Typically, a counter attack would consist of gaining possession and making a sequence of very few passes, 1-3, and then making an attempt on goal.
+                    Here we take a look at how the number of passes in a sequence affects the pass sequence xG.
+                </h2>
+                <h3>Although the actual difference in pass sequence xG is not very large, about .5%, we see that a pass sequence xG of around .025 is around the 75th percentile of pass sequence xG. While a pass sequence xG of around .018 is around the 55th percentile. 
+                    This is a huge difference of 20 percentile points!This leads us to believe that the context of the passes are important and that sequences where the build up sequence was good can set up a "last pass" in a good position to create a goal.</h3>
+                    <h3>Build up is important!</h3>
             </div>
             <div class="step" id="step-7">
                 <h2 style="text-align: center">Now we can take a look at the distribution of passes within those 5 pass sequences.</h2>
-                <h3>First thing that we can see is that goal kicks, free kicks, corners, and throw-ins all happen on the first pass of a sequence, this should match our intuition and general knowledge for how soccer works. ></h3>
+                <h3>First thing that we can see is that goal kicks, free kicks, corners, and throw-ins all happen on the first pass of a sequence, this should match our intuition and general knowledge for how soccer works. 
+                    <br></br>
+                    The next thing that is important to identify is the types of passes that can be labled as sequence ending. We see that through balls, crosses, and cutbacks all tend to end sequences at least 50% of the time. We can attribute this to shots happenng after each of these pass types.</h3>
             </div>
             <div class="step" id="step-8">
                 <h2 style="text-align: center">Take a look at this heatmap to see information about shots and goals!</h2>

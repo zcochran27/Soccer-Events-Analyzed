@@ -166,6 +166,9 @@ scroller
     // NEW: Reset and restart slider animation on slider step enter
     if (stepIndex === sliderStepIndex) {
       resetAndStartSlider();
+      startSliderAnimation(true);
+      isPaused = false;
+      document.getElementById('pause-animation-btn').textContent = 'Pause Slider Animation';
     }
   });
 
@@ -1369,13 +1372,26 @@ const svg = d3
   .attr("height", height)
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`);
+  svg
+  .append("text")
+  .attr("x", width / 2)
+  .attr("y", 0) // Position it above the slider
+  .attr("text-anchor", "middle")
+  .style("font-size", "16px")
+  .style("font-weight", "bold")
+  .text("Select the percentile of pass xG for passes displayed");
 
 const x = d3.scaleLinear().domain([0, 1]).range([0, width]);
 
+function ordinalSuffix(n) {
+  const s = ["th", "st", "nd", "rd"],
+    v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
 svg
   .append("g")
   .attr("transform", `translate(0,${height / 2})`)
-  .call(d3.axisBottom(x).ticks(10).tickFormat(d3.format(".0%")));
+  .call(d3.axisBottom(x).ticks(10).tickFormat(d => ordinalSuffix(Math.round(d * 100))));
 
 const brush = d3
   .brushX()
@@ -1410,7 +1426,7 @@ svg
 let progress = 0;
 const windowSize = 0.1; // size of the sliding window (10%)
 const step = 0.01; // how much to move per tick
-const intervalDelay = 50; // milliseconds between steps
+const intervalDelay = 150; // milliseconds between steps
 
 let sliderAnimationInterval = setInterval(() => {
   if (progress + windowSize > 1) {
@@ -2016,9 +2032,9 @@ function createHeatmap() {
 createHeatmap();
 const toggleButton = document.getElementById("toggle-heatmap");
 
-heatContainer.style("display", "flex");
-pitch4.style("display", "none");
-toggleButton.textContent = "Toggle Passmap"; // Since heatmap is showing
+// heatContainer.style("display", "flex");
+// pitch4.style("display", "none");
+// toggleButton.textContent = "Toggle Passmap"; // Since heatmap is showing
 
 
 
@@ -2119,6 +2135,7 @@ const fifthPassAvgPred = d3.mean(
   fivePassSequences.filter((d) => d !== undefined),
   (d) => d.sequence_pred
 );
+console.log(firstPassAvgPred, secondPassAvgPred, thirdPassAvgPred, fourthPassAvgPred, fifthPassAvgPred);
 
 const allPassMetaData = fivePassSequences.map(getPassLocationsWithMetadata);
 
@@ -2132,8 +2149,8 @@ const passPositionData = [
 ].filter((d) => !isNaN(d.avg)); // Filter out any NaN values
 
 const barMargin = { top: 30, right: 20, bottom: 60, left: 40 };
-const barWidth = 420 - barMargin.left - barMargin.right;
-const barHeight = 400 - barMargin.top - barMargin.bottom;
+const barWidth = 620 - barMargin.left - barMargin.right;
+const barHeight = 600 - barMargin.top - barMargin.bottom;
 
 const barSvg = d3
   .select(".chart-top-left")
@@ -2185,30 +2202,108 @@ barSvg
   .attr("text-anchor", "middle")
   .style("font-size", "16px")
   .style("font-weight", "bold")
-  .text("Average Prediction by Number of Passes in Sequence");
+  .text("Average Pass Sequence xG by Number of Passes in Sequence");
+  const lastBar = passPositionData[passPositionData.length - 1];
+  const xLastBar = xPassPosition(lastBar.position) + xPassPosition.bandwidth() / 2;
+  const yLastBar = yPassPosition(lastBar.avg);
+  
+  // Draw arrow line
+  barSvg
+    .append("line")
+    .attr("x1", xLastBar)
+    .attr("y1", yLastBar + 10)
+    .attr("x2", xLastBar - 60)
+    .attr("y2", yLastBar + 50)
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+    .attr("marker-end", "url(#arrow)");
+  
+  // Add arrowhead marker definition
+  barSvg
+    .append("defs")
+    .append("marker")
+    .attr("id", "arrow")
+    .attr("viewBox", "0 0 10 10")
+    .attr("refX", 0)
+    .attr("refY", 5)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto-start-reverse")
+    .append("path")
+    .attr("d", "M 0 0 L 10 5 L 0 10 z")
+    .attr("fill", "black");
+  
+  // Add annotation text
+  barSvg
+    .append("text")
+    .attr("x", xLastBar - 170)
+    .attr("y", yLastBar + 70)
+    .attr("text-anchor", "start")
+    .style("font-size", "12px")
+    .style("font-weight", "bold")
+    .text("75th percentile of pass sequence xGs");
+  const firstBar = passPositionData[0];
+  const xFirstBar = xPassPosition(firstBar.position) + xPassPosition.bandwidth() / 2;
+  const yFirstBar = yPassPosition(firstBar.avg);
+  
+  // Draw arrow line
+  barSvg
+    .append("line")
+    .attr("x1", xFirstBar)
+    .attr("y1", yFirstBar + 10)
+    .attr("x2", xFirstBar + 60)
+    .attr("y2", yFirstBar - 50)
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+    .attr("marker-end", "url(#arrow)");
+  
+  // Add arrowhead marker definition
+  // barSvg
+  //   .append("defs")
+  //   .append("marker")
+  //   .attr("id", "arrow")
+  //   .attr("viewBox", "0 0 10 10")
+  //   .attr("refX", 0)
+  //   .attr("refY", 5)
+  //   .attr("markerWidth", 6)
+  //   .attr("markerHeight", 6)
+  //   .attr("orient", "auto-start-reverse")
+  //   .append("path")
+  //   .attr("d", "M 0 0 L 10 5 L 0 10 z")
+  //   .attr("fill", "black");
+  
+  // Add annotation text
+  barSvg
+    .append("text")
+    .attr("x", xFirstBar + 10)
+    .attr("y", yFirstBar - 70)
+    .attr("text-anchor", "start")
+    .style("font-size", "12px")
+    .style("font-weight", "bold")
+    .text("55th percentile of pass sequence xGs");
 
 const allPassMetaDataWithPosition = allPassMetaData.flatMap((seq) =>
   seq.map((pass, i) => ({
     ...pass,
     position: [
-      "Last Pass",
-      "Previous Pass",
-      "Second Previous Pass",
-      "Third Previous Pass",
-      "Fourth Previous Pass",
+      "Fifth Pass",
+      "Fourth Pass",
+      "Third Pass",
+      "Second Pass",
+      "First Pass",
     ].reverse()[i],
   }))
 );
-const marginStacked = { top: 60, right: 140, bottom: 60, left: 40 };
-const widthStacked = 420 - marginStacked.left - marginStacked.right;
-const heightStacked = 400 - marginStacked.top - marginStacked.bottom;
+const marginStacked = { top: 60, right: 160, bottom: 60, left: 50 };
+const widthStacked = 620 - marginStacked.left - marginStacked.right;
+const heightStacked = 600 - marginStacked.top - marginStacked.bottom;
 
 const passPositions = [
-  "Fourth Previous Pass",
-  "Third Previous Pass",
-  "Second Previous Pass",
-  "Previous Pass",
-  "Last Pass",
+  "First Pass",
+  "Second Pass",
+  "Third Pass",
+  "Fourth Pass",
+  "Fifth Pass",
 ];
 const passTypes = Array.from(
   new Set(allPassMetaDataWithPosition.map((d) => d.type))
@@ -2270,7 +2365,7 @@ svgStacked
   .attr("text-anchor", "middle")
   .style("font-size", "16px")
   .style("font-weight", "bold")
-  .text("Distribution of Pass Types by Pass Position");
+  .text("Distribution of Pass Position by Pass Type");
 
 // Bars
 svgStacked
@@ -2326,6 +2421,59 @@ legendStacked
   .attr("y", (d, i) => i * 20 + 9)
   .text((d) => d)
   .style("font-size", "12px");
+
+svgStacked
+  .append("line")
+  .attr("x1", 130)
+  .attr("y1", 370)
+  .attr("x2", 415)
+  .attr("y2", 320)
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("marker-end", "url(#arrowStack)");
+svgStacked
+  .append("line")
+  .attr("x1", 180)
+  .attr("y1", 230)
+  .attr("x2", 410)
+  .attr("y2", 300)
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("marker-end", "url(#arrowStack)");
+svgStacked
+  .append("line")
+  .attr("x1", 230)
+  .attr("y1", 190)
+  .attr("x2", 420)
+  .attr("y2", 280)
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("marker-end", "url(#arrowStack)");
+
+// Add arrowhead marker definition
+svgStacked
+  .append("defs")
+  .append("marker")
+  .attr("id", "arrowStack")
+  .attr("viewBox", "0 0 10 10")
+  .attr("refX", 0)
+  .attr("refY", 5)
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto-start-reverse")
+  .append("path")
+  .attr("d", "M 0 0 L 10 5 L 0 10 z")
+  .attr("fill", "black");
+
+// Add annotation text
+svgStacked
+  .append("text")
+  .attr("x",  425)
+  .attr("y",  305)
+  .attr("text-anchor", "start")
+  .style("font-size", "13px")
+  .style("font-weight", "bold")
+  .text("Sequence Ending Passes!");
 
 
 const flat_passes = euroSequences.map(getPassLocationsWithMetadata).flat();
