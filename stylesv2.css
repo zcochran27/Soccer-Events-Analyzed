@@ -490,3 +490,20 @@ body {
   fill: white;
   pointer-events: none;
 }
+#graphic-item-10 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px; 
+}
+#graphic-item-10 h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+#graphic-item-10 > * {
+  margin: 4px 0; /* Reduce vertical spacing */
+}

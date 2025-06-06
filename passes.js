@@ -162,6 +162,12 @@ scroller
     } else {
       graphicItem9.style.display = "none";
     }
+    const graphicItem10 = document.getElementById("graphic-item-10");
+    if (stepIndex === 9) {
+      graphicItem10.style.display = "flex";
+    } else {
+      graphicItem10.style.display = "none";
+    }
 
     // NEW: Reset and restart slider animation on slider step enter
     if (stepIndex === sliderStepIndex) {
@@ -316,7 +322,7 @@ const svg1 = d3.select("#pitch1");
 const defs = svg1.append("defs");
 passes.forEach((d, i) => {
   const color = d.outcome === 1.0 ? "green" : "red";
-  const strokeWidth = 1.2 + i * 0.1; // adjust multiplier as needed
+  const strokeWidth = 1.2 + i * 0.3; // adjust multiplier as needed
 
   defs
     .append("marker")
@@ -368,7 +374,7 @@ svg1
   .attr("x2", (d) => d.end[0])
   .attr("y2", (d) => d.end[1])
   .attr("stroke", (d) => (d.outcome === 1.0 ? "green" : "red"))
-  .attr("stroke-width", (d, i) => 0.5 + i * 0.2)
+  .attr("stroke-width", (d, i) => 0.4 + i * 0.2)
   .attr("marker-end", (d, i) => `url(#arrow-${i})`)
   .on("mouseover", (event, d) => {
     tooltip1.style("opacity", 1).html(`
@@ -2524,10 +2530,12 @@ for (let xi = 0; xi < xBins; xi++) {
     let maxMean = -Infinity;
 
     for (const type in predSums) {
-      const mean = predSums[type] / counts[type];
-      if (mean > maxMean) {
-        maxMean = mean;
-        maxType = type;
+      if (counts[type] >= 3) { // Only consider if at least 2 passes
+        const mean = predSums[type] / counts[type];
+        if (mean > maxMean) {
+          maxMean = mean;
+          maxType = type;
+        }
       }
     }
 
@@ -2598,12 +2606,12 @@ for (let xi = 0; xi < xBins; xi++) {
 }
 pitch6.append("defs")
   .append("marker")
-  .attr("id", "arrow")
+  .attr("id", "arrowType")
   .attr("viewBox", "0 -5 10 10")
   .attr("refX", 1)            // smaller refX shifts the arrowhead closer to the line end
   .attr("refY", 0)
-  .attr("markerWidth", 1.5)     // smaller width
-  .attr("markerHeight", 1.5)    // smaller height
+  .attr("markerWidth", 3)     // smaller width
+  .attr("markerHeight", 3)    // smaller height
   .attr("orient", "auto")
   .append("path")
   .attr("d", "M0,-5L10,0L0,5")
@@ -2651,7 +2659,7 @@ for (let xi = 0; xi < xBins; xi++) {
       .attr("y2", centerY + dyTrue)
       .attr("stroke", "black")
       .attr("stroke-width", 1.5)
-      .attr("marker-end", "url(#arrow)")
+      .attr("marker-end", "url(#arrowType)")
       .style("display", "none");
 
     // Transparent rect for hover
