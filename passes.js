@@ -1244,7 +1244,7 @@ function updateBarChart(stage) {
     .attr("y", -40)
     .attr("x", -(barHeight / 2))
     .attr("text-anchor", "middle")
-    .text("Total Expected Goals");
+    .text("Average Expected Goals per Game");
 }
 function createStageLegend(data) {
   const stages = Array.from(new Set(data.map(d => d.competition_stage))).filter(Boolean);
