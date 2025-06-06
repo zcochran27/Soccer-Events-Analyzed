@@ -44,6 +44,14 @@ html {
     padding: 2rem;
     box-sizing: border-box;
   }
+  .statsbomb-image {
+    position: absolute;
+    top: 800px;       /* adjust as needed */
+    left: 40px;      /* adjust as needed */
+    width: 400px;    /* size of overlay image */
+    z-index: 10;     /* higher z-index = in front */
+    pointer-events: none;
+  }
 }
 
 #predictBtn, #predictBtn2 {
@@ -134,10 +142,9 @@ body {
 }
 
 .step.active {
-  background: #e0f7fa;
-  border-left-color: #00796b;
+  background: #d0e7ff;         /* Light Euro blue */
+  border-left-color: #0050a0;  /* Deep UEFA blue */
 }
-
 .graphic {
   width: 60%;
   position: sticky;
