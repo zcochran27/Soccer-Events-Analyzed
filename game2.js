@@ -14,6 +14,9 @@ let shotTaken = false;
 
 let collectedStats = []; // Array to store all submitted data
 
+let showPromptArrow = true;
+
+
 function drawPitch() {
   const ctx = canvas.getContext("2d");
 
@@ -126,12 +129,25 @@ function drawPitch() {
       ctx.stroke();
     });
   });
+
+    if (collectedStats.length === 0) {
+    const start = scaleToCanvas(60, 40); // center of pitch
+    const end = scaleToCanvas(100, 40); // pointing toward right goal
+    drawArrow(start[0], start[1], end[0], end[1], "red");
+
+    ctx.fillStyle = "red";
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Attack this goal →", (start[0] + end[0]) / 2, end[1] - 10);
+  }
+
 }
 
-function drawArrow(fromX, fromY, toX, toY) {
+function drawArrow(fromX, fromY, toX, toY, color="white") {
   const headlen = 10;
   const angle = Math.atan2(toY - fromY, toX - fromX);
-  ctx.strokeStyle = "white";
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
   ctx.lineTo(toX, toY);
@@ -222,6 +238,10 @@ canvas.addEventListener("click", (event) => {
         pass_type: passType,
         pass_height: passHeight,
       });
+      showPromptArrow = false;
+      drawPitch(); 
+      collectedStats.forEach(drawEventFromStats);
+      drawDribbles();
 
       passNumber++;
       lastEndPos = endPos;
@@ -279,7 +299,6 @@ canvas.addEventListener("click", (event) => {
         pass_type: passType,
         pass_height: passHeight,
       });
-
       passNumber++;
       lastEndPos = endPos;
       updatePredictBtn();
@@ -299,7 +318,7 @@ function drawEventFromStats(event, index) {
   ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
   ctx.fillStyle = "green";
   ctx.fill();
-
+  
   ctx.beginPath();
   ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
   ctx.fillStyle = "red";

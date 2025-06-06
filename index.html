@@ -94,6 +94,8 @@
                 </div>
                 <svg id ='pitch4' width="900" height="600" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet"></svg>
                 <div id="controls-container">
+                    <button id="start-animation-btn">Start Slider Animation</button>
+                    <button id="pause-animation-btn">Pause Slider Animation</button>
                     <button id="toggle-heatmap">Toggle Heatmap</button>
                     <div id="slider-container"></div>
                 </div>
@@ -169,7 +171,7 @@
             <div class="step" id="step-4">
                 <h2 style="text-align: center">Now let's take a look at the how many goals each team was expected to score given their pass sequences.</h2>
                 <br></br>
-                <h2>As we can see, Spain had the highest pass sequence xG out of all teams. This was likely a major contributor to their success, as they won the entire tournament!</h2>
+                <h2>As we can see, Spain ranks very highly at all stages of the tournament. This was likely a major contributor to their success, as they won the entire tournament!</h2>
             </div>
             <div class="step" id="step-5">
                 <h1 style="text-align: center;">Pass Sequence Game</h1>
@@ -184,11 +186,11 @@
             </div>
             <div class="step" id="step-6">
                 <h2 style="text-align: center">You may be thinking that you only need one pass to score a goal. However, taking a look at the pass sequences we can see that on average having a sequence of 5 passes generally has a higher pass sequence xG.</h2>
-                <h3>This leads us to believe that the context of the passes are important and that passes where the last few passes were good can set up a "last pass" in a good position to make an assist that leads to a goal.</h3>
+                <h3>This leads us to believe that the context of the passes are important and that sequences where the last few passes were good can set up a "last pass" in a good position to create a goal.</h3>
             </div>
             <div class="step" id="step-7">
                 <h2 style="text-align: center">Lets look at the specifics in the order of passes in a sequence.</h2>
-                <h3>Based on all of the inputs into our model, passing sequences with 5 passes have the highest probability of success.</h3>
+                <h3>Based on all of the inputs into our model, passing sequences with 5 passes have the highest probability of success. Keep this in mind when creating your own pass sequences!</h3>
             </div>
             <div class="step" id="step-8">
                 <h2 style="text-align: center">Take a look at this heatmap to see information about shots and goals!</h2>
@@ -196,7 +198,7 @@
             </div>
             <div class="step" id="step-9">
                 <h2 style="text-align: center">The last pass of a sequence is the most important in influencing the probability of a goal. Here we take a look at all the last passes of a sequence from the 2024 UEFA Euro Tournament.</h2>
-                <h2>Adjust the slider to control the percentile of the sequence xG for the last passes displayed. Toggle the heatmap mode to see the distribution of pass end locations. Does this heatmap look familiar? Lastly, Click on the pie charts to further filter by pass type and pass height.</h2>
+                <h2>Adjust the slider to control the percentile of the sequence xG for the last passes displayed. Toggle the mode to see the distribution of pass end locations. Does this heatmap look familiar? Lastly, Click on the pie charts to further filter by pass type and pass height.</h2>
                 <h3>Try and answer these questions: </h3>
                 <h3>1. What is the pass type that tends to have the highest pass sequence xG?</h3>
                 <h3>2. What height should you be passing the ball from the middle of the pitch? What about from the wings?</h3>
@@ -210,7 +212,7 @@
             </div>
             <div class="step" id="step-11">
                 <h2 style="text-align: center">Let's take a look at the top 10 passing sequences that have the highest probability of leading to a goal.</h2>
-                <h3>As we can see, the final pass of almost every sequence is going into the box, and is either a cross or a ground pass.</h3>
+                <h3>These sequences are very different, and every pass has lots of variation, except the last pass. In almost every sequence, the last pass is a cross or ground pass towards the middle of the box. Keep this in mind!</h3>
             </div>
             <div class="step" id="step-12">
                 <h1 style="text-align: center;">Pass Sequence Game pt. 2</h1>

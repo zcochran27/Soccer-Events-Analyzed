@@ -92,9 +92,27 @@ function stopVideoLoop() {
   }
 }
 
+function resetAndStartSlider() {
+  progress = 0;
+  clearInterval(animationInterval);
+  animationInterval = setInterval(() => {
+    if (progress + windowSize > 1) {
+      clearInterval(animationInterval);
+      return;
+    }
+    const startPixel = x(progress);
+    const endPixel = x(progress + windowSize);
+    svg.select(".brush").call(brush.move, [startPixel, endPixel]);
+    progress += step;
+  }, intervalDelay);
+}
+
+
 const scroller = scrollama();
 
 // Set up Scrollama
+const sliderStepIndex = 8; // Replace with your actual slider step index
+
 scroller
   .setup({
     step: ".step",
@@ -141,10 +159,16 @@ scroller
     const graphicItem9 = document.getElementById("graphic-item-9");
     if (stepIndex === 8) {
       graphicItem9.style.display = "block";
-    }else{
+    } else {
       graphicItem9.style.display = "none";
     }
+
+    // NEW: Reset and restart slider animation on slider step enter
+    if (stepIndex === sliderStepIndex) {
+      resetAndStartSlider();
+    }
   });
+
 
 // Recalculate dimensions on resize
 window.addEventListener("resize", scroller.resize);
@@ -1383,6 +1407,85 @@ svg
   .call(brush)
   .call(brush.move, [0.45, 0.55].map(x)); // Initial range: 10%–90%
 
+let progress = 0;
+const windowSize = 0.1; // size of the sliding window (10%)
+const step = 0.01; // how much to move per tick
+const intervalDelay = 50; // milliseconds between steps
+
+let sliderAnimationInterval = setInterval(() => {
+  if (progress + windowSize > 1) {
+    clearInterval(sliderAnimationInterval); // Stop at end
+    return;
+  }
+
+  const startPixel = x(progress);
+  const endPixel = x(progress + windowSize);
+
+  svg.select(".brush").call(brush.move, [startPixel, endPixel]);
+
+  progress += step;
+}, intervalDelay);
+
+function startSliderAnimation(resetProgress = false) {
+  if (resetProgress) {
+    progress = 0;
+  }
+  clearInterval(sliderAnimationInterval);
+
+  sliderAnimationInterval = setInterval(() => {
+    // Dynamically get brush width (in pixels) and convert it to a fraction of the x domain
+    const brushSelection = d3.brushSelection(svg.select(".brush").node());
+    if (!brushSelection) return;
+
+    const [startPixel, endPixel] = brushSelection;
+    const currentWindowSize = x.invert(endPixel) - x.invert(startPixel);
+
+    if (progress + currentWindowSize > 1) {
+      clearInterval(sliderAnimationInterval);
+      return;
+    }
+
+    const start = x(progress);
+    const end = x(progress + currentWindowSize);
+
+    svg.select(".brush").call(brush.move, [start, end]);
+
+    progress += step;
+  }, intervalDelay);
+}
+
+
+startSliderAnimation();
+
+document.getElementById('start-animation-btn').addEventListener('click', () => {
+  startSliderAnimation();
+});
+
+let isPaused = false;
+
+document.getElementById('start-animation-btn').addEventListener('click', () => {
+  // Start fresh from the beginning
+  startSliderAnimation(true);
+  isPaused = false;
+  document.getElementById('pause-animation-btn').textContent = 'Pause Slider Animation';
+});
+
+document.getElementById('pause-animation-btn').addEventListener('click', () => {
+  if (isPaused) {
+    // Resume without resetting progress
+    startSliderAnimation(false);
+    document.getElementById('pause-animation-btn').textContent = 'Pause Slider Animation';
+  } else {
+    // Pause animation
+    clearInterval(sliderAnimationInterval);
+    document.getElementById('pause-animation-btn').textContent = 'Resume Slider Animation';
+  }
+  isPaused = !isPaused;
+});
+
+
+
+
 function createPassTypePieChart() {
   d3.select("#pass-type-pie-chart").selectAll("*").remove(); // clear previous chart
 
@@ -1913,13 +2016,23 @@ function createHeatmap() {
 createHeatmap();
 const toggleButton = document.getElementById("toggle-heatmap");
 
+heatContainer.style("display", "flex");
+pitch4.style("display", "none");
+toggleButton.textContent = "Toggle Passmap"; // Since heatmap is showing
+
+
+
 toggleButton.addEventListener("click", () => {
   if (heatContainer.style("display") === "none") {
+    // Show heatmap, hide passes
     heatContainer.style("display", "flex");
     pitch4.style("display", "none");
+    toggleButton.textContent = "Toggle Passmap";
   } else {
+    // Show passes, hide heatmap
     heatContainer.style("display", "none");
     pitch4.style("display", "inline");
+    toggleButton.textContent = "Toggle Heatmap";
   }
 });
 
