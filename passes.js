@@ -151,10 +151,15 @@ scroller
       stopVideoLoop();
       graphicItem1.style.display = "none";
     }
+    const graphicItem4 = document.getElementById("graphic-item-4");
     if (stepIndex === 3) {
-      createPieChart();
+      graphicItem4.style.display = "flex";
+      //createPieChart();
       updateBarChart("");
+      createStageLegend(euroSequences);
       console.log("step 3");
+    } else {
+      graphicItem4.style.display = "none";
     }
     const graphicItem9 = document.getElementById("graphic-item-9");
     if (stepIndex === 8) {
@@ -1115,21 +1120,29 @@ function updateBarChart(stage) {
     (d) => d.possession, // Group by team and possession
     (d) => d.match_id
   );
-  // Calculate mean of possession max predictions per team
-  const teamAverages = Array.from(teamsPreds.entries()).map(
-    ([team, possessions]) => {
-      const allPreds = [];
-      for (const matchMap of possessions.values()) {
-        for (const pred of matchMap.values()) {
-          allPreds.push(pred);
-        }
+  const flattened = [];
+
+  for (const [team, possessionMap] of teamsPreds.entries()) {
+    for (const [possession, matchMap] of possessionMap.entries()) {
+      for (const [match_id, max_pred] of matchMap.entries()) {
+        flattened.push({ team, possession, match_id, max_pred });
       }
-      return {
-        team,
-        avgPred: d3.mean(allPreds),
-      };
     }
+  }
+  const teamMatchSums = d3.rollup(
+    flattened,
+    v => d3.sum(v, d => d.max_pred),
+    d => d.team,
+    d => d.match_id
   );
+  // Calculate mean of possession max predictions per team
+  const teamAverages = Array.from(teamMatchSums.entries()).map(([team, matchMap]) => {
+    const matchSums = Array.from(matchMap.values());
+    return {
+      team,
+      avgPred: d3.mean(matchSums)
+    };
+  });
   const teamSums = Array.from(teamsPreds.entries()).map(
     ([team, possessions]) => {
       const possessionValues = Array.from(possessions.values());
@@ -1145,9 +1158,9 @@ function updateBarChart(stage) {
 
   const barChart = d3.select("#bar-chart");
   const barWidth = 0.8 * barChart.node().getBoundingClientRect().width;
-  const barHeight = 0.4 * barChart.node().getBoundingClientRect().height;
+  const barHeight = .7 * barChart.node().getBoundingClientRect().height;
   const barMargin = {
-    top: 20,
+    top: 80,
     right: 20,
     bottom: 60,
     left: 60,
@@ -1188,23 +1201,44 @@ function updateBarChart(stage) {
 
   // Add bars
   barSvg
-    .selectAll("rect")
-    .data(teamAverages)
-    .join("rect")
-    .attr("x", (d) => x(d.team))
-    .attr("y", (d) => y(d.avgPred))
-    .attr("width", x.bandwidth())
-    .attr("height", (d) => barHeight - y(d.avgPred))
-    .attr("fill", "#69b3a2");
+  .selectAll("rect")
+  .data(teamAverages)
+  .join("rect")
+  .attr("x", (d) => x(d.team))
+  .attr("y", (d) => y(d.avgPred))
+  .attr("width", x.bandwidth())
+  .attr("height", (d) => barHeight - y(d.avgPred))
+  .attr("fill", (d) => {
+    switch (d.team.toLowerCase()) {
+      case "spain":
+        return "#FFD700"; // Gold
+      case "england":
+        return "#C0C0C0"; // Silver
+      case "netherlands":
+      case "france":
+        return "#CD7F32"; // Bronze
+      default:
+        return "#d0e7ff"; // Default
+    }
+  });
 
   // Add title
   barSvg
     .append("text")
     .attr("x", barWidth / 2)
-    .attr("y", 0)
+    .attr("y", -50)
+    .attr("text-anchor", "middle")
+    .style("font-size", "32px")
+    .style("font-weight", "bold")
+    .text("Spain's Passing Dominance");
+  barSvg
+    .append("text")
+    .attr("x", barWidth / 2)
+    .attr("y", -10)
     .attr("text-anchor", "middle")
     .style("font-size", "16px")
-    .text("Average Expected Goals per Possession from Pass Sequences by Team");
+    .style("font-weight", "bold")
+    .text("Average Expected Goals per Game from Pass Sequences");
 
   // Add Y axis label
   barSvg
@@ -1214,6 +1248,43 @@ function updateBarChart(stage) {
     .attr("x", -(barHeight / 2))
     .attr("text-anchor", "middle")
     .text("Total Expected Goals");
+}
+function createStageLegend(data) {
+  const stages = Array.from(new Set(data.map(d => d.competition_stage))).filter(Boolean);
+
+  let currentStage = ""; // Track currently selected stage ("All" by default)
+
+  const legend = d3.select("#bar-chart-legend");
+  legend.selectAll("*").remove(); // Clear previous
+
+  legend
+    .append("div")
+    .attr("class", "legend-title")
+    .text("Filter by Competition Stage:");
+
+  const buttons = legend
+    .selectAll(".stage-button")
+    .data(["All", ...stages])
+    .join("button")
+    .attr("class", "stage-button")
+    .text(d => d)
+    .on("click", function(event, stage) {
+      const selectedStage = stage === "All" ? "" : stage;
+
+      if (currentStage === selectedStage) {
+        // If clicked again, unselect and reset to All
+        currentStage = "";
+        d3.selectAll(".stage-button").classed("active", false);
+        d3.select(this).classed("active", false);
+        updateBarChart("");
+      } else {
+        // Apply filter
+        currentStage = selectedStage;
+        d3.selectAll(".stage-button").classed("active", false);
+        d3.select(this).classed("active", true);
+        updateBarChart(selectedStage);
+      }
+    });
 }
 
 function safeCreateBarChart() {
@@ -1245,13 +1316,15 @@ function safeCreatePieChart() {
 
 // Run once DOM and layout are ready
 window.addEventListener("load", () => {
+  createStageLegend(euroSequences);
   safeCreateBarChart();
-  safeCreatePieChart();
+  //safeCreatePieChart();
 });
 // Update on window resize
 window.addEventListener("resize", () => {
+  createStageLegend(euroSequences);
   updateBarChart("");
-  createPieChart();
+  //createPieChart();
 });
 
 // Create a new SVG for the pass visualization
