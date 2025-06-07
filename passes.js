@@ -534,7 +534,7 @@ try {
   if (result.prediction !== undefined) {
     resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${
       100 * result.prediction.toFixed(4)
-    }%. From now on we will be refering to this probability as pass sequence xG. This probability is extremely low and is testiment to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.<br><br>Try clicking the different options below to see how the pass sequence xG changes!<br></br>Does this match your intuition? What do you think was the best passing option for this play?`;
+    }%. From now on, we will be referring to this probability as pass sequence xG (expected goals). This probability is extremely low and is a testament to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.<br><br>Try clicking the different options below to see how the pass sequence xG changes!<br></br>Does this match your intuition? What do you think was the best passing option for this play?`;
   } else {
     resultBox.innerText = `Error: ${result.error}`;
   }
@@ -1271,7 +1271,17 @@ function updateBarChart(stage) {
     .text("Average Expected Goals per Game");
 }
 function createStageLegend(data) {
-  const stages = Array.from(new Set(data.map(d => d.competition_stage))).filter(Boolean);
+  const desiredOrder = [
+    "Group Stage",
+    "Round of 16",
+    "Quarter-finals",
+    "Semi-finals",
+    "Final"
+  ];
+
+  const stages = Array.from(new Set(data.map(d => d.competition_stage)))
+    .filter(Boolean)
+    .sort((a, b) => desiredOrder.indexOf(a) - desiredOrder.indexOf(b));
 
   let currentStage = ""; // Track currently selected stage ("All" by default)
 
@@ -2771,3 +2781,31 @@ for (let xi = 0; xi < xBins; xi++) {
       });
   }
 }
+// Create a shared tooltip element
+const tooltip = document.createElement("div");
+tooltip.id = "tooltip";
+document.body.appendChild(tooltip);
+
+// Function to handle tooltip display
+function setupTooltip(selectElement) {
+  selectElement.addEventListener("mousemove", (e) => {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const tip = selectedOption.getAttribute("data-tooltip");
+    if (tip) {
+      tooltip.textContent = tip;
+      tooltip.style.left = e.pageX + 15 + "px";
+      tooltip.style.top = e.pageY + 10 + "px";
+      tooltip.style.opacity = 1;
+    }
+  });
+
+  selectElement.addEventListener("mouseleave", () => {
+    tooltip.style.opacity = 0;
+  });
+}
+
+// Apply to all game dropdowns
+setupTooltip(document.getElementById("passType2"));
+setupTooltip(document.getElementById("passHeight2"));
+setupTooltip(document.getElementById("passType"));
+setupTooltip(document.getElementById("passHeight"));

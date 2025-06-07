@@ -225,12 +225,12 @@ canvas.addEventListener("click", (event) => {
       ctx.fillStyle = "red";
       ctx.fill();
       drawArrow(sx1, sy1, cx, cy);
+      passType = document.getElementById("passType2").value;
+      passHeight = document.getElementById("passHeight2").value;
       ctx.fillStyle = "black";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("pass " + passNumber, (sx1 + cx) / 2, (sy1 + cy) / 2 - 10);
-      passType = document.getElementById("passType2").value;
-      passHeight = document.getElementById("passHeight2").value;
+      ctx.fillText(passHeight + " " + passType + " (" + (passNumber) + ")", (sx1 + cx) / 2, (sy1 + cy) / 2 - 10);
       collectedStats.push({
         start: startPos,
         end: endPos,
@@ -287,11 +287,10 @@ canvas.addEventListener("click", (event) => {
       ctx.fillStyle = "black";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("pass " + passNumber, (sx3 + cx) / 2, (sy3 + cy) / 2 - 10);
-
       passType = document.getElementById("passType2").value;
       passHeight = document.getElementById("passHeight2").value;
-
+      ctx.fillText(passHeight + " " + passType + " (" + (passNumber) + ")", (sx3 + cx) / 2, (sy3 + cy) / 2 - 10);
+      
       collectedStats.push({
         start: startPos,
         end: endPos,
@@ -331,7 +330,7 @@ function drawEventFromStats(event, index) {
   ctx.fillStyle = "black";
   ctx.font = "16px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("pass " + (index + 1), midX, midY - 10);
+  ctx.fillText(event.pass_height + " " + event.pass_type + " (" + (index + 1) + ")", midX, midY - 10);
 
   lastRedDot = [ex, ey];
 }

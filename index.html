@@ -52,25 +52,26 @@
                     <div class="canvas-container">
                         <canvas id="pitchCanvas" width="720" height="480"></canvas>
                     </div>
+                    <p>Select a pass type and height for each pass. Hover over each selection to see more details.</p>
                     <div id="controls">
                         <label for="passType">Select Pass Type:</label>
                         <select id="passType" name="passType">
-                            <option value="normal">Normal Pass</option>
-                            <option value="Cross">Cross</option>
-                            <option value="Through Ball">Through Ball</option>
-                            <option value="Cut-back">Cut Back</option>
-                            <option value="Switch">Switch</option>
-                            <option value="Throw-in">Throw-in</option>
-                            <option value="Corner">Corner</option>
-                            <option value="Free Kick">Free Kick</option>
-                            <option value="Goal Kick">Goal Kick</option>
+                            <option value="normal" data-tooltip="A standard pass. Can be anywhere on the pitch.">Normal Pass</option>
+                            <option value="Cross" data-tooltip="A pass generally played from the side of the pitch into the penalty area.">Cross</option>
+                            <option value="Through Ball" data-tooltip="A pass that is played into space behind defenders.">Through Ball</option>
+                            <option value="Cut-back" data-tooltip="A pass played from the endline back towards the middle of the box.">Cut Back</option>
+                            <option value="Switch" data-tooltip="A pass that is played across the pitch from one side to another.">Switch</option>
+                            <option value="Throw-in" data-tooltip="A pass from the sideline that starts a play after the ball has gone out.">Throw-in</option>
+                            <option value="Corner" data-tooltip="A pass that generally goes from the corner into the box.">Corner</option>
+                            <option value="Free Kick" data-tooltip="A method of restarting play after a foul, can be from anywhere.">Free Kick</option>
+                            <option value="Goal Kick" data-tooltip="A method of restarting play after the ball has gone out of bounds. Taken from inside a team's own 6-yard box. Generally played high and far.">Goal Kick</option>
                         </select>
 
                         <label for="passHeight">Select Pass Height:</label>
                         <select id="passHeight" name="passHeight">
-                            <option value="Ground">Ground Pass</option>
-                            <option value="Low">Low Pass</option>
-                            <option value="High">High Pass</option>
+                            <option value="Ground" data-tooltip="A pass that is played along the ground.">Ground Pass</option>
+                            <option value="Low" data-tooltip="A pass that is played generally below the chest.">Low Pass</option>
+                            <option value="High" data-tooltip="A pass that is played higher in the air.">High Pass</option>
                         </select>
 
                         <button id="undoBtn">Undo last pass</button>
@@ -199,25 +200,26 @@
                     <div class="canvas-container">
                         <canvas id="pitchCanvas2" width="720" height="480"></canvas>
                     </div>
+                    <p>Select a pass type and height for each pass. Hover over each selection to see more details.</p>
                     <div id="controls">
                         <label for="passType">Select Pass Type:</label>
                         <select id="passType2" name="passType">
-                            <option value="normal">Normal Pass</option>
-                            <option value="Cross">Cross</option>
-                            <option value="Through Ball">Through Ball</option>
-                            <option value="Cut-back">Cut Back</option>
-                            <option value="Switch">Switch</option>
-                            <option value="Throw-in">Throw-in</option>
-                            <option value="Corner">Corner</option>
-                            <option value="Free Kick">Free Kick</option>
-                            <option value="Goal Kick">Goal Kick</option>
+                            <option value="normal" data-tooltip="A standard pass. Can be anywhere on the pitch.">Normal Pass</option>
+                            <option value="Cross" data-tooltip="A pass generally played from the side of the pitch into the penalty area.">Cross</option>
+                            <option value="Through Ball" data-tooltip="A pass that is played into space behind defenders.">Through Ball</option>
+                            <option value="Cut-back" data-tooltip="A pass played from the endline back towards the middle of the box.">Cut Back</option>
+                            <option value="Switch" data-tooltip="A pass that is played across the pitch from one side to another.">Switch</option>
+                            <option value="Throw-in" data-tooltip="A pass from the sideline that starts a play after the ball has gone out.">Throw-in</option>
+                            <option value="Corner" data-tooltip="A pass that generally goes from the corner into the box.">Corner</option>
+                            <option value="Free Kick" data-tooltip="A method of restarting play after a foul, can be from anywhere.">Free Kick</option>
+                            <option value="Goal Kick" data-tooltip="A method of restarting play after the ball has gone out of bounds. Taken from inside a team's own 6-yard box.">Goal Kick</option>
                         </select>
 
                         <label for="passHeight">Select Pass Height:</label>
                         <select id="passHeight2" name="passHeight">
-                            <option value="Ground">Ground Pass</option>
-                            <option value="Low">Low Pass</option>
-                            <option value="High">High Pass</option>
+                            <option value="Ground" data-tooltip="A pass that is played along the ground.">Ground Pass</option>
+                            <option value="Low" data-tooltip="A pass that is played generally below the chest.">Low Pass</option>
+                            <option value="High" data-tooltip="A pass that is played higher in the air.">High Pass</option>
                         </select>
 
                         <button id="undoBtn2">Undo last pass</button>
@@ -249,11 +251,11 @@
                     pass by it's outcome.</h2>
                 <h2>Try hovering over the passes to see more details!</h2>
                 <br></br>
-                <h2>What do you think is the probability of this pass sequence leads to a goal?</h2>
+                <h2>What do you think is the probability that this pass sequence leads to a goal?</h2>
             </div>
             <div class="step" id="step-3">
                 <h2 style="text-align: center" id="yamalChancexG">The probability of this pass sequence leading to a
-                    goal is Loading... From now on, we will be refering to this probability as pass sequence xG.
+                    goal is Loading... From now on, we will be referring to this probability as pass sequence xG (expected goals).
                     This probability is extremely low and is a testament to the ability of Lamine Yamal to create and
                     finish a chance given a bad situation. However, let's look at how the pass sequence xG could change
                     if a different pass was played.
@@ -264,7 +266,6 @@
             <div class="step" id="step-4">
                 <h2 style="text-align: center">Now let's take a look at the how many goals each team was expected to
                     score given their pass sequences.</h2>
-                <br></br>
                 <h2>As we can see, Spain ranks very highly at all stages of the tournament. This was likely a major
                     contributor to their success, as they won the entire tournament!</h2>
             </div>
@@ -284,28 +285,29 @@
             </div>
             <div class="step" id="step-6">
                 <h2 style="text-align: center">Counter attacks have been a major talking point lately in soccer.
-                    Typically, a counter attack would consist of gaining possession and making a sequence of very few
-                    passes, 1-3, and then making an attempt on goal.
+                    A counter attack typically consists of gaining possession and making a short sequence of
+                    passes, usually 1-3, and then ending with a shot towards goal.
                     Here we take a look at how the number of passes in a sequence affects the pass sequence xG.
                 </h2>
                 <h3>Although the actual difference in pass sequence xG is not very large, about .5%, we see that a pass
                     sequence xG of around .025 is around the 75th percentile of pass sequence xG. While a pass sequence
-                    xG of around .018 is around the 55th percentile.
-                    This is a huge difference of 20 percentile points!This leads us to believe that the context of the
-                    passes are important and that sequences where the build up sequence was good can set up a "last
+                    xG of around .018 is around the 55th percentile.</h3>
+
+                <h3>This is a huge difference of 20 percentile points! The context of the
+                    passes is important and sequences that have a solid build-up can set up a "last
                     pass" in a good position to create a goal.</h3>
                 <h3>Build up is important!</h3>
             </div>
             <div class="step" id="step-7">
-                <h2 style="text-align: center">Now we can take a look at the distribution of passes within those 5 pass
+                <h2 style="text-align: center">We've established that 5 passes is optimal. Now, we can take a look at the distribution of passes within those 5 pass
                     sequences.</h2>
                 <h3>First thing that we can see is that goal kicks, free kicks, corners, and throw-ins all happen on the
-                    first pass of a sequence, this should match our intuition and general knowledge for how soccer
+                    first pass of a sequence. This should match our intuition and general knowledge for how soccer
                     works.
                     <br></br>
-                    The next thing that is important to identify is the types of passes that can be labled as sequence
+                    The next thing that is important to identify is the types of passes that can be labeled as sequence
                     ending. We see that through balls, crosses, and cutbacks all tend to end sequences at least 50% of
-                    the time. We can attribute this to shots happenng after each of these pass types.
+                    the time. We can attribute this to shots happening after each of these pass types.
                 </h3>
             </div>
             <div class="step" id="step-8">
@@ -314,6 +316,10 @@
                 <h3>A majority of shots are taken from inside the box or just outside the 18-yard box, particularly from
                     the central areas. Most goals are scored from inside the 18-yard box, with the highest xG coming
                     from shots near the goal. </h3>
+                <h3>Combining this with the previous findings, we can see that the location and context of passes are crucial
+                    in determining their effectiveness. Through balls, crosses, and cutbacks are all sequence-ending passes
+                    that are played into dangerous areas. They often lead to shots on goal, and as a result,
+                    are more likely to result in high xG values.</h3>
             </div>
             <div class="step" id="step-9">
                 <h2 style="text-align: center">The last pass of a sequence is the most important in influencing the
@@ -361,17 +367,19 @@
                 <h3>3. What area should you be passing the ball to in order to maximize the probability of a goal?</h3>
             </div>
             <div class="step" id="step-14">
-                <h2 style="text-align: center">Now that you have explored how the last pass affects the probability of a
-                    goal, we can look to see what types of passes should be performed at each location of the pitch in
-                    order to maximize the probability of a goal.
-                    <b>Hover</b> over each cell to see the best pass type for that location and what a good pass from
-                    that location would look like.<br></br>Looking at this we can separate the pitch naturally into
-                    three parts: the defensive third, the middle third, and the attacking third.
+                <h2 style="text-align: center">Now that we've have explored how the last pass affects the probability of a
+                    goal, we can take a look at what types of passes should be performed at each location of the pitch in
+                    order to maximize the probability of a goal.</h2>
+                    <h2><b>Hover</b> over each cell to see the best pass type for that location and what a good pass from
+                    that location would look like.</h2>
+                    <br></br>
+                    <h3>Looking at this we can separate the pitch naturally into three parts: the defensive third, the middle third, and the attacking third.
                     We can see that the main goal of passes in the defensive third should be switches to open up the
-                    defense and create gaps in the midfield. Then moving on into the midfield the goal is to penetrate
-                    the defense through the use of through balls and get the ball to just around the top of the box.
-                    Finally, in the attacking third along the wings a team should focus on cut-backs and crosses to get
-                    the ball into the box for goal scoring opportunities.
+                    defense and create gaps in the midfield.</h3>
+                    <h3>In the midfield, the goal is to penetrate
+                    the defense through the use of through balls in order to get the ball near the 18-yard box.</h3>
+                    <h3>In the attacking third, a team should focus on cut-backs and crosses to get
+                    the ball into the box for goal scoring opportunities.</h3>
                 </h2>
             </div>
             <div class="step" id="step-15">
