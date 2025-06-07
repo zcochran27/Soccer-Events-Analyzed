@@ -442,6 +442,16 @@ function getHeightLabel(height) {
       return "unknown";
   }
 }
+function getOutcomeLabel(outcome) {
+  switch (outcome) {
+    case 0:
+      return "Incomplete";
+    case 1:
+      return "Complete";
+    default:
+      return "unknown";
+  }
+}
 svg1
   .selectAll(".pass")
   .data(passes)
@@ -457,7 +467,7 @@ svg1
   .on("mouseover", (event, d) => {
     tooltip1.style("opacity", 1).html(`
         <strong>Pass</strong><br/>
-        Outcome: ${d.outcome}<br/>
+        Outcome: ${getOutcomeLabel(d.outcome)}<br/>
         Type: ${d.type}<br/>
         Height: ${getHeightLabel(d.height)}
       `);
@@ -888,7 +898,7 @@ function updatePassDisplay() {
     .on("mouseover", (event, d) => {
       tooltip3.style("opacity", 1).html(`
               <strong>Pass</strong><br/>
-              Outcome: ${d.outcome}<br/>
+              Outcome: ${getOutcomeLabel(d.outcome)}<br/>
               Type: ${d.type}<br/>
               Height: ${getHeightLabel(d.height)}
             `);
