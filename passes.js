@@ -161,7 +161,7 @@ function resetAndStartSlider() {
 const scroller = scrollama();
 
 // Set up Scrollama
-const sliderStepIndex = 8; // Replace with your actual slider step index
+const sliderStepIndex = 12; // Replace with your actual slider step index
 
 scroller
   .setup({
@@ -212,7 +212,7 @@ scroller
     }
     const graphicItem9 = document.getElementById("graphic-item-9");
     if (stepIndex === 8) {
-      graphicItem9.style.display = "block";
+      graphicItem9.style.display = "flex";
     } else {
       graphicItem9.style.display = "none";
     }
@@ -221,6 +221,30 @@ scroller
       graphicItem10.style.display = "flex";
     } else {
       graphicItem10.style.display = "none";
+    }
+    const graphicItem11 = document.getElementById("graphic-item-11");
+    if (stepIndex === 10) {
+      graphicItem11.style.display = "flex";
+    } else {
+      graphicItem11.style.display = "none";
+    }
+    const graphicItem12 = document.getElementById("graphic-item-12");
+    if (stepIndex === 11) {
+      graphicItem12.style.display = "flex";
+    } else {
+      graphicItem12.style.display = "none";
+    }
+    const graphicItem13 = document.getElementById("graphic-item-13");
+    if (stepIndex === 12) {
+      graphicItem13.style.display = "block";
+    } else {
+      graphicItem13.style.display = "none";
+    }
+    const graphicItem14 = document.getElementById("graphic-item-14");
+    if (stepIndex === 13) {
+      graphicItem14.style.display = "flex";
+    } else {
+      graphicItem14.style.display = "none";
     }
 
     // NEW: Reset and restart slider animation on slider step enter
@@ -1327,6 +1351,7 @@ window.addEventListener("resize", () => {
 // Create a new SVG for the pass visualization
 const pitch4 = d3.select("#pitch4");
 const svgHeat = d3.select("#pitch5");
+
 const heatContainer = d3.select("#heatmap-container");
 // Clear any existing elements
 pitch4.selectAll("*").remove();

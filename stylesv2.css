@@ -171,6 +171,7 @@ body {
 
 .graphic-item.active {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -180,7 +181,15 @@ body {
 #pitch2,
 #pitch3,
 #pitch4,
-#pitch5 {
+#pitch5,
+#pitch4Step1,
+#pitch4Step2,
+#pitch4Step3,
+#pitch4Step4,
+#pitch5Step1,
+#pitch5Step2,
+#pitch5Step3,
+#pitch5Step4 {
   width: 100%;
   height: auto;
   max-height: 90vh;
@@ -426,11 +435,15 @@ body {
   flex-shrink: 0;
   border: 1px solid #ccc;
 }
-#pitch4 {
+#pitch4, #pitch4Step1, #pitch4Step2, #pitch4Step3, #pitch4Step4 {
   max-width: 700px;
 }
-#pitch5 {
+#pitch5, #pitch5Step1, #pitch5Step2, #pitch5Step3, #pitch5Step4 {
   max-width: 700px;
+}
+#toggle-heatmapStep1, #toggle-heatmapStep2, #toggle-heatmapStep3, #toggle-heatmapStep4 {
+  margin-bottom: 2rem;
+  margin-top: 2rem;
 }
 .legend-item text {
   cursor: pointer;
@@ -504,21 +517,21 @@ body {
   fill: white;
   pointer-events: none;
 }
-#graphic-item-10 {
+#graphic-item-14 {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px; 
 }
-#graphic-item-10 h2 {
+#graphic-item-14 h2 {
   font-size: 2rem;
   font-weight: 600;
   text-align: center;
   margin-top: 0;
   margin-bottom: 2rem;
 }
-#graphic-item-10 > * {
+#graphic-item-14 > * {
   margin: 4px 0; /* Reduce vertical spacing */
 }
 #bar-chart-legend {
