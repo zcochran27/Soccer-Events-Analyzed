@@ -115,11 +115,11 @@ function draw(fdata, tag) {
       tooltip.style("opacity", 1)
         .html(`${tag}: ${Math.round(d.z * 100) / 100}`)
         .style("left", `${event.pageX + 10}px`)
-        .style("top", `${event.pageY - 20}px`);
+        .style("top", `${event.clientY - 20}px`);
     })
     .on("mousemove", event => {
       tooltip.style("left", `${event.pageX + 10}px`)
-             .style("top", `${event.pageY - 20}px`);
+             .style("top", `${event.clientY - 20}px`);
     })
     .on("mouseout", () => {
       tooltip.style("opacity", 0);
