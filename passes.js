@@ -265,10 +265,10 @@ scroller
         "Pause Slider Animation";
     }
   });
-const graphicItem10 = document.getElementById("graphic-item-10");
-graphicItem10.style.display = "none";
-const graphicItem10 = document.getElementById("graphic-item-10");
-graphicItem10.style.display = "none";
+// const graphicItem10 = document.getElementById("graphic-item-10");
+// graphicItem10.style.display = "none";
+// const graphicItem10 = document.getElementById("graphic-item-10");
+// graphicItem10.style.display = "none";
 // Recalculate dimensions on resize
 window.addEventListener("resize", scroller.resize);
 window.addEventListener("load", () => {
