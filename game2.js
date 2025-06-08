@@ -415,7 +415,6 @@ document.getElementById("predictBtn2").addEventListener("click", async () => {
     ]
   );
   const resultBox = document.getElementById("predictionResult2");
-  const nameDiv = document.getElementById("name-div");
 
   resultBox.innerText = "";
   try {
@@ -430,11 +429,11 @@ document.getElementById("predictBtn2").addEventListener("click", async () => {
 
     const result = await response.json();
     if (result.prediction !== undefined) {
-      resultBox.innerText = `Probability of Scoring Off Sequence: ${result.prediction.toFixed(
-        4
-      )}`;
+      resultBox.innerText = `Probability of Scoring Off Sequence: ${(
+        result.prediction * 100
+      ).toFixed(2)}%`;
       nameDiv.style.display = "flex";
-      localStorage.setItem("prediction", result.prediction.toFixed(4));
+      localStorage.setItem("prediction", (result.prediction * 100).toFixed(2));
     } else {
       resultBox.innerText = `Error: ${result.error}`;
     }

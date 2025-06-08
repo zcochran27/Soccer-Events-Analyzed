@@ -176,6 +176,32 @@ function drawFootballPitch(svg) {
         .append("path")
         .attr("d", "M 0 0 L 10 5 L 0 10 z")
         .attr("fill", "red");
+
+    const arcGenerator = d3.arc()
+        .innerRadius(9.15)
+        .outerRadius(9.15)
+        .startAngle(-0.3 * Math.PI)
+        .endAngle(0.3 * Math.PI);
+
+    // Left penalty box arc
+    svg.append("path")
+        .attr("d", arcGenerator())
+        .attr("transform", "translate(11,40) rotate(90,0,0)")
+        .attr("fill", "none")
+        .attr("class", "line");
+
+    // Right penalty box arc
+    const arcGeneratorRight = d3.arc()
+        .innerRadius(9.15)
+        .outerRadius(9.15)
+        .startAngle(0.7 * Math.PI)
+        .endAngle(1.3 * Math.PI);
+
+    svg.append("path")
+        .attr("d", arcGeneratorRight())
+        .attr("transform", "translate(109,40) rotate(90,0,0)")
+        .attr("fill", "none")
+        .attr("class", "line");
 }
 function getHeightLabel(height) {
     switch (height) {
@@ -224,7 +250,6 @@ const data = percentiles.map(([lower, upper]) => {
 function setUpStepI(i) {
     // Create a new SVG for the pass visualization
     const regPitch = d3.select("#pitch4Step" + i);
-    console.log(regPitch);
     const svgHeat = d3.select("#pitch5Step" + i);
     const heatContainer = d3.select("#heatmap-containerStep" + i);
     // Clear any existing elements
@@ -722,82 +747,82 @@ function setUpStepI(i) {
             .attr("fill", (d) => colorDiff(d.value))
             .attr("fill-opacity", 0.85);
 
-        // const svgLegend = d3.select("#legendStep" + i);
+        const svgLegend = d3.select("#legendStep" + i);
 
-        // // Clear previous content
-        // svgLegend.selectAll("*").remove();
+        // Clear previous content
+        svgLegend.selectAll("*").remove();
 
-        // const legendWidth = +svgLegend.attr("width");
-        // const legendHeight = +svgLegend.attr("height");
+        const legendWidth = +svgLegend.attr("width");
+        const legendHeight = +svgLegend.attr("height");
 
-        // const marginHeat = { top: 20, right: 60, bottom: 20, left: 40 };
-        // const widthHeat = legendWidth - marginHeat.left - marginHeat.right;
-        // const heightHeat = legendHeight - marginHeat.top - marginHeat.bottom;
+        const marginHeat = { top: 30, right: 60, bottom: 20, left: 40 };
+        const widthHeat = legendWidth - marginHeat.left - marginHeat.right;
+        const heightHeat = legendHeight - marginHeat.top - marginHeat.bottom;
 
-        // const legendG = svgLegend
-        //     .append("g")
-        //     .attr("transform", `translate(${marginHeat.left},${marginHeat.top})`);
+        const legendG = svgLegend
+            .append("g")
+            .attr("transform", `translate(${marginHeat.left},${marginHeat.top})`);
 
-        // // Create a defs and linearGradient for the color bar
-        // const defsHeat = svgLegend.append("defs");
+        // Create a defs and linearGradient for the color bar
+        const defsHeat = svgLegend.append("defs");
 
-        // const gradientHeat = defsHeat
-        //     .append("linearGradient")
-        //     .attr("id", "legend-gradient")
-        //     .attr("x1", "0%")
-        //     .attr("y1", "100%") // vertical bottom
-        //     .attr("x2", "0%")
-        //     .attr("y2", "0%"); // vertical top
+        const gradientHeat = defsHeat
+            .append("linearGradient")
+            .attr("id", `legend-gradient-${i}`)
+            .attr("x1", "0%")
+            .attr("y1", "100%") // vertical bottom
+            .attr("x2", "0%")
+            .attr("y2", "0%"); // vertical top
 
-        // // Generate stops for gradient, e.g. 10 stops
-        // const stopsCount = 10;
-        // for (let i = 0; i <= stopsCount; i++) {
-        //     const t = i / stopsCount;
-        //     const value = -maxDiff + t * (2 * maxDiff);
-        //     gradientHeat
-        //         .append("stop")
-        //         .attr("offset", `${t * 100}%`)
-        //         .attr("stop-color", colorDiff(value));
-        // }
+        // Generate stops for gradient, e.g. 10 stops
+        const stopsCount = 10;
+        for (let i = 0; i <= stopsCount; i++) {
+            const t = i / stopsCount;
+            const value = -maxDiff + t * (2 * maxDiff);
+            gradientHeat
+                .append("stop")
+                .attr("offset", `${t * 100}%`)
+                .attr("stop-color", colorDiff(value));
+        }
 
-        // // Draw the color bar rectangle using the gradient
-        // legendG
-        //     .append("rect")
-        //     .attr("width", widthHeat)
-        //     .attr("height", heightHeat)
-        //     .style("fill", "url(#legend-gradient)")
-        //     .style("stroke", "black")
-        //     .style("stroke-width", 0.5);
+        // Draw the color bar rectangle using the gradient
+        legendG
+            .append("rect")
+            .attr("width", widthHeat)
+            .attr("height", heightHeat)
+            .style("fill", `url(#legend-gradient-${i})`)
+            .style("stroke", "black")
+            .style("stroke-width", 0.5);
 
-        // // Scale for axis (values along the color bar)
-        // const legendScale = d3
-        //     .scaleLinear()
-        //     .domain([-maxDiff, 0, maxDiff])
-        //     .range([-heightHeat / 4, heightHeat / 4]);
+        // Scale for axis (values along the color bar)
+        const legendScale = d3
+            .scaleLinear()
+            .domain([-maxDiff, 0, maxDiff])
+            .range([-heightHeat / 4, heightHeat / 4]);
 
-        // // Axis with percentage formatting
-        // const legendAxis = d3
-        //     .axisRight(legendScale)
-        //     .ticks(5)
-        //     .tickFormat((d) =>
-        //         d === 0 ? `${d.toFixed(1)}` : `${d < 0 ? "+" : "-"}${d.toFixed(1)}`
-        //     );
+        // Axis with percentage formatting
+        const legendAxis = d3
+            .axisRight(legendScale)
+            .ticks(5)
+            .tickFormat((d) =>
+                d === 0 ? `${d.toFixed(1)}` : `${d < 0 ? "+" : "-"}${d.toFixed(1)}`
+            );
 
-        // // Append axis to legend group, translate right after the color bar
-        // legendG
-        //     .append("g")
-        //     .attr("transform", `translate(${widthHeat},80)`)
-        //     .call(legendAxis);
+        // Append axis to legend group, translate right after the color bar
+        legendG
+            .append("g")
+            .attr("transform", `translate(${widthHeat},80)`)
+            .call(legendAxis);
 
-        // // Optional: legend title
-        // legendG
-        //     .append("text")
-        //     .attr("x", widthHeat / 2)
-        //     .attr("y", -10)
-        //     .attr("text-anchor", "middle")
-        //     .style("font-weight", "bold")
-        //     .style("font-size", "12px")
-        //     .text("Comp - Incomp");
+        // Optional: legend title
+        legendG
+            .append("text")
+            .attr("x", widthHeat / 2)
+            .attr("y", -15)
+            .attr("text-anchor", "middle")
+            .style("font-weight", "bold")
+            .style("font-size", "12px")
+            .text("Comp - Incomp");
     }
     createHeatmap(svgHeat);
 

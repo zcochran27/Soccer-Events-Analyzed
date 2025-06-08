@@ -4,6 +4,7 @@ html {
   font-family: "Lato", sans-serif;
   padding: 0;
   margin: 0;
+  scroll-behavior: smooth;
   overflow-x: hidden;
 }
 
@@ -157,12 +158,16 @@ body {
   border-left: 4px solid #ccc;
   background: #f9f9f9;
   border-radius: 8px;
-  transition: background 0.3s ease;
+  opacity: 0.2;
+  transform: translateY(20px);
+  transition: all 0.5s ease-in-out;
 }
 
 .step.active {
   background: #d0e7ff; /* Light Euro blue */
   border-left-color: #0050a0; /* Deep UEFA blue */
+  opacity: 1;
+  transform: translateY(0);
 }
 .graphic {
   width: 60%;
@@ -186,6 +191,9 @@ body {
   margin-right: 20px;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 1s ease-in-out;
 }
 
 .graphic-item.active {
@@ -193,6 +201,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Pitch SVGs */
@@ -655,6 +665,34 @@ body {
   transition: opacity 0.2s;
   max-width: 200px;
   z-index: 1000;
+}
+
+.conclusion {
+  width: 100%;
+  height: 110vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #d0e7ff;
+  border: 1px solid #0050a0;
+  border-radius: 20px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  gap: 4px;
+}
+.conclusion h2 {
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+#legendStep1,
+#legendStep2,
+#legendStep3,
+#legendStep4,
+#legend {
+  all: unset;
 }
 
 .leaderboard-table {

@@ -157,7 +157,7 @@ function resetAndStartSlider() {
 }
 
 const scroller = scrollama();
-
+let ballInterval;
 // Set up Scrollama
 const sliderStepIndex = 12; // Replace with your actual slider step index
 
@@ -198,6 +198,17 @@ scroller
     } else {
       stopVideoLoop();
       graphicItem1.style.display = "none";
+    }
+    if (stepIndex === 1) {
+      if (ballInterval) {
+        clearInterval(ballInterval);
+      }
+      animateSegments();
+      ballInterval = setInterval(animateSegments, 13000);
+    } else {
+      if (ballInterval) {
+        clearInterval(ballInterval);
+      }
     }
     const graphicItem4 = document.getElementById("graphic-item-4");
     if (stepIndex === 3) {
@@ -254,6 +265,8 @@ scroller
         "Pause Slider Animation";
     }
   });
+const graphicItem10 = document.getElementById("graphic-item-10");
+graphicItem10.style.display = "none";
 const graphicItem10 = document.getElementById("graphic-item-10");
 graphicItem10.style.display = "none";
 // Recalculate dimensions on resize
@@ -394,6 +407,36 @@ function drawFootballPitch(svg) {
     .append("path")
     .attr("d", "M 0 0 L 10 5 L 0 10 z")
     .attr("fill", "red");
+
+  const arcGenerator = d3
+    .arc()
+    .innerRadius(9.15)
+    .outerRadius(9.15)
+    .startAngle(-0.3 * Math.PI)
+    .endAngle(0.3 * Math.PI);
+
+  // Left penalty box arc
+  svg
+    .append("path")
+    .attr("d", arcGenerator())
+    .attr("transform", "translate(11,40) rotate(90,0,0)")
+    .attr("fill", "none")
+    .attr("class", "line");
+
+  // Right penalty box arc
+  const arcGeneratorRight = d3
+    .arc()
+    .innerRadius(9.15)
+    .outerRadius(9.15)
+    .startAngle(0.7 * Math.PI)
+    .endAngle(1.3 * Math.PI);
+
+  svg
+    .append("path")
+    .attr("d", arcGeneratorRight())
+    .attr("transform", "translate(109,40) rotate(90,0,0)")
+    .attr("fill", "none")
+    .attr("class", "line");
 }
 const svg1 = d3.select("#pitch1");
 const defs = svg1.append("defs");
@@ -442,6 +485,16 @@ function getHeightLabel(height) {
       return "unknown";
   }
 }
+function getOutcomeLabel(outcome) {
+  switch (outcome) {
+    case 0:
+      return "Incomplete";
+    case 1:
+      return "Complete";
+    default:
+      return "unknown";
+  }
+}
 svg1
   .selectAll(".pass")
   .data(passes)
@@ -464,7 +517,7 @@ svg1
   .on("mouseover", (event, d) => {
     tooltip1.style("opacity", 1).html(`
         <strong>Pass</strong><br/>
-        Outcome: ${d.outcome}<br/>
+        Outcome: ${getOutcomeLabel(d.outcome)}<br/>
         Type: ${d.type}<br/>
         Height: ${getHeightLabel(d.height)}
       `);
@@ -509,10 +562,8 @@ function animateSegments(index = 0) {
     .attr("y", end.y - BALL_SIZE / 2)
     .on("end", () => animateSegments(index + 1));
 }
-animateSegments();
-
-// Optional: loop every 5 seconds
-setInterval(animateSegments, 18000);
+// animateSegments();
+// setInterval(animateSegments, 13000);
 
 const reversedPasses = passes.reverse();
 const passesFormatted = reversedPasses.flatMap(
@@ -541,7 +592,7 @@ try {
   if (result.prediction !== undefined) {
     resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${
       100 * result.prediction.toFixed(4)
-    }%. From now on, we will be referring to this probability as pass sequence xG (expected goals). This probability is extremely low and is a testament to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.<br><br>Try clicking the different options below to see how the pass sequence xG changes!<br></br>Does this match your intuition? What do you think was the best passing option for this play?`;
+    }%`;
   } else {
     resultBox.innerText = `Error: ${result.error}`;
   }
@@ -769,6 +820,7 @@ svg2
 //   return d;
 // });
 const topTenSequences = euroSequences
+  .filter((seq) => parseInt(seq.all_successful) === 1)
   .sort((a, b) => b.sequence_pred - a.sequence_pred)
   .slice(0, 10);
 
@@ -905,7 +957,7 @@ function updatePassDisplay() {
     .on("mouseover", (event, d) => {
       tooltip3.style("opacity", 1).html(`
               <strong>Pass</strong><br/>
-              Outcome: ${d.outcome}<br/>
+              Outcome: ${getOutcomeLabel(d.outcome)}<br/>
               Type: ${d.type}<br/>
               Height: ${getHeightLabel(d.height)}
             `);
@@ -934,6 +986,74 @@ function updatePassDisplay() {
   d3.select("#sequence-counter").text(
     `Sequence ${currentSequenceIndex + 1} of ${topTenSequencePasses.length}`
   );
+
+  // Remove any existing last-pass indicator
+  svg3.selectAll(".last-pass-indicator").remove();
+
+  // Get the last pass
+  const lastPass = topTenSequencePasses[currentSequenceIndex].slice(-1)[0];
+
+  // Calculate midpoint of the last pass
+  const midX = (lastPass.start[0] + lastPass.end[0]) / 2;
+  const midY = (lastPass.start[1] + lastPass.end[1]) / 2;
+
+  // Define direction for the arrow (e.g., from slightly left of midpoint)
+  const arrowStartX = midX - 20;
+  const arrowStartY = midY;
+
+  // Define arrowhead marker if it doesn't exist
+  if (defs3.select("#last-arrow-marker").empty()) {
+    defs3
+      .append("marker")
+      .attr("id", "last-arrow-marker")
+      .attr("viewBox", "0 0 10 10")
+      .attr("refX", 5)
+      .attr("refY", 5)
+      .attr("markerWidth", 2)
+      .attr("markerHeight", 2)
+      .attr("orient", "auto")
+      .attr("markerUnits", "strokeWidth")
+      .append("path")
+      .attr("d", "M 0 0 L 10 5 L 0 10 z")
+      .attr("fill", "blue");
+  }
+
+  // Draw the blue arrow pointing toward the midpoint
+  svg3
+    .append("line")
+    .attr("class", "last-pass-indicator")
+    .attr("x1", arrowStartX)
+    .attr("y1", arrowStartY)
+    .attr("x2", midX - 2)
+    .attr("y2", midY)
+    .attr("stroke", "blue")
+    .attr("stroke-width", 0.5)
+    .attr("marker-end", "url(#last-arrow-marker)");
+
+  // Only show text for the first sequence
+  if (currentSequenceIndex === 0) {
+    // Remove any existing instruction text
+    svg3.selectAll(".arrow-instruction").remove();
+
+    // Get midpoint of last pass again (already calculated earlier)
+    const lastPass = topTenSequencePasses[0].slice(-1)[0];
+    const midX = (lastPass.start[0] + lastPass.end[0]) / 2;
+    const midY = (lastPass.start[1] + lastPass.end[1]) / 2;
+
+    // Add instruction text above the arrow
+    svg3
+      .append("text")
+      .attr("class", "arrow-instruction")
+      .attr("x", midX - 18)
+      .attr("y", midY - 2)
+      .attr("text-anchor", "middle")
+      .style("font-size", "1.5px")
+      .style("fill", "blue")
+      .text("The blue arrow points towards the last pass!");
+  } else {
+    // Remove instruction if not the first sequence
+    svg3.selectAll(".arrow-instruction").remove();
+  }
 }
 
 drawFootballPitch(svg3);
@@ -1385,7 +1505,8 @@ const heatContainer = d3.select("#heatmap-container");
 // Clear any existing elements
 pitch4.selectAll("*").remove();
 drawFootballPitch(pitch4);
-heatContainer.style("display", "none");
+heatContainer.style("display", "flex");
+pitch4.style("display", "none");
 
 // Get the best sequence for each possession
 const teamsLastPreds = d3.rollup(
@@ -2059,9 +2180,9 @@ function createHeatmap() {
   );
 
   //changing max difference
-  //const maxDiff = d3.max(difference.flat().map(Math.abs));
+  const maxDiff = d3.max(difference.flat().map(Math.abs));
   //constant max difference
-  const maxDiff = 4.5;
+  //const maxDiff = 4.5;
 
   const colorDiff = d3
     .scaleDiverging()
@@ -2443,10 +2564,18 @@ const passTypes = Array.from(
 );
 
 // Color
+const customColors = [
+  d3.schemeTableau10[0], // First Pass
+  d3.schemeTableau10[1], // Second Pass
+  d3.schemeTableau10[2], // Third Pass
+  d3.schemeTableau10[3], // Fourth Pass
+  "#2ca02c", // Fifth Pass - brighter green
+];
+
 const colorStacked = d3
   .scaleOrdinal()
   .domain(passPositions)
-  .range(d3.schemeTableau10);
+  .range(customColors);
 
 // Aggregate
 const grouped = d3.group(
@@ -2507,7 +2636,15 @@ svgStacked
   .enter()
   .append("g")
   .attr("class", "layer")
-  .attr("fill", (d) => colorStacked(d.key))
+  .attr("fill", (d) => {
+    const color = colorStacked(d.key);
+    if (color === "#2ca02c") {
+      return color; // Full opacity for green (fifth pass)
+    } else {
+      const rgb = d3.color(color);
+      return `rgba(${rgb.r},${rgb.g},${rgb.b},0.6)`; // 0.6 opacity
+    }
+  })
   .selectAll("rect")
   .data((d) => d)
   .enter()
@@ -2566,8 +2703,8 @@ svgStacked
   .attr("marker-end", "url(#arrowStack)");
 svgStacked
   .append("line")
-  .attr("x1", 180)
-  .attr("y1", 230)
+  .attr("x1", 230)
+  .attr("y1", 190)
   .attr("x2", 410)
   .attr("y2", 300)
   .attr("stroke", "black")
@@ -2575,8 +2712,8 @@ svgStacked
   .attr("marker-end", "url(#arrowStack)");
 svgStacked
   .append("line")
-  .attr("x1", 230)
-  .attr("y1", 190)
+  .attr("x1", 380)
+  .attr("y1", 150)
   .attr("x2", 420)
   .attr("y2", 280)
   .attr("stroke", "black")
