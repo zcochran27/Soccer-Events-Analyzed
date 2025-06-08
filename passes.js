@@ -534,7 +534,7 @@ try {
   if (result.prediction !== undefined) {
     resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${
       100 * result.prediction.toFixed(4)
-    }%. From now on, we will be referring to this probability as pass sequence xG (expected goals). This probability is extremely low and is a testament to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.<br><br>Try clicking the different options below to see how the pass sequence xG changes!<br></br>Does this match your intuition? What do you think was the best passing option for this play?`;
+    }`;
   } else {
     resultBox.innerText = `Error: ${result.error}`;
   }
@@ -917,6 +917,76 @@ function updatePassDisplay() {
   d3.select("#sequence-counter").text(
     `Sequence ${currentSequenceIndex + 1} of ${topTenSequencePasses.length}`
   );
+
+// Remove any existing last-pass indicator
+svg3.selectAll(".last-pass-indicator").remove();
+
+// Get the last pass
+const lastPass = topTenSequencePasses[currentSequenceIndex].slice(-1)[0];
+
+// Calculate midpoint of the last pass
+const midX = (lastPass.start[0] + lastPass.end[0]) / 2;
+const midY = (lastPass.start[1] + lastPass.end[1]) / 2;
+
+// Define direction for the arrow (e.g., from slightly left of midpoint)
+const arrowStartX = midX - 20;
+const arrowStartY = midY;
+
+// Define arrowhead marker if it doesn't exist
+if (defs3.select("#last-arrow-marker").empty()) {
+  defs3
+    .append("marker")
+    .attr("id", "last-arrow-marker")
+    .attr("viewBox", "0 0 10 10")
+    .attr("refX", 5)
+    .attr("refY", 5)
+    .attr("markerWidth", 2)
+    .attr("markerHeight", 2)
+    .attr("orient", "auto")
+    .attr("markerUnits", "strokeWidth")
+    .append("path")
+    .attr("d", "M 0 0 L 10 5 L 0 10 z")
+    .attr("fill", "blue");
+}
+
+// Draw the blue arrow pointing toward the midpoint
+svg3
+  .append("line")
+  .attr("class", "last-pass-indicator")
+  .attr("x1", arrowStartX)
+  .attr("y1", arrowStartY)
+  .attr("x2", midX-2)
+  .attr("y2", midY)
+  .attr("stroke", "blue")
+  .attr("stroke-width", 0.5)
+  .attr("marker-end", "url(#last-arrow-marker)");
+
+  // Only show text for the first sequence
+if (currentSequenceIndex === 0) {
+  // Remove any existing instruction text
+  svg3.selectAll(".arrow-instruction").remove();
+
+  // Get midpoint of last pass again (already calculated earlier)
+  const lastPass = topTenSequencePasses[0].slice(-1)[0];
+  const midX = (lastPass.start[0] + lastPass.end[0]) / 2;
+  const midY = (lastPass.start[1] + lastPass.end[1]) / 2;
+
+  // Add instruction text above the arrow
+  svg3
+    .append("text")
+    .attr("class", "arrow-instruction")
+    .attr("x", midX-18)
+    .attr("y", midY-2)
+    .attr("text-anchor", "middle")
+    .style("font-size", "1.5px")
+    .style("fill", "blue")
+    .text("The blue arrow points towards the last pass!");
+} else {
+  // Remove instruction if not the first sequence
+  svg3.selectAll(".arrow-instruction").remove();
+}
+
+
 }
 
 drawFootballPitch(svg3);
