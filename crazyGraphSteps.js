@@ -176,6 +176,32 @@ function drawFootballPitch(svg) {
         .append("path")
         .attr("d", "M 0 0 L 10 5 L 0 10 z")
         .attr("fill", "red");
+
+    const arcGenerator = d3.arc()
+        .innerRadius(9.15)
+        .outerRadius(9.15)
+        .startAngle(-0.3 * Math.PI)
+        .endAngle(0.3 * Math.PI);
+
+    // Left penalty box arc
+    svg.append("path")
+        .attr("d", arcGenerator())
+        .attr("transform", "translate(11,40) rotate(90,0,0)")
+        .attr("fill", "none")
+        .attr("class", "line");
+
+    // Right penalty box arc
+    const arcGeneratorRight = d3.arc()
+        .innerRadius(9.15)
+        .outerRadius(9.15)
+        .startAngle(0.7 * Math.PI)
+        .endAngle(1.3 * Math.PI);
+
+    svg.append("path")
+        .attr("d", arcGeneratorRight())
+        .attr("transform", "translate(109,40) rotate(90,0,0)")
+        .attr("fill", "none")
+        .attr("class", "line");
 }
 function getHeightLabel(height) {
     switch (height) {

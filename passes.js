@@ -56,7 +56,7 @@ let euroSequences = await d3
 const intro = document.querySelector(".intro");
 intro.style.backgroundImage = 'url("assets/bg-soccer.jpeg")';
 intro.style.backgroundSize = 'cover';          // optional, but usually needed
-intro.style.backgroundPosition = 'center'; 
+intro.style.backgroundPosition = 'center';
 // Load YouTube iframe API
 function handleStep(stepIndex, element) {
   // Remove active classes from all graphics
@@ -255,8 +255,8 @@ scroller
       document.getElementById('pause-animation-btn').textContent = 'Pause Slider Animation';
     }
   });
-  const graphicItem10 = document.getElementById("graphic-item-10");
-  graphicItem10.style.display = "none";
+const graphicItem10 = document.getElementById("graphic-item-10");
+graphicItem10.style.display = "none";
 // Recalculate dimensions on resize
 window.addEventListener("resize", scroller.resize);
 window.addEventListener("load", () => {
@@ -395,6 +395,32 @@ function drawFootballPitch(svg) {
     .append("path")
     .attr("d", "M 0 0 L 10 5 L 0 10 z")
     .attr("fill", "red");
+
+  const arcGenerator = d3.arc()
+    .innerRadius(9.15)
+    .outerRadius(9.15)
+    .startAngle(-0.3 * Math.PI)
+    .endAngle(0.3 * Math.PI);
+
+  // Left penalty box arc
+  svg.append("path")
+  .attr("d", arcGenerator())
+  .attr("transform", "translate(11,40) rotate(90,0,0)")
+  .attr("fill", "none")
+  .attr("class", "line");
+
+  // Right penalty box arc
+  const arcGeneratorRight = d3.arc()
+    .innerRadius(9.15)
+    .outerRadius(9.15)
+    .startAngle(0.7 * Math.PI)
+    .endAngle(1.3 * Math.PI);
+
+    svg.append("path")
+    .attr("d", arcGeneratorRight())
+    .attr("transform", "translate(109,40) rotate(90,0,0)")
+    .attr("fill", "none")
+    .attr("class", "line");
 }
 const svg1 = d3.select("#pitch1");
 const defs = svg1.append("defs");
@@ -542,9 +568,8 @@ try {
 
   const result = await response.json();
   if (result.prediction !== undefined) {
-    resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${
-      100 * result.prediction.toFixed(4)
-    }%`;
+    resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${100 * result.prediction.toFixed(4)
+      }%`;
   } else {
     resultBox.innerText = `Error: ${result.error}`;
   }
@@ -727,8 +752,8 @@ svg2
           .html(
             `
                         Pass sequence xG: ${(
-                          100 * result.prediction.toFixed(4)
-                        ).toFixed(2)}%.      
+              100 * result.prediction.toFixed(4)
+            ).toFixed(2)}%.      
                     `
           )
           .style("left", `${event.clientX + 10}px`)
@@ -928,73 +953,73 @@ function updatePassDisplay() {
     `Sequence ${currentSequenceIndex + 1} of ${topTenSequencePasses.length}`
   );
 
-// Remove any existing last-pass indicator
-svg3.selectAll(".last-pass-indicator").remove();
+  // Remove any existing last-pass indicator
+  svg3.selectAll(".last-pass-indicator").remove();
 
-// Get the last pass
-const lastPass = topTenSequencePasses[currentSequenceIndex].slice(-1)[0];
+  // Get the last pass
+  const lastPass = topTenSequencePasses[currentSequenceIndex].slice(-1)[0];
 
-// Calculate midpoint of the last pass
-const midX = (lastPass.start[0] + lastPass.end[0]) / 2;
-const midY = (lastPass.start[1] + lastPass.end[1]) / 2;
-
-// Define direction for the arrow (e.g., from slightly left of midpoint)
-const arrowStartX = midX - 20;
-const arrowStartY = midY;
-
-// Define arrowhead marker if it doesn't exist
-if (defs3.select("#last-arrow-marker").empty()) {
-  defs3
-    .append("marker")
-    .attr("id", "last-arrow-marker")
-    .attr("viewBox", "0 0 10 10")
-    .attr("refX", 5)
-    .attr("refY", 5)
-    .attr("markerWidth", 2)
-    .attr("markerHeight", 2)
-    .attr("orient", "auto")
-    .attr("markerUnits", "strokeWidth")
-    .append("path")
-    .attr("d", "M 0 0 L 10 5 L 0 10 z")
-    .attr("fill", "blue");
-}
-
-// Draw the blue arrow pointing toward the midpoint
-svg3
-  .append("line")
-  .attr("class", "last-pass-indicator")
-  .attr("x1", arrowStartX)
-  .attr("y1", arrowStartY)
-  .attr("x2", midX-2)
-  .attr("y2", midY)
-  .attr("stroke", "blue")
-  .attr("stroke-width", 0.5)
-  .attr("marker-end", "url(#last-arrow-marker)");
-
-  // Only show text for the first sequence
-if (currentSequenceIndex === 0) {
-  // Remove any existing instruction text
-  svg3.selectAll(".arrow-instruction").remove();
-
-  // Get midpoint of last pass again (already calculated earlier)
-  const lastPass = topTenSequencePasses[0].slice(-1)[0];
+  // Calculate midpoint of the last pass
   const midX = (lastPass.start[0] + lastPass.end[0]) / 2;
   const midY = (lastPass.start[1] + lastPass.end[1]) / 2;
 
-  // Add instruction text above the arrow
+  // Define direction for the arrow (e.g., from slightly left of midpoint)
+  const arrowStartX = midX - 20;
+  const arrowStartY = midY;
+
+  // Define arrowhead marker if it doesn't exist
+  if (defs3.select("#last-arrow-marker").empty()) {
+    defs3
+      .append("marker")
+      .attr("id", "last-arrow-marker")
+      .attr("viewBox", "0 0 10 10")
+      .attr("refX", 5)
+      .attr("refY", 5)
+      .attr("markerWidth", 2)
+      .attr("markerHeight", 2)
+      .attr("orient", "auto")
+      .attr("markerUnits", "strokeWidth")
+      .append("path")
+      .attr("d", "M 0 0 L 10 5 L 0 10 z")
+      .attr("fill", "blue");
+  }
+
+  // Draw the blue arrow pointing toward the midpoint
   svg3
-    .append("text")
-    .attr("class", "arrow-instruction")
-    .attr("x", midX-18)
-    .attr("y", midY-2)
-    .attr("text-anchor", "middle")
-    .style("font-size", "1.5px")
-    .style("fill", "blue")
-    .text("The blue arrow points towards the last pass!");
-} else {
-  // Remove instruction if not the first sequence
-  svg3.selectAll(".arrow-instruction").remove();
-}
+    .append("line")
+    .attr("class", "last-pass-indicator")
+    .attr("x1", arrowStartX)
+    .attr("y1", arrowStartY)
+    .attr("x2", midX - 2)
+    .attr("y2", midY)
+    .attr("stroke", "blue")
+    .attr("stroke-width", 0.5)
+    .attr("marker-end", "url(#last-arrow-marker)");
+
+  // Only show text for the first sequence
+  if (currentSequenceIndex === 0) {
+    // Remove any existing instruction text
+    svg3.selectAll(".arrow-instruction").remove();
+
+    // Get midpoint of last pass again (already calculated earlier)
+    const lastPass = topTenSequencePasses[0].slice(-1)[0];
+    const midX = (lastPass.start[0] + lastPass.end[0]) / 2;
+    const midY = (lastPass.start[1] + lastPass.end[1]) / 2;
+
+    // Add instruction text above the arrow
+    svg3
+      .append("text")
+      .attr("class", "arrow-instruction")
+      .attr("x", midX - 18)
+      .attr("y", midY - 2)
+      .attr("text-anchor", "middle")
+      .style("font-size", "1.5px")
+      .style("fill", "blue")
+      .text("The blue arrow points towards the last pass!");
+  } else {
+    // Remove instruction if not the first sequence
+    svg3.selectAll(".arrow-instruction").remove();
+  }
 
 
 }
@@ -1302,26 +1327,26 @@ function updateBarChart(stage) {
 
   // Add bars
   barSvg
-  .selectAll("rect")
-  .data(teamAverages)
-  .join("rect")
-  .attr("x", (d) => x(d.team))
-  .attr("y", (d) => y(d.avgPred))
-  .attr("width", x.bandwidth())
-  .attr("height", (d) => barHeight - y(d.avgPred))
-  .attr("fill", (d) => {
-    switch (d.team.toLowerCase()) {
-      case "spain":
-        return "#FFD700"; // Gold
-      case "england":
-        return "#C0C0C0"; // Silver
-      case "netherlands":
-      case "france":
-        return "#CD7F32"; // Bronze
-      default:
-        return "#d0e7ff"; // Default
-    }
-  });
+    .selectAll("rect")
+    .data(teamAverages)
+    .join("rect")
+    .attr("x", (d) => x(d.team))
+    .attr("y", (d) => y(d.avgPred))
+    .attr("width", x.bandwidth())
+    .attr("height", (d) => barHeight - y(d.avgPred))
+    .attr("fill", (d) => {
+      switch (d.team.toLowerCase()) {
+        case "spain":
+          return "#FFD700"; // Gold
+        case "england":
+          return "#C0C0C0"; // Silver
+        case "netherlands":
+        case "france":
+          return "#CD7F32"; // Bronze
+        default:
+          return "#d0e7ff"; // Default
+      }
+    });
 
   // Add title
   barSvg
@@ -1379,7 +1404,7 @@ function createStageLegend(data) {
     .join("button")
     .attr("class", "stage-button")
     .text(d => d)
-    .on("click", function(event, stage) {
+    .on("click", function (event, stage) {
       const selectedStage = stage === "All" ? "" : stage;
 
       if (currentStage === selectedStage) {
@@ -1563,7 +1588,7 @@ const svg = d3
   .attr("height", height)
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`);
-  svg
+svg
   .append("text")
   .attr("x", width / 2)
   .attr("y", 0) // Position it above the slider
@@ -2059,7 +2084,7 @@ function createHeatmap() {
       for (let j = 0; j < size; j++) {
         const val = Math.exp(
           -0.5 *
-            (Math.pow((i - mean) / sigma, 2) + Math.pow((j - mean) / sigma, 2))
+          (Math.pow((i - mean) / sigma, 2) + Math.pow((j - mean) / sigma, 2))
         );
         kernel[i][j] = val;
         sum += val;
@@ -2393,84 +2418,84 @@ barSvg
   .style("font-size", "16px")
   .style("font-weight", "bold")
   .text("Average Pass Sequence xG by Number of Passes in Sequence");
-  const lastBar = passPositionData[passPositionData.length - 1];
-  const xLastBar = xPassPosition(lastBar.position) + xPassPosition.bandwidth() / 2;
-  const yLastBar = yPassPosition(lastBar.avg);
-  
-  // Draw arrow line
-  barSvg
-    .append("line")
-    .attr("x1", xLastBar)
-    .attr("y1", yLastBar + 10)
-    .attr("x2", xLastBar - 60)
-    .attr("y2", yLastBar + 50)
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-    .attr("marker-end", "url(#arrow)");
-  
-  // Add arrowhead marker definition
-  barSvg
-    .append("defs")
-    .append("marker")
-    .attr("id", "arrow")
-    .attr("viewBox", "0 0 10 10")
-    .attr("refX", 0)
-    .attr("refY", 5)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("orient", "auto-start-reverse")
-    .append("path")
-    .attr("d", "M 0 0 L 10 5 L 0 10 z")
-    .attr("fill", "black");
-  
-  // Add annotation text
-  barSvg
-    .append("text")
-    .attr("x", xLastBar - 170)
-    .attr("y", yLastBar + 70)
-    .attr("text-anchor", "start")
-    .style("font-size", "12px")
-    .style("font-weight", "bold")
-    .text("75th percentile of pass sequence xGs");
-  const firstBar = passPositionData[0];
-  const xFirstBar = xPassPosition(firstBar.position) + xPassPosition.bandwidth() / 2;
-  const yFirstBar = yPassPosition(firstBar.avg);
-  
-  // Draw arrow line
-  barSvg
-    .append("line")
-    .attr("x1", xFirstBar)
-    .attr("y1", yFirstBar + 10)
-    .attr("x2", xFirstBar + 60)
-    .attr("y2", yFirstBar - 50)
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-    .attr("marker-end", "url(#arrow)");
-  
-  // Add arrowhead marker definition
-  // barSvg
-  //   .append("defs")
-  //   .append("marker")
-  //   .attr("id", "arrow")
-  //   .attr("viewBox", "0 0 10 10")
-  //   .attr("refX", 0)
-  //   .attr("refY", 5)
-  //   .attr("markerWidth", 6)
-  //   .attr("markerHeight", 6)
-  //   .attr("orient", "auto-start-reverse")
-  //   .append("path")
-  //   .attr("d", "M 0 0 L 10 5 L 0 10 z")
-  //   .attr("fill", "black");
-  
-  // Add annotation text
-  barSvg
-    .append("text")
-    .attr("x", xFirstBar + 10)
-    .attr("y", yFirstBar - 70)
-    .attr("text-anchor", "start")
-    .style("font-size", "12px")
-    .style("font-weight", "bold")
-    .text("55th percentile of pass sequence xGs");
+const lastBar = passPositionData[passPositionData.length - 1];
+const xLastBar = xPassPosition(lastBar.position) + xPassPosition.bandwidth() / 2;
+const yLastBar = yPassPosition(lastBar.avg);
+
+// Draw arrow line
+barSvg
+  .append("line")
+  .attr("x1", xLastBar)
+  .attr("y1", yLastBar + 10)
+  .attr("x2", xLastBar - 60)
+  .attr("y2", yLastBar + 50)
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("marker-end", "url(#arrow)");
+
+// Add arrowhead marker definition
+barSvg
+  .append("defs")
+  .append("marker")
+  .attr("id", "arrow")
+  .attr("viewBox", "0 0 10 10")
+  .attr("refX", 0)
+  .attr("refY", 5)
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto-start-reverse")
+  .append("path")
+  .attr("d", "M 0 0 L 10 5 L 0 10 z")
+  .attr("fill", "black");
+
+// Add annotation text
+barSvg
+  .append("text")
+  .attr("x", xLastBar - 170)
+  .attr("y", yLastBar + 70)
+  .attr("text-anchor", "start")
+  .style("font-size", "12px")
+  .style("font-weight", "bold")
+  .text("75th percentile of pass sequence xGs");
+const firstBar = passPositionData[0];
+const xFirstBar = xPassPosition(firstBar.position) + xPassPosition.bandwidth() / 2;
+const yFirstBar = yPassPosition(firstBar.avg);
+
+// Draw arrow line
+barSvg
+  .append("line")
+  .attr("x1", xFirstBar)
+  .attr("y1", yFirstBar + 10)
+  .attr("x2", xFirstBar + 60)
+  .attr("y2", yFirstBar - 50)
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("marker-end", "url(#arrow)");
+
+// Add arrowhead marker definition
+// barSvg
+//   .append("defs")
+//   .append("marker")
+//   .attr("id", "arrow")
+//   .attr("viewBox", "0 0 10 10")
+//   .attr("refX", 0)
+//   .attr("refY", 5)
+//   .attr("markerWidth", 6)
+//   .attr("markerHeight", 6)
+//   .attr("orient", "auto-start-reverse")
+//   .append("path")
+//   .attr("d", "M 0 0 L 10 5 L 0 10 z")
+//   .attr("fill", "black");
+
+// Add annotation text
+barSvg
+  .append("text")
+  .attr("x", xFirstBar + 10)
+  .attr("y", yFirstBar - 70)
+  .attr("text-anchor", "start")
+  .style("font-size", "12px")
+  .style("font-weight", "bold")
+  .text("55th percentile of pass sequence xGs");
 
 const allPassMetaDataWithPosition = allPassMetaData.flatMap((seq) =>
   seq.map((pass, i) => ({
@@ -2658,8 +2683,8 @@ svgStacked
 // Add annotation text
 svgStacked
   .append("text")
-  .attr("x",  425)
-  .attr("y",  305)
+  .attr("x", 425)
+  .attr("y", 305)
   .attr("text-anchor", "start")
   .style("font-size", "13px")
   .style("font-weight", "bold")
@@ -2728,10 +2753,10 @@ for (let xi = 0; xi < xBins; xi++) {
 }
 
 const passTypeColor = d3.scaleOrdinal()
-.domain([
-  "Pass", "Through Ball", "Switch", "Cross", "Free Kick", "Cut Back", "Corner", "Throw In"
-])
-.range(d3.schemeCategory10);
+  .domain([
+    "Pass", "Through Ball", "Switch", "Cross", "Free Kick", "Cut Back", "Corner", "Throw In"
+  ])
+  .range(d3.schemeCategory10);
 
 const cellWidth = 120 / xBins;
 const cellHeight = 80 / yBins;
