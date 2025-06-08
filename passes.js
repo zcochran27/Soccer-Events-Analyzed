@@ -2529,10 +2529,17 @@ const passTypes = Array.from(
 );
 
 // Color
-const colorStacked = d3
-  .scaleOrdinal()
+const customColors = [
+  d3.schemeTableau10[0], // First Pass
+  d3.schemeTableau10[1], // Second Pass
+  d3.schemeTableau10[2], // Third Pass
+  d3.schemeTableau10[3], // Fourth Pass
+  "#2ca02c"              // Fifth Pass - brighter green
+];
+
+const colorStacked = d3.scaleOrdinal()
   .domain(passPositions)
-  .range(d3.schemeTableau10);
+  .range(customColors);
 
 // Aggregate
 const grouped = d3.group(
@@ -2593,7 +2600,15 @@ svgStacked
   .enter()
   .append("g")
   .attr("class", "layer")
-  .attr("fill", (d) => colorStacked(d.key))
+  .attr("fill", (d) => {
+    const color = colorStacked(d.key);
+    if (color === "#2ca02c") {
+      return color; // Full opacity for green (fifth pass)
+    } else {
+      const rgb = d3.color(color);
+      return `rgba(${rgb.r},${rgb.g},${rgb.b},0.6)`; // 0.6 opacity
+    }
+  })
   .selectAll("rect")
   .data((d) => d)
   .enter()
@@ -2652,8 +2667,8 @@ svgStacked
   .attr("marker-end", "url(#arrowStack)");
 svgStacked
   .append("line")
-  .attr("x1", 180)
-  .attr("y1", 230)
+  .attr("x1", 230)
+  .attr("y1", 190)
   .attr("x2", 410)
   .attr("y2", 300)
   .attr("stroke", "black")
@@ -2661,8 +2676,8 @@ svgStacked
   .attr("marker-end", "url(#arrowStack)");
 svgStacked
   .append("line")
-  .attr("x1", 230)
-  .attr("y1", 190)
+  .attr("x1", 380)
+  .attr("y1", 150)
   .attr("x2", 420)
   .attr("y2", 280)
   .attr("stroke", "black")
