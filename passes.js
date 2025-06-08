@@ -201,6 +201,10 @@ scroller
       stopVideoLoop();
       graphicItem1.style.display = "none";
     }
+    if (stepIndex === 1) {
+      animateSegments();
+      setInterval(animateSegments, 13000);
+    }
     const graphicItem4 = document.getElementById("graphic-item-4");
     if (stepIndex === 3) {
       graphicItem4.style.display = "flex";
@@ -538,10 +542,8 @@ function animateSegments(index = 0) {
     .attr("y", end.y - BALL_SIZE / 2)
     .on("end", () => animateSegments(index + 1));
 }
-animateSegments();
-
-// Optional: loop every 5 seconds
-setInterval(animateSegments, 18000);
+// animateSegments();
+// setInterval(animateSegments, 13000);
 
 const reversedPasses = passes.reverse();
 const passesFormatted = reversedPasses.flatMap(
@@ -788,7 +790,6 @@ svg2
 //   else if (d.pass_height === 2) d.pass_height = "High";
 //   return d;
 // });
-console.log(euroSequences);
 const topTenSequences = euroSequences
   .filter(seq => parseInt(seq.all_successful) === 1)
   .sort((a, b) => b.sequence_pred - a.sequence_pred)

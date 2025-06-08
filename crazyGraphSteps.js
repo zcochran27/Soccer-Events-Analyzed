@@ -250,7 +250,6 @@ const data = percentiles.map(([lower, upper]) => {
 function setUpStepI(i) {
     // Create a new SVG for the pass visualization
     const regPitch = d3.select("#pitch4Step" + i);
-    console.log(regPitch);
     const svgHeat = d3.select("#pitch5Step" + i);
     const heatContainer = d3.select("#heatmap-containerStep" + i);
     // Clear any existing elements
