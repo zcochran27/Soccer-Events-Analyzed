@@ -544,7 +544,7 @@ try {
   if (result.prediction !== undefined) {
     resultBox.innerHTML = `The probability of this pass sequence leading to a goal is ${
       100 * result.prediction.toFixed(4)
-    }`;
+    }%`;
   } else {
     resultBox.innerText = `Error: ${result.error}`;
   }
