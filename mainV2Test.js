@@ -474,9 +474,7 @@ document.getElementById("predictBtn").addEventListener("click", async () => {
 
     const result = await response.json();
     if (result.prediction !== undefined) {
-      resultBox.innerText = `Probability of Scoring Off Sequence: ${result.prediction.toFixed(
-        4
-      )}`;
+      resultBox.innerText = `Probability of Scoring Off Sequence: ${(result.prediction*100).toFixed(2)}%`;
       drawDoughnutChart(getPercentile(result.prediction));
     } else {
       resultBox.innerText = `Error: ${result.error}`;
