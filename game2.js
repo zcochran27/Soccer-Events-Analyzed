@@ -415,6 +415,7 @@ document.getElementById("predictBtn2").addEventListener("click", async () => {
     ]
   );
   const resultBox = document.getElementById("predictionResult2");
+  const nameDiv = document.getElementById("name-div");
 
   resultBox.innerText = "";
   try {
