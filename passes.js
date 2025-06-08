@@ -159,7 +159,7 @@ function resetAndStartSlider() {
 
 
 const scroller = scrollama();
-
+let ballInterval;
 // Set up Scrollama
 const sliderStepIndex = 12; // Replace with your actual slider step index
 
@@ -202,8 +202,15 @@ scroller
       graphicItem1.style.display = "none";
     }
     if (stepIndex === 1) {
+      if (ballInterval) {
+        clearInterval(ballInterval);
+      }
       animateSegments();
-      setInterval(animateSegments, 13000);
+      ballInterval = setInterval(animateSegments, 13000);
+    }else{
+      if (ballInterval) {
+        clearInterval(ballInterval);
+      }
     }
     const graphicItem4 = document.getElementById("graphic-item-4");
     if (stepIndex === 3) {
