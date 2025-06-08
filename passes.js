@@ -52,11 +52,10 @@ let euroSequences = await d3
     return updatedData;
   });
 
-
 const intro = document.querySelector(".intro");
 intro.style.backgroundImage = 'url("assets/bg-soccer.jpeg")';
-intro.style.backgroundSize = 'cover';          // optional, but usually needed
-intro.style.backgroundPosition = 'center'; 
+intro.style.backgroundSize = "cover"; // optional, but usually needed
+intro.style.backgroundPosition = "center";
 // Load YouTube iframe API
 function handleStep(stepIndex, element) {
   // Remove active classes from all graphics
@@ -157,7 +156,6 @@ function resetAndStartSlider() {
   }, intervalDelay);
 }
 
-
 const scroller = scrollama();
 
 // Set up Scrollama
@@ -252,11 +250,12 @@ scroller
       resetAndStartSlider();
       startSliderAnimation(true);
       isPaused = false;
-      document.getElementById('pause-animation-btn').textContent = 'Pause Slider Animation';
+      document.getElementById("pause-animation-btn").textContent =
+        "Pause Slider Animation";
     }
   });
-  const graphicItem10 = document.getElementById("graphic-item-10");
-  graphicItem10.style.display = "none";
+const graphicItem10 = document.getElementById("graphic-item-10");
+graphicItem10.style.display = "none";
 // Recalculate dimensions on resize
 window.addEventListener("resize", scroller.resize);
 window.addEventListener("load", () => {
@@ -269,7 +268,7 @@ window.addEventListener("load", () => {
 
 const lamineChanceLast5 = await fetch("lamine_chance_last_5.json");
 const passes = await lamineChanceLast5.json();
-let passesV2 = passes.slice(0, 4);
+let passesV2 = passes.slice(0, passes.length - 1);
 function drawFootballPitch(svg) {
   // Pitch Boundary
   svg
@@ -399,7 +398,8 @@ function drawFootballPitch(svg) {
 const svg1 = d3.select("#pitch1");
 const defs = svg1.append("defs");
 passes.forEach((d, i) => {
-  const color = d.outcome === 1.0 ? "green" : "red";
+  let color = d.outcome === 1.0 ? "green" : "red";
+  if (d.type === "Dribble") color = "gray";
   const strokeWidth = 1.2 + i * 0.3; // adjust multiplier as needed
 
   defs
@@ -451,8 +451,15 @@ svg1
   .attr("y1", (d) => d.start[1])
   .attr("x2", (d) => d.end[0])
   .attr("y2", (d) => d.end[1])
-  .attr("stroke", (d) => (d.outcome === 1.0 ? "green" : "red"))
-  .attr("stroke-width", (d, i) => 0.4 + i * 0.2)
+  .attr("stroke", (d) => {
+    if (d.type === "Dribble") return "gray";
+    return d.outcome === 1.0 ? "green" : "red";
+  })
+  .attr("stroke-dasharray", (d) => {
+    if (d.type === "Dribble") return "1 1"; // dashed for dribbles
+    return "none"; // solid for passes
+  })
+  .attr("stroke-width", (d, i) => 0.4 + i * 0.1)
   .attr("marker-end", (d, i) => `url(#arrow-${i})`)
   .on("mouseover", (event, d) => {
     tooltip1.style("opacity", 1).html(`
@@ -568,7 +575,8 @@ const endPoints = Object.values(lamineOptionsData).map((d) => d.end);
 const startPoint = lamineOptionsData.option1.start;
 const defs2 = svg2.append("defs");
 passesV2.forEach((d, i) => {
-  const color = d.outcome === 1.0 ? "green" : "red";
+  let color = d.outcome === 1.0 ? "green" : "red";
+  if (d.type === "Dribble") color = "gray";
   const strokeWidth = 1.2 + i * 0.1; // adjust multiplier as needed
 
   defs2
@@ -635,8 +643,15 @@ svg2
   .attr("y1", (d) => d.start[1])
   .attr("x2", (d) => d.end[0])
   .attr("y2", (d) => d.end[1])
-  .attr("stroke", (d) => (d.outcome === 1.0 ? "green" : "red"))
-  .attr("stroke-width", (d, i) => 0.5 + i * 0.2)
+  .attr("stroke", (d) => {
+    if (d.type === "Dribble") return "gray";
+    return d.outcome === 1.0 ? "green" : "red";
+  })
+  .attr("stroke-dasharray", (d) => {
+    if (d.type === "Dribble") return "1 1"; // dashed for dribbles
+    return "none"; // solid for passes
+  })
+  .attr("stroke-width", (d, i) => 0.5 + i * 0.1)
   .attr("marker-end", (d, i) => `url(#arrow2-${i})`);
 
 svg2
@@ -723,7 +738,7 @@ svg2
           )
           .style("left", `${event.clientX + 10}px`)
           .style("top", `${event.clientY + 10}px`);
-        console.log(tooltip2)
+        console.log(tooltip2);
       } else {
         tooltip2.html(`Error: ${result.error}`);
       }
@@ -868,9 +883,11 @@ function updatePassDisplay() {
   // Update sequence header
   const currentSequence = topTenSequencePasses[currentSequenceIndex][0];
   d3.select("#sequence-header").html(
-    `Team: ${currentSequence.team}<br>Sequence Probability: ${(
-      currentSequence.sequence_pred * 100
-    ).toFixed(2)}%`
+    `<div class="country-sequence">Team: ${
+      currentSequence.team
+    }<br>Sequence Probability: ${(currentSequence.sequence_pred * 100).toFixed(
+      2
+    )}%</div>`
   );
 
   svg3
@@ -1152,18 +1169,20 @@ function updateBarChart(stage) {
   }
   const teamMatchSums = d3.rollup(
     flattened,
-    v => d3.sum(v, d => d.max_pred),
-    d => d.team,
-    d => d.match_id
+    (v) => d3.sum(v, (d) => d.max_pred),
+    (d) => d.team,
+    (d) => d.match_id
   );
   // Calculate mean of possession max predictions per team
-  const teamAverages = Array.from(teamMatchSums.entries()).map(([team, matchMap]) => {
-    const matchSums = Array.from(matchMap.values());
-    return {
-      team,
-      avgPred: d3.mean(matchSums)
-    };
-  });
+  const teamAverages = Array.from(teamMatchSums.entries()).map(
+    ([team, matchMap]) => {
+      const matchSums = Array.from(matchMap.values());
+      return {
+        team,
+        avgPred: d3.mean(matchSums),
+      };
+    }
+  );
   const teamSums = Array.from(teamsPreds.entries()).map(
     ([team, possessions]) => {
       const possessionValues = Array.from(possessions.values());
@@ -1179,7 +1198,7 @@ function updateBarChart(stage) {
 
   const barChart = d3.select("#bar-chart");
   const barWidth = 0.8 * barChart.node().getBoundingClientRect().width;
-  const barHeight = .7 * barChart.node().getBoundingClientRect().height;
+  const barHeight = 0.7 * barChart.node().getBoundingClientRect().height;
   const barMargin = {
     top: 80,
     right: 20,
@@ -1222,26 +1241,26 @@ function updateBarChart(stage) {
 
   // Add bars
   barSvg
-  .selectAll("rect")
-  .data(teamAverages)
-  .join("rect")
-  .attr("x", (d) => x(d.team))
-  .attr("y", (d) => y(d.avgPred))
-  .attr("width", x.bandwidth())
-  .attr("height", (d) => barHeight - y(d.avgPred))
-  .attr("fill", (d) => {
-    switch (d.team.toLowerCase()) {
-      case "spain":
-        return "#FFD700"; // Gold
-      case "england":
-        return "#C0C0C0"; // Silver
-      case "netherlands":
-      case "france":
-        return "#CD7F32"; // Bronze
-      default:
-        return "#d0e7ff"; // Default
-    }
-  });
+    .selectAll("rect")
+    .data(teamAverages)
+    .join("rect")
+    .attr("x", (d) => x(d.team))
+    .attr("y", (d) => y(d.avgPred))
+    .attr("width", x.bandwidth())
+    .attr("height", (d) => barHeight - y(d.avgPred))
+    .attr("fill", (d) => {
+      switch (d.team.toLowerCase()) {
+        case "spain":
+          return "#FFD700"; // Gold
+        case "england":
+          return "#C0C0C0"; // Silver
+        case "netherlands":
+        case "france":
+          return "#CD7F32"; // Bronze
+        default:
+          return "#d0e7ff"; // Default
+      }
+    });
 
   // Add title
   barSvg
@@ -1276,10 +1295,10 @@ function createStageLegend(data) {
     "Round of 16",
     "Quarter-finals",
     "Semi-finals",
-    "Final"
+    "Final",
   ];
 
-  const stages = Array.from(new Set(data.map(d => d.competition_stage)))
+  const stages = Array.from(new Set(data.map((d) => d.competition_stage)))
     .filter(Boolean)
     .sort((a, b) => desiredOrder.indexOf(a) - desiredOrder.indexOf(b));
 
@@ -1298,8 +1317,8 @@ function createStageLegend(data) {
     .data(["All", ...stages])
     .join("button")
     .attr("class", "stage-button")
-    .text(d => d)
-    .on("click", function(event, stage) {
+    .text((d) => d)
+    .on("click", function (event, stage) {
       const selectedStage = stage === "All" ? "" : stage;
 
       if (currentStage === selectedStage) {
@@ -1483,7 +1502,7 @@ const svg = d3
   .attr("height", height)
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`);
-  svg
+svg
   .append("text")
   .attr("x", width / 2)
   .attr("y", 0) // Position it above the slider
@@ -1502,7 +1521,12 @@ function ordinalSuffix(n) {
 svg
   .append("g")
   .attr("transform", `translate(0,${height / 2})`)
-  .call(d3.axisBottom(x).ticks(10).tickFormat(d => ordinalSuffix(Math.round(d * 100))));
+  .call(
+    d3
+      .axisBottom(x)
+      .ticks(10)
+      .tickFormat((d) => ordinalSuffix(Math.round(d * 100)))
+  );
 
 const brush = d3
   .brushX()
@@ -1581,37 +1605,36 @@ function startSliderAnimation(resetProgress = false) {
   }, intervalDelay);
 }
 
-
 startSliderAnimation();
 
-document.getElementById('start-animation-btn').addEventListener('click', () => {
+document.getElementById("start-animation-btn").addEventListener("click", () => {
   startSliderAnimation();
 });
 
 let isPaused = false;
 
-document.getElementById('start-animation-btn').addEventListener('click', () => {
+document.getElementById("start-animation-btn").addEventListener("click", () => {
   // Start fresh from the beginning
   startSliderAnimation(true);
   isPaused = false;
-  document.getElementById('pause-animation-btn').textContent = 'Pause Slider Animation';
+  document.getElementById("pause-animation-btn").textContent =
+    "Pause Slider Animation";
 });
 
-document.getElementById('pause-animation-btn').addEventListener('click', () => {
+document.getElementById("pause-animation-btn").addEventListener("click", () => {
   if (isPaused) {
     // Resume without resetting progress
     startSliderAnimation(false);
-    document.getElementById('pause-animation-btn').textContent = 'Pause Slider Animation';
+    document.getElementById("pause-animation-btn").textContent =
+      "Pause Slider Animation";
   } else {
     // Pause animation
     clearInterval(sliderAnimationInterval);
-    document.getElementById('pause-animation-btn').textContent = 'Resume Slider Animation';
+    document.getElementById("pause-animation-btn").textContent =
+      "Resume Slider Animation";
   }
   isPaused = !isPaused;
 });
-
-
-
 
 function createPassTypePieChart() {
   d3.select("#pass-type-pie-chart").selectAll("*").remove(); // clear previous chart
@@ -2147,8 +2170,6 @@ const toggleButton = document.getElementById("toggle-heatmap");
 // pitch4.style("display", "none");
 // toggleButton.textContent = "Toggle Passmap"; // Since heatmap is showing
 
-
-
 toggleButton.addEventListener("click", () => {
   if (heatContainer.style("display") === "none") {
     // Show heatmap, hide passes
@@ -2313,84 +2334,86 @@ barSvg
   .style("font-size", "16px")
   .style("font-weight", "bold")
   .text("Average Pass Sequence xG by Number of Passes in Sequence");
-  const lastBar = passPositionData[passPositionData.length - 1];
-  const xLastBar = xPassPosition(lastBar.position) + xPassPosition.bandwidth() / 2;
-  const yLastBar = yPassPosition(lastBar.avg);
-  
-  // Draw arrow line
-  barSvg
-    .append("line")
-    .attr("x1", xLastBar)
-    .attr("y1", yLastBar + 10)
-    .attr("x2", xLastBar - 60)
-    .attr("y2", yLastBar + 50)
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-    .attr("marker-end", "url(#arrow)");
-  
-  // Add arrowhead marker definition
-  barSvg
-    .append("defs")
-    .append("marker")
-    .attr("id", "arrow")
-    .attr("viewBox", "0 0 10 10")
-    .attr("refX", 0)
-    .attr("refY", 5)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("orient", "auto-start-reverse")
-    .append("path")
-    .attr("d", "M 0 0 L 10 5 L 0 10 z")
-    .attr("fill", "black");
-  
-  // Add annotation text
-  barSvg
-    .append("text")
-    .attr("x", xLastBar - 170)
-    .attr("y", yLastBar + 70)
-    .attr("text-anchor", "start")
-    .style("font-size", "12px")
-    .style("font-weight", "bold")
-    .text("75th percentile of pass sequence xGs");
-  const firstBar = passPositionData[0];
-  const xFirstBar = xPassPosition(firstBar.position) + xPassPosition.bandwidth() / 2;
-  const yFirstBar = yPassPosition(firstBar.avg);
-  
-  // Draw arrow line
-  barSvg
-    .append("line")
-    .attr("x1", xFirstBar)
-    .attr("y1", yFirstBar + 10)
-    .attr("x2", xFirstBar + 60)
-    .attr("y2", yFirstBar - 50)
-    .attr("stroke", "black")
-    .attr("stroke-width", 2)
-    .attr("marker-end", "url(#arrow)");
-  
-  // Add arrowhead marker definition
-  // barSvg
-  //   .append("defs")
-  //   .append("marker")
-  //   .attr("id", "arrow")
-  //   .attr("viewBox", "0 0 10 10")
-  //   .attr("refX", 0)
-  //   .attr("refY", 5)
-  //   .attr("markerWidth", 6)
-  //   .attr("markerHeight", 6)
-  //   .attr("orient", "auto-start-reverse")
-  //   .append("path")
-  //   .attr("d", "M 0 0 L 10 5 L 0 10 z")
-  //   .attr("fill", "black");
-  
-  // Add annotation text
-  barSvg
-    .append("text")
-    .attr("x", xFirstBar + 10)
-    .attr("y", yFirstBar - 70)
-    .attr("text-anchor", "start")
-    .style("font-size", "12px")
-    .style("font-weight", "bold")
-    .text("55th percentile of pass sequence xGs");
+const lastBar = passPositionData[passPositionData.length - 1];
+const xLastBar =
+  xPassPosition(lastBar.position) + xPassPosition.bandwidth() / 2;
+const yLastBar = yPassPosition(lastBar.avg);
+
+// Draw arrow line
+barSvg
+  .append("line")
+  .attr("x1", xLastBar)
+  .attr("y1", yLastBar + 10)
+  .attr("x2", xLastBar - 60)
+  .attr("y2", yLastBar + 50)
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("marker-end", "url(#arrow)");
+
+// Add arrowhead marker definition
+barSvg
+  .append("defs")
+  .append("marker")
+  .attr("id", "arrow")
+  .attr("viewBox", "0 0 10 10")
+  .attr("refX", 0)
+  .attr("refY", 5)
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto-start-reverse")
+  .append("path")
+  .attr("d", "M 0 0 L 10 5 L 0 10 z")
+  .attr("fill", "black");
+
+// Add annotation text
+barSvg
+  .append("text")
+  .attr("x", xLastBar - 170)
+  .attr("y", yLastBar + 70)
+  .attr("text-anchor", "start")
+  .style("font-size", "12px")
+  .style("font-weight", "bold")
+  .text("75th percentile of pass sequence xGs");
+const firstBar = passPositionData[0];
+const xFirstBar =
+  xPassPosition(firstBar.position) + xPassPosition.bandwidth() / 2;
+const yFirstBar = yPassPosition(firstBar.avg);
+
+// Draw arrow line
+barSvg
+  .append("line")
+  .attr("x1", xFirstBar)
+  .attr("y1", yFirstBar + 10)
+  .attr("x2", xFirstBar + 60)
+  .attr("y2", yFirstBar - 50)
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("marker-end", "url(#arrow)");
+
+// Add arrowhead marker definition
+// barSvg
+//   .append("defs")
+//   .append("marker")
+//   .attr("id", "arrow")
+//   .attr("viewBox", "0 0 10 10")
+//   .attr("refX", 0)
+//   .attr("refY", 5)
+//   .attr("markerWidth", 6)
+//   .attr("markerHeight", 6)
+//   .attr("orient", "auto-start-reverse")
+//   .append("path")
+//   .attr("d", "M 0 0 L 10 5 L 0 10 z")
+//   .attr("fill", "black");
+
+// Add annotation text
+barSvg
+  .append("text")
+  .attr("x", xFirstBar + 10)
+  .attr("y", yFirstBar - 70)
+  .attr("text-anchor", "start")
+  .style("font-size", "12px")
+  .style("font-weight", "bold")
+  .text("55th percentile of pass sequence xGs");
 
 const allPassMetaDataWithPosition = allPassMetaData.flatMap((seq) =>
   seq.map((pass, i) => ({
@@ -2578,13 +2601,12 @@ svgStacked
 // Add annotation text
 svgStacked
   .append("text")
-  .attr("x",  425)
-  .attr("y",  305)
+  .attr("x", 425)
+  .attr("y", 305)
   .attr("text-anchor", "start")
   .style("font-size", "13px")
   .style("font-weight", "bold")
   .text("Sequence Ending Passes!");
-
 
 const flat_passes = euroSequences.map(getPassLocationsWithMetadata).flat();
 const pitch6 = d3.select("#pitch6");
@@ -2594,13 +2616,13 @@ const fieldWidth = 120;
 const fieldHeight = 80;
 const xBins = 12;
 const yBins = 8;
-const binWidth = fieldWidth / xBins;   // 10
+const binWidth = fieldWidth / xBins; // 10
 const binHeight = fieldHeight / yBins;
 const binnedPasses = Array.from({ length: xBins }, () =>
   Array.from({ length: yBins }, () => [])
 );
 
-flat_passes.forEach(pass => {
+flat_passes.forEach((pass) => {
   const [x, y] = pass.start;
   const xi = Math.min(Math.floor(x / binWidth), xBins - 1);
   const yi = Math.min(Math.floor(y / binHeight), yBins - 1);
@@ -2619,7 +2641,7 @@ for (let xi = 0; xi < xBins; xi++) {
     const counts = {};
 
     // Accumulate sequence_pred per pass type
-    passes.forEach(p => {
+    passes.forEach((p) => {
       const type = p.type;
       const pred = parseFloat(p.sequence_pred);
 
@@ -2634,7 +2656,8 @@ for (let xi = 0; xi < xBins; xi++) {
     let maxMean = -Infinity;
 
     for (const type in predSums) {
-      if (counts[type] >= 3) { // Only consider if at least 2 passes
+      if (counts[type] >= 3) {
+        // Only consider if at least 2 passes
         const mean = predSums[type] / counts[type];
         if (mean > maxMean) {
           maxMean = mean;
@@ -2647,11 +2670,19 @@ for (let xi = 0; xi < xBins; xi++) {
   }
 }
 
-const passTypeColor = d3.scaleOrdinal()
-.domain([
-  "Pass", "Through Ball", "Switch", "Cross", "Free Kick", "Cut Back", "Corner", "Throw In"
-])
-.range(d3.schemeCategory10);
+const passTypeColor = d3
+  .scaleOrdinal()
+  .domain([
+    "Pass",
+    "Through Ball",
+    "Switch",
+    "Cross",
+    "Free Kick",
+    "Cut Back",
+    "Corner",
+    "Throw In",
+  ])
+  .range(d3.schemeCategory10);
 
 const cellWidth = 120 / xBins;
 const cellHeight = 80 / yBins;
@@ -2662,7 +2693,7 @@ const angleDistanceStats = Array.from({ length: xBins }, () =>
   Array.from({ length: yBins }, () => ({
     weightedAngle: 0,
     weightedDistance: 0,
-    totalWeight: 0
+    totalWeight: 0,
   }))
 );
 
@@ -2676,7 +2707,7 @@ function getAngleAndDistance(start, end) {
 }
 
 // Compute weighted stats
-flat_passes.forEach(pass => {
+flat_passes.forEach((pass) => {
   const [x, y] = pass.start;
   const binX = Math.floor(x / binWidth);
   const binY = Math.floor(y / binHeight);
@@ -2708,14 +2739,15 @@ for (let xi = 0; xi < xBins; xi++) {
     }
   }
 }
-pitch6.append("defs")
+pitch6
+  .append("defs")
   .append("marker")
   .attr("id", "arrowType")
   .attr("viewBox", "0 -5 10 10")
-  .attr("refX", 1)            // smaller refX shifts the arrowhead closer to the line end
+  .attr("refX", 1) // smaller refX shifts the arrowhead closer to the line end
   .attr("refY", 0)
-  .attr("markerWidth", 3)     // smaller width
-  .attr("markerHeight", 3)    // smaller height
+  .attr("markerWidth", 3) // smaller width
+  .attr("markerHeight", 3) // smaller height
   .attr("orient", "auto")
   .append("path")
   .attr("d", "M0,-5L10,0L0,5")
@@ -2725,20 +2757,22 @@ for (let xi = 0; xi < xBins; xi++) {
   for (let yi = 0; yi < yBins; yi++) {
     const type = bestPassTypePerBin[xi]?.[yi] || "Unknown";
 
-    pitch6.append("rect")
+    pitch6
+      .append("rect")
       .attr("x", xi * cellWidth)
       .attr("y", yi * cellHeight)
       .attr("width", cellWidth)
       .attr("height", cellHeight)
       .attr("fill", passTypeColor(type))
-      .attr('opacity', 0.5)
+      .attr("opacity", 0.5)
       .attr("class", "bin-cell");
 
-    pitch6.append("text")
+    pitch6
+      .append("text")
       .attr("x", xi * cellWidth + cellWidth / 2)
       .attr("y", yi * cellHeight + cellHeight / 2)
       .text(type) // first word only to avoid overflow
-      .attr('font-size', '1px')
+      .attr("font-size", "1px")
       .attr("class", "bin-label");
   }
 }
@@ -2756,7 +2790,8 @@ for (let xi = 0; xi < xBins; xi++) {
     const dyTrue = Math.sin(bin.avgAngle) * unscaledLen;
 
     // Hover-visible unnormalized arrow (initially hidden)
-    const hoverArrow = pitch6.append("line")
+    const hoverArrow = pitch6
+      .append("line")
       .attr("x1", centerX)
       .attr("y1", centerY)
       .attr("x2", centerX + dxTrue)
@@ -2767,7 +2802,8 @@ for (let xi = 0; xi < xBins; xi++) {
       .style("display", "none");
 
     // Transparent rect for hover
-    pitch6.append("rect")
+    pitch6
+      .append("rect")
       .attr("x", xi * binWidth)
       .attr("y", yi * binHeight)
       .attr("width", binWidth)

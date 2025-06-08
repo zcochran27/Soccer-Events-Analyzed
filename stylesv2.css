@@ -4,6 +4,7 @@ html {
   font-family: "Lato", sans-serif;
   padding: 0;
   margin: 0;
+  overflow-x: hidden;
 }
 
 .intro {
@@ -46,17 +47,18 @@ html {
   }
   .statsbomb-image {
     position: absolute;
-    top: 800px;       /* adjust as needed */
-    left: 40px;      /* adjust as needed */
-    width: 400px;    /* size of overlay image */
-    z-index: 10;     /* higher z-index = in front */
+    top: 800px; /* adjust as needed */
+    left: 40px; /* adjust as needed */
+    width: 400px; /* size of overlay image */
+    z-index: 10; /* higher z-index = in front */
     pointer-events: none;
   }
 }
 
-#predictBtn, #predictBtn2 {
+#predictBtn,
+#predictBtn2 {
   position: static;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background-color: gray;
   color: white;
   padding: 8px 16px;
@@ -64,23 +66,24 @@ html {
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  font-weight: bold;
   z-index: auto;
 }
 
-#predictBtn.active, #predictBtn2.active {
+#predictBtn.active,
+#predictBtn2.active {
   background-color: #28a745;
 }
 
-#undoBtn, #undoBtn2 {
+#undoBtn,
+#undoBtn2 {
   position: static;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background-color: #e74c3c;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
+
   z-index: auto;
 }
 
@@ -95,11 +98,27 @@ body {
   box-sizing: border-box; /* include padding in size */
   text-align: center; /* center text inside elements */
 }
-#pitchCanvas, #pitchCanvas2 {
+#pitchCanvas,
+#pitchCanvas2 {
   width: 100%;
   height: auto;
   aspect-ratio: 3/2;
   background: rgb(141, 208, 139);
+}
+
+.country-sequence {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin: auto;
+  padding: 1rem;
+  align-items: center;
+  justify-content: center;
+  background-color: #0050a020;
+  color: #0050a0;
+  font-weight: 600;
+  line-height: 25px;
+  border-radius: 8px;
 }
 
 .line {
@@ -142,8 +161,8 @@ body {
 }
 
 .step.active {
-  background: #d0e7ff;         /* Light Euro blue */
-  border-left-color: #0050a0;  /* Deep UEFA blue */
+  background: #d0e7ff; /* Light Euro blue */
+  border-left-color: #0050a0; /* Deep UEFA blue */
 }
 .graphic {
   width: 60%;
@@ -236,7 +255,7 @@ body {
 
 #controls button {
   cursor: pointer;
-  background: #00796b;
+  background: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
@@ -268,6 +287,23 @@ body {
   width: 100%;
   text-align: center;
   padding: 1rem;
+}
+
+#pitch3-container div > button {
+  padding: 0.5rem 0.8rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  background-color: white;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease;
+}
+
+#pitch3-container div > button:hover {
+  background-color: #007bff;
+  color: white;
 }
 
 /* Heatmap placeholder */
@@ -382,13 +418,17 @@ body {
   justify-content: center;
 }
 #bar-chart {
- /* Allow them to grow equally */
- width: 100%;
- height: 70%;
+  /* Allow them to grow equally */
+  width: 100%;
   min-height: 400px;
   min-width: 400px;
   margin-top: 4rem; /* Ensures visibility on load */
 }
+
+#bar-chart svg {
+  padding: 2rem 1rem;
+}
+
 .arc path:hover {
   opacity: 0.8;
   stroke: #333;
@@ -435,13 +475,24 @@ body {
   flex-shrink: 0;
   border: 1px solid #ccc;
 }
-#pitch4, #pitch4Step1, #pitch4Step2, #pitch4Step3, #pitch4Step4 {
+#pitch4,
+#pitch4Step1,
+#pitch4Step2,
+#pitch4Step3,
+#pitch4Step4 {
   max-width: 700px;
 }
-#pitch5, #pitch5Step1, #pitch5Step2, #pitch5Step3, #pitch5Step4 {
+#pitch5,
+#pitch5Step1,
+#pitch5Step2,
+#pitch5Step3,
+#pitch5Step4 {
   max-width: 700px;
 }
-#toggle-heatmapStep1, #toggle-heatmapStep2, #toggle-heatmapStep3, #toggle-heatmapStep4 {
+#toggle-heatmapStep1,
+#toggle-heatmapStep2,
+#toggle-heatmapStep3,
+#toggle-heatmapStep4 {
   margin-bottom: 2rem;
   margin-top: 2rem;
 }
@@ -470,8 +521,25 @@ body {
   margin-left: 1rem;
 }
 #slider-container {
-  margin: 3rem;
+  margin: 2rem;
 }
+
+#slider-container svg {
+  padding: 0.5rem;
+}
+
+.toggle-heatmap {
+  padding: 0.5rem 0.8rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: white;
+  background-color: #007bff;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease;
+}
+
 .diagonal-container {
   display: block;
   grid-template-columns: 1fr 1fr;
@@ -504,16 +572,32 @@ body {
 }
 #controls-container {
   display: flex;
-  flex-direction: row;
-  gap: 1rem;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 1rem;
-  margin-left: 1rem;
 }
+
+.animation-controls {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.animation-controls button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
 .bin-label {
   font-size: 1.5px;
   text-anchor: middle;
-  dominant-baseline: central;  /* 👈 Key for vertical centering */
+  dominant-baseline: central; /* 👈 Key for vertical centering */
   fill: white;
   pointer-events: none;
 }
@@ -522,7 +606,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px; 
+  gap: 4px;
 }
 #graphic-item-14 h2 {
   font-size: 2rem;
@@ -571,4 +655,66 @@ body {
   transition: opacity 0.2s;
   max-width: 200px;
   z-index: 1000;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+}
+
+#nameInput {
+  padding: 0.5rem 0.8rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  background-color: white;
+  cursor: text;
+  min-width: 120px;
+  transition: all 0.2s ease;
+}
+
+#submitBtn {
+  padding: 0.5rem 0.8rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: white;
+  background-color: #007bff;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease;
+}
+
+.name-div {
+  display: none;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+#prediction-container2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer {
+  width: 100%;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.footer p {
+  max-width: 60%;
 }

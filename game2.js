@@ -16,7 +16,6 @@ let collectedStats = []; // Array to store all submitted data
 
 let showPromptArrow = true;
 
-
 function drawPitch() {
   const ctx = canvas.getContext("2d");
 
@@ -130,7 +129,7 @@ function drawPitch() {
     });
   });
 
-    if (collectedStats.length === 0) {
+  if (collectedStats.length === 0) {
     const start = scaleToCanvas(60, 40); // center of pitch
     const end = scaleToCanvas(100, 40); // pointing toward right goal
     drawArrow(start[0], start[1], end[0], end[1], "red");
@@ -140,10 +139,9 @@ function drawPitch() {
     ctx.textAlign = "center";
     ctx.fillText("Attack this goal →", (start[0] + end[0]) / 2, end[1] - 10);
   }
-
 }
 
-function drawArrow(fromX, fromY, toX, toY, color="white") {
+function drawArrow(fromX, fromY, toX, toY, color = "white") {
   const headlen = 10;
   const angle = Math.atan2(toY - fromY, toX - fromX);
   ctx.strokeStyle = color;
@@ -230,7 +228,11 @@ canvas.addEventListener("click", (event) => {
       ctx.fillStyle = "black";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
-      ctx.fillText(passHeight + " " + passType + " (" + (passNumber) + ")", (sx1 + cx) / 2, (sy1 + cy) / 2 - 10);
+      ctx.fillText(
+        passHeight + " " + passType + " (" + passNumber + ")",
+        (sx1 + cx) / 2,
+        (sy1 + cy) / 2 - 10
+      );
       collectedStats.push({
         start: startPos,
         end: endPos,
@@ -239,7 +241,7 @@ canvas.addEventListener("click", (event) => {
         pass_height: passHeight,
       });
       showPromptArrow = false;
-      drawPitch(); 
+      drawPitch();
       collectedStats.forEach(drawEventFromStats);
       drawDribbles();
 
@@ -289,8 +291,12 @@ canvas.addEventListener("click", (event) => {
       ctx.textAlign = "center";
       passType = document.getElementById("passType2").value;
       passHeight = document.getElementById("passHeight2").value;
-      ctx.fillText(passHeight + " " + passType + " (" + (passNumber) + ")", (sx3 + cx) / 2, (sy3 + cy) / 2 - 10);
-      
+      ctx.fillText(
+        passHeight + " " + passType + " (" + passNumber + ")",
+        (sx3 + cx) / 2,
+        (sy3 + cy) / 2 - 10
+      );
+
       collectedStats.push({
         start: startPos,
         end: endPos,
@@ -317,7 +323,7 @@ function drawEventFromStats(event, index) {
   ctx.arc(sx, sy, 6, 0, 2 * Math.PI);
   ctx.fillStyle = "green";
   ctx.fill();
-  
+
   ctx.beginPath();
   ctx.arc(ex, ey, 6, 0, 2 * Math.PI);
   ctx.fillStyle = "red";
@@ -330,7 +336,11 @@ function drawEventFromStats(event, index) {
   ctx.fillStyle = "black";
   ctx.font = "16px Arial";
   ctx.textAlign = "center";
-  ctx.fillText(event.pass_height + " " + event.pass_type + " (" + (index + 1) + ")", midX, midY - 10);
+  ctx.fillText(
+    event.pass_height + " " + event.pass_type + " (" + (index + 1) + ")",
+    midX,
+    midY - 10
+  );
 
   lastRedDot = [ex, ey];
 }
@@ -387,62 +397,64 @@ document.getElementById("undoBtn2").addEventListener("click", () => {
   lastEndPos = collectedStats.at(-1).end;
 });
 
-
 document.getElementById("predictBtn2").addEventListener("click", async () => {
-    if (collectedStats.length === 0) {
-      alert("Please create at least one pass before predicting.");
-      return;
-    }
-    const reversedStats = collectedStats.reverse();
-    const formatted = reversedStats.flatMap(
-      ({ start, end, pass_type, pass_height }) => [
-        start[0],
-        start[1],
-        end[0],
-        end[1],
-        1,
-        pass_type,
-        pass_height,
-      ]
-    );
-    const resultBox = document.getElementById("predictionResult2");
-  
-    resultBox.innerText = "";
-    try {
-      const response = await fetch(
-        "https://soccer-events-analyzed.onrender.com/predict",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ features: formatted }),
-        }
-      );
-  
-      const result = await response.json();
-      if (result.prediction !== undefined) {
-        resultBox.innerText = `Probability of Scoring Off Sequence: ${result.prediction.toFixed(
-          4
-        )}`;
-      } else {
-        resultBox.innerText = `Error: ${result.error}`;
-      }
-    } catch (error) {
-      resultBox.innerText = `Fetch error: ${error}`;
-    } finally {
-      collectedStats = collectedStats.reverse();
-    }
-  });
-  
-  function updatePredictBtn() {
-    const predictBtn = document.getElementById("predictBtn2");
-    if (collectedStats.length > 0) {
-      predictBtn.classList.add("active");
-      predictBtn.disabled = false;
-    } else {
-      predictBtn.classList.remove("active");
-      predictBtn.disabled = true;
-    }
+  if (collectedStats.length === 0) {
+    alert("Please create at least one pass before predicting.");
+    return;
   }
+  const reversedStats = collectedStats.reverse();
+  const formatted = reversedStats.flatMap(
+    ({ start, end, pass_type, pass_height }) => [
+      start[0],
+      start[1],
+      end[0],
+      end[1],
+      1,
+      pass_type,
+      pass_height,
+    ]
+  );
+  const resultBox = document.getElementById("predictionResult2");
+  const nameDiv = document.getElementById("name-div");
 
-  drawPitch();
-  updatePredictBtn();
+  resultBox.innerText = "";
+  try {
+    const response = await fetch(
+      "https://soccer-events-analyzed.onrender.com/predict",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ features: formatted }),
+      }
+    );
+
+    const result = await response.json();
+    if (result.prediction !== undefined) {
+      resultBox.innerText = `Probability of Scoring Off Sequence: ${result.prediction.toFixed(
+        4
+      )}`;
+      nameDiv.style.display = "flex";
+      localStorage.setItem("prediction", result.prediction.toFixed(4));
+    } else {
+      resultBox.innerText = `Error: ${result.error}`;
+    }
+  } catch (error) {
+    resultBox.innerText = `Fetch error: ${error}`;
+  } finally {
+    collectedStats = collectedStats.reverse();
+  }
+});
+
+function updatePredictBtn() {
+  const predictBtn = document.getElementById("predictBtn2");
+  if (collectedStats.length > 0) {
+    predictBtn.classList.add("active");
+    predictBtn.disabled = false;
+  } else {
+    predictBtn.classList.remove("active");
+    predictBtn.disabled = true;
+  }
+}
+
+drawPitch();
+updatePredictBtn();

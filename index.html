@@ -7,6 +7,7 @@
     <script type="module" src="passes.js"></script>
     <script type="module" src="game2.js"></script>
     <script type="module" src="crazyGraphSteps.js"></script>
+    <script type="module" src="leaderboard.js"></script>
     <link rel="stylesheet" href="stylesv2.css" />
     <link rel="stylesheet" href="goals/goals.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -107,7 +108,7 @@
                 <svg id='pitch4Step1' width="900" height="600" viewBox="0 0 120 80"
                     preserveAspectRatio="xMidYMid meet"></svg>
 
-                <button id="toggle-heatmapStep1">Toggle Heatmap</button>
+                <button id="toggle-heatmapStep1" class="toggle-heatmap">Toggle Heatmap</button>
 
                 <div id="pie-containers">
                     <div id="pass-type-pie-chartStep1"></div>
@@ -124,7 +125,7 @@
                 </div>
                 <svg id='pitch4Step2' width="900" height="600" viewBox="0 0 120 80"
                     preserveAspectRatio="xMidYMid meet"></svg>
-                <button id="toggle-heatmapStep2">Toggle Heatmap</button>
+                <button id="toggle-heatmapStep2" class="toggle-heatmap">Toggle Heatmap</button>
                 <div id="pie-containers">
                     <div id="pass-type-pie-chartStep2"></div>
                     <div id="pass-height-pie-chartStep2"></div>
@@ -140,7 +141,7 @@
                 </div>
                 <svg id='pitch4Step3' width="900" height="600" viewBox="0 0 120 80"
                     preserveAspectRatio="xMidYMid meet"></svg>
-                <button id="toggle-heatmapStep3">Toggle Heatmap</button>
+                <button id="toggle-heatmapStep3" class="toggle-heatmap">Toggle Heatmap</button>
                 <div id="pie-containers">
                     <div id="pass-type-pie-chartStep3"></div>
                     <div id="pass-height-pie-chartStep3"></div>
@@ -156,7 +157,7 @@
                 </div>
                 <svg id='pitch4Step4' width="900" height="600" viewBox="0 0 120 80"
                     preserveAspectRatio="xMidYMid meet"></svg>
-                <button id="toggle-heatmapStep4">Toggle Heatmap</button>
+                <button id="toggle-heatmapStep4" class="toggle-heatmap">Toggle Heatmap</button>
                 <div id="pie-containers">
                     <div id="pass-type-pie-chartStep4"></div>
                     <div id="pass-height-pie-chartStep4"></div>
@@ -171,10 +172,13 @@
                 <svg id='pitch4' width="900" height="600" viewBox="0 0 120 80"
                     preserveAspectRatio="xMidYMid meet"></svg>
                 <div id="controls-container">
+                    <div id="slider-container"></div>
+                    <div class="animation-controls">
+
                     <button id="start-animation-btn">Start Slider Animation</button>
                     <button id="pause-animation-btn">Pause Slider Animation</button>
-                    <button id="toggle-heatmap">Toggle Heatmap</button>
-                    <div id="slider-container"></div>
+                    <button id="toggle-heatmap" class="toggle-heatmap">Toggle Heatmap</button>
+                </div>
                 </div>
                 <div id="pie-containers">
                     <div id="pass-type-pie-chart"></div>
@@ -227,6 +231,11 @@
                     </div>
                     <div id="prediction-container2">
                         <p id="predictionResult2"></p>
+                        <div id="name-div" class="name-div">
+
+                            <input type="text" id="nameInput" placeholder="Enter your name">
+                            <button id="submitBtn">Submit</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -240,7 +249,7 @@
                     the pass sequence that led to his shot?</h2>
                 <h2>In the next sections we will dive into this chance and see how we can use our model to analyze the
                     pass sequence.</h2>
-                <img src="assets/uefa-euro-2024-logo.jpg" alt="UEFA Euro 2024 Logo" style="width: 50%; height: auto;">
+                <img src="assets/uefa-euro-2024-logo.jpg" alt="UEFA Euro 2024 Logo" style="width: 50%; height: auto; border-radius: 20px;">
             </div>
             <div class="step" id="step-2">
                 <h1>How do we define a pass sequence?</h1> <br></br>
@@ -393,8 +402,13 @@
                 <h1 style="text-align: center;">Pass Sequence Game pt. 2</h1>
                 <h2 style="text-align: center">Given all the insights we've gathered, how would you approach creating a
                     successful pass sequence? Try out our game again and see if you can improve your score!</h2>
+                <div id="leaderboard"></div>
             </div>
         </div>
+    </div>
+    <div class="footer">
+        <h2>About us</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ut quae nam vel vitae, molestiae nemo ipsam praesentium cupiditate facilis tempore modi, omnis possimus. Similique aspernatur quos laboriosam molestias delectus vero blanditiis praesentium necessitatibus. Consectetur, qui alias! Ad qui officia quam id aperiam soluta perferendis consectetur eveniet itaque accusantium facere, harum est dolores molestias labore fuga distinctio iusto sapiente minus voluptatum? Provident culpa, illum officia delectus, autem minima, fugiat distinctio quis maxime dolores illo. Minima quibusdam assumenda, suscipit eaque deleniti atque aspernatur, cumque excepturi, natus ratione perferendis animi hic esse inventore nemo voluptatum! Repellendus dignissimos iure eaque aperiam excepturi illo quod, quidem voluptatem, est, vel itaque ducimus nulla? Adipisci, esse, omnis praesentium ipsam deserunt neque enim ratione qui, eaque a sunt beatae voluptas laudantium facere modi fugiat? Assumenda, iste! Laborum enim quos temporibus provident unde molestias sit consectetur laboriosam asperiores possimus quia ipsa eligendi ea quod, a porro, corporis cum est? Earum, aperiam! Adipisci id nisi quam ipsum sequi repellendus veritatis ipsam quaerat consequuntur dolor. Ad fugiat rem culpa ipsam ea aut consequuntur placeat ducimus optio, consequatur sit a aspernatur laborum exercitationem quae saepe dicta tempora quam repudiandae beatae provident doloremque! Placeat totam ratione labore, reprehenderit suscipit ex earum ducimus consequatur omnis fugiat incidunt ipsum nam sed possimus dolores, repellat nihil animi perspiciatis. Fugiat possimus ad accusantium alias in placeat, quis nam eligendi doloremque obcaecati. Mollitia fugit aspernatur consequatur natus quam molestiae, harum necessitatibus nulla tempore culpa, vel repellat obcaecati, placeat consectetur magni quod assumenda officia asperiores. Odio amet recusandae ducimus, praesentium fugiat magnam illum nesciunt enim ipsa rerum temporibus! Id exercitationem recusandae quasi debitis distinctio voluptate natus odit facere quia dolorem, labore asperiores alias consequuntur sequi quaerat unde culpa necessitatibus doloremque! Eum veritatis unde veniam ullam quos ipsam modi excepturi nesciunt voluptas, fuga, ipsum optio impedit error omnis est suscipit molestias ad mollitia nulla vitae? Incidunt a vel vero dolore ipsam. Quo delectus eaque, perspiciatis voluptatum maxime numquam dicta ad odio sit labore animi repudiandae pariatur minima eligendi earum ex sunt voluptate, sint mollitia deserunt. Tempora illo ipsa beatae, dignissimos assumenda eveniet architecto, voluptates exercitationem deserunt in aut culpa esse facilis. Ducimus tempore, at qui, ratione unde, nihil omnis recusandae molestias cupiditate ipsa deserunt id nulla dicta debitis adipisci quas eveniet illo vero veritatis ut aspernatur. Quos in nemo ipsum atque a dolore commodi exercitationem dolor maxime saepe accusantium cupiditate, natus totam praesentium beatae quasi quas eveniet porro? Necessitatibus officia maxime et. Consequuntur aut ipsam voluptate, quo quasi earum doloribus totam voluptatibus obcaecati sequi facere hic expedita impedit temporibus adipisci repellendus, praesentium minima odio, quia dolore rerum reiciendis quibusdam odit. Sit, adipisci ullam, aspernatur voluptas illo exercitationem magnam tempora quidem saepe similique nesciunt, ratione vel soluta sint commodi optio? Placeat omnis architecto, esse, iure voluptatibus ea ipsam amet neque laudantium, suscipit earum. Modi repellendus eius ipsam voluptate minima omnis dolores amet libero perspiciatis reiciendis et ut in cupiditate aut nulla, veritatis ipsa nemo autem officiis! Fugit quod quas beatae iste recusandae laboriosam libero, quaerat necessitatibus, officia consequuntur minus, corporis ad.</p>
     </div>
 </body>
 
