@@ -593,3 +593,10 @@ body {
   margin-right: auto;
   text-align: center;
 }
+#legendStep1,
+#legendStep2,
+#legendStep3,
+#legendStep4,
+#legend {
+  all: unset;
+}

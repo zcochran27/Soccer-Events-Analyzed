@@ -788,7 +788,9 @@ svg2
 //   else if (d.pass_height === 2) d.pass_height = "High";
 //   return d;
 // });
+console.log(euroSequences);
 const topTenSequences = euroSequences
+  .filter(seq => parseInt(seq.all_successful) === 1)
   .sort((a, b) => b.sequence_pred - a.sequence_pred)
   .slice(0, 10);
 
@@ -1471,7 +1473,8 @@ const heatContainer = d3.select("#heatmap-container");
 // Clear any existing elements
 pitch4.selectAll("*").remove();
 drawFootballPitch(pitch4);
-heatContainer.style("display", "none");
+heatContainer.style("display", "flex");
+pitch4.style("display", "none");
 
 // Get the best sequence for each possession
 const teamsLastPreds = d3.rollup(
@@ -2141,9 +2144,9 @@ function createHeatmap() {
   );
 
   //changing max difference
-  //const maxDiff = d3.max(difference.flat().map(Math.abs));
+  const maxDiff = d3.max(difference.flat().map(Math.abs));
   //constant max difference
-  const maxDiff = 4.5;
+  //const maxDiff = 4.5;
 
   const colorDiff = d3
     .scaleDiverging()
