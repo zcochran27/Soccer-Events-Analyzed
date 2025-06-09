@@ -230,17 +230,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 20px;
 }
 
-.canvas-container {
-  margin-bottom: 1rem;
-}
+
 
 #controls {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
-  margin-top: 1rem;
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
@@ -484,6 +482,10 @@ body {
   border-radius: 3px;
   flex-shrink: 0;
   border: 1px solid #ccc;
+}
+#pitch1,
+#pitch2 {
+  max-width: 850px;
 }
 #pitch4,
 #pitch4Step1,
