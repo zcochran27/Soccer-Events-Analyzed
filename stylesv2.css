@@ -218,7 +218,8 @@ body {
 #pitch5Step1,
 #pitch5Step2,
 #pitch5Step3,
-#pitch5Step4 {
+#pitch5Step4,
+#pitch33{
   width: 100%;
   height: auto;
   max-height: 90vh;
@@ -757,4 +758,19 @@ body {
 
 .footer p {
   max-width: 60%;
+}
+
+#learning-commentary {
+  display: block;
+  background-color: #f5f7fa;
+  color: #333;
+  padding: 0.5em 1em;
+  margin: 1em;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  font-family: 'Segoe UI', sans-serif;
+  width: 40em;
 }
