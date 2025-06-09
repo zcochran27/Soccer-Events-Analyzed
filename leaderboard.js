@@ -64,7 +64,7 @@ function getLeaderboard() {
           const row = document.createElement("tr");
           row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td>${
             team.score
-          }</td>`;
+          }%</td>`;
           table.appendChild(row);
         });
 
