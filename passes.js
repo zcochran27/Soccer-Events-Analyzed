@@ -279,8 +279,26 @@ window.addEventListener("load", () => {
   }
 });
 
+function getDribblesFromPasses(passes) {
+  const dribbles = [];
+
+  for (let i = 0; i < passes.length - 1; i++) {
+    const currentPass = passes[i];
+    const nextPass = passes[i + 1];
+
+    dribbles.push({
+      start: currentPass.end,
+      end: nextPass.start,
+      type: "Dribble",
+    });
+  }
+
+  return dribbles;
+}
+
 const lamineChanceLast5 = await fetch("lamine_chance_last_5.json");
 const passes = await lamineChanceLast5.json();
+const lamineDribbles = getDribblesFromPasses(passes);
 let passesV2 = passes.slice(0, passes.length - 1);
 function drawFootballPitch(svg) {
   // Pitch Boundary
@@ -530,6 +548,17 @@ svg1
   .on("mouseout", () => {
     tooltip1.style("opacity", 0);
   });
+svg1
+  .selectAll(".dribble")
+  .data(lamineDribbles)
+  .join("line")
+  .attr("class", "dribble")
+  .attr("x1", (d) => d.start[0])
+  .attr("y1", (d) => d.start[1])
+  .attr("x2", (d) => d.end[0])
+  .attr("y2", (d) => d.end[1])
+  .attr("stroke-width", 0.5)
+  .attr("stroke-dasharray", "1 1");
 const pathPoints = passes.flatMap((pass) => [pass.start, pass.end]);
 
 // Convert [x, y] pairs to {x, y} objects
@@ -704,7 +733,17 @@ svg2
   })
   .attr("stroke-width", (d, i) => 0.5 + i * 0.1)
   .attr("marker-end", (d, i) => `url(#arrow2-${i})`);
-
+svg2
+  .selectAll(".dribble")
+  .data(lamineDribbles)
+  .join("line")
+  .attr("class", "dribble")
+  .attr("x1", (d) => d.start[0])
+  .attr("y1", (d) => d.start[1])
+  .attr("x2", (d) => d.end[0])
+  .attr("y2", (d) => d.end[1])
+  .attr("stroke-width", 0.5)
+  .attr("stroke-dasharray", "1 1");
 svg2
   .append("circle")
   .attr("cx", startPoint[0])
@@ -882,22 +921,6 @@ function getPassLocationsWithMetadata(sequence) {
   return passes;
 }
 
-function getDribblesFromPasses(passes) {
-  const dribbles = [];
-
-  for (let i = 0; i < passes.length - 1; i++) {
-    const currentPass = passes[i];
-    const nextPass = passes[i + 1];
-
-    dribbles.push({
-      start: currentPass.end,
-      end: nextPass.start,
-      type: "Dribble",
-    });
-  }
-
-  return dribbles;
-}
 const topTenSequencePasses = topTenSequences.map(getPassLocationsWithMetadata);
 const topTenSequenceDribbles = topTenSequencePasses.map(getDribblesFromPasses);
 const svg3 = d3.select("#pitch3");

@@ -193,10 +193,10 @@
                     <div id="slider-container"></div>
                     <div class="animation-controls">
 
-                    <button id="start-animation-btn">Start Slider Animation</button>
-                    <button id="pause-animation-btn">Pause Slider Animation</button>
-                    <button id="toggle-heatmap" class="toggle-heatmap">Toggle Heatmap</button>
-                </div>
+                        <button id="start-animation-btn">Start Slider Animation</button>
+                        <button id="pause-animation-btn">Pause Slider Animation</button>
+                        <button id="toggle-heatmap" class="toggle-heatmap">Toggle Heatmap</button>
+                    </div>
                 </div>
                 <div id="pie-containers">
                     <div id="pass-type-pie-chart"></div>
@@ -285,7 +285,8 @@
                     the pass sequence that led to his shot?</h2>
                 <h2>In the next sections we will dive into this chance and see how we can use our model to analyze the
                     pass sequence.</h2>
-                <img src="assets/uefa-euro-2024-logo.jpg" alt="UEFA Euro 2024 Logo" style="width: 50%; height: auto; border-radius: 20px;">
+                <img src="assets/uefa-euro-2024-logo.jpg" alt="UEFA Euro 2024 Logo"
+                    style="width: 50%; height: auto; border-radius: 20px;">
             </div>
             <div class="step" id="step-2">
                 <h2>How do we define a pass sequence?</h2> <br></br>
@@ -296,13 +297,17 @@
                     pass by it's outcome.</h3>
                 <h3>Try hovering over the passes to see more details!</h3>
                 <br></br>
-                <h2>What do you think is the probability that this pass sequence leads to a goal? Scroll to find out!</h2>
+                <h2>What do you think is the probability that this pass sequence leads to a goal? Scroll to find out!
+                </h2>
             </div>
             <div class="step" id="step-3">
                 <h2 style="text-align: center" id="yamalChancexG">The probability of this pass sequence leading to a
                     goal is Loading...
                 </h2>
-                <h3>From now on, we will be referring to this probability as pass sequence xG (expected goals). This probability is extremely low and is a testament to the ability of Lamine Yamal to create and finish a chance given a bad situation. However, let's look at how the pass sequence xG could change if a different pass was played.
+                <h3>From now on, we will be referring to this probability as pass sequence xG (expected goals). This
+                    probability is extremely low and is a testament to the ability of Lamine Yamal to create and finish
+                    a chance given a bad situation. However, let's look at how the pass sequence xG could change if a
+                    different pass was played.
                     <br><br>
                     Try clicking the different options to see how the pass sequence xG changes!
                     <br></br>
@@ -421,14 +426,16 @@
                 </h2>
             </div>
             <div class="step" id="step-13">
-                <h2 style="text-align: center">The final pass of a sequence is the most important in influencing the
-                    probability of a goal. Here we take a look at all the final passes of a sequence from the 2024 UEFA
-                    Euro Tournament.</h2>
-                <h2>Adjust the slider to control the percentile of the sequence xG for the final passes displayed.
-                    Toggle
-                    the mode to see the distribution of pass end locations. Does this heatmap look familiar? Lastly,
-                    Click on the pie charts to further filter by pass type and pass height.</h2>
-                <h3>Try and answer these questions: </h3>
+                <h2 style="text-align: center">Now you can explore all the final passes of a sequence from the 2024 UEFA
+                    Euro Tournament!</h2>
+                <h2>Adjust the slider to control the percentile of the sequence xG for the final passes
+                    displayed.<br></br>
+                    Toggle the mode to see the passes or heatmap of pass end locations.<br></br>Click on the pie charts,
+                    or legend items, to further filter by pass type and pass height.<br></br>
+                    Lastly, click on the start slider animation to see how these final passes change as the percentile
+                    of the sequence xG increases.<br></br>
+                    Try and answer these questions:
+                </h2>
                 <h3>1. What is the pass type that tends to have the highest pass sequence xG?</h3>
                 <h3>2. What height should you be passing the ball from the middle of the pitch? What about from the
                     wings?</h3>
@@ -472,16 +479,33 @@
     <div class="conclusion">
         <h1>Conclusion</h1>
         <h2>
-            In this article, we explored how a sequence of passes can be used to predict the likelihood of scoring a goal — a concept we refer to as pass sequence xG. Using real match data from UEFA Euro 2024, we examined the underlying features of effective passing sequences and how different elements contribute to increasing scoring probability.<br></br>
-          
-            A key takeaway from our analysis is the importance of the build-up phase. Far from being just a means of progressing the ball, the build-up creates the foundation for high-quality final passes. We highlighted how switches of play—lateral passes that shift the ball across the pitch—are especially effective in disrupting defensive structures and opening up space between lines. These types of passes consistently raised the pass sequencexG of subsequent actions by forcing defenders to reposition and creating exploitable gaps in the midfield.<br></br>
-          
-            We also identified the most dangerous zones on the pitch, offering insight into where players should aim to direct their attacks. Knowing where the threat is highest allows teams to shape their sequences more intelligently and maximize their offensive potential. Additionally, we examined how subtle variations in pass height and type—such as using through balls or lofted passes—can be strategically employed to overcome pressure and unlock better shooting opportunities.<br></br>
-          
-            To complement our findings, we’ve provided interactive tools that allow you to explore the influence of the final pass on a sequence’s xG. You can also build your own custom sequences to see how different combinations affect pass sequence xG. We invite you to dive in, experiment with different setups, and even analyze real moments from matches you watch. The next time you see a passing move unfold, consider what made it effective—or why it fell short—and use our model to test your observations.<br></br>
-          
-            Through this lens, we hope you gain a deeper appreciation of the strategy behind every pass and develop a new way to think about the beautiful game.
-          </h2>
+            In this article, we explored how a sequence of passes can be used to predict the likelihood of scoring a
+            goal — a concept we refer to as pass sequence xG. Using real match data from UEFA Euro 2024, we examined the
+            underlying features of effective passing sequences and how different elements contribute to increasing
+            scoring probability.<br></br>
+
+            A key takeaway from our analysis is the importance of the build-up phase. Far from being just a means of
+            progressing the ball, the build-up creates the foundation for high-quality final passes. We highlighted how
+            switches of play—lateral passes that shift the ball across the pitch—are especially effective in disrupting
+            defensive structures and opening up space between lines. These types of passes consistently raised the pass
+            sequencexG of subsequent actions by forcing defenders to reposition and creating exploitable gaps in the
+            midfield.<br></br>
+
+            We also identified the most dangerous zones on the pitch, offering insight into where players should aim to
+            direct their attacks. Knowing where the threat is highest allows teams to shape their sequences more
+            intelligently and maximize their offensive potential. Additionally, we examined how subtle variations in
+            pass height and type—such as using through balls or lofted passes—can be strategically employed to overcome
+            pressure and unlock better shooting opportunities.<br></br>
+
+            To complement our findings, we’ve provided interactive tools that allow you to explore the influence of the
+            final pass on a sequence’s xG. You can also build your own custom sequences to see how different
+            combinations affect pass sequence xG. We invite you to dive in, experiment with different setups, and even
+            analyze real moments from matches you watch. The next time you see a passing move unfold, consider what made
+            it effective—or why it fell short—and use our model to test your observations.<br></br>
+
+            Through this lens, we hope you gain a deeper appreciation of the strategy behind every pass and develop a
+            new way to think about the beautiful game.
+        </h2>
         <!-- <h2>We hope you enjoyed this article and learned something new! If you have any questions or feedback, please
             reach out to us at <a href="mailto:tritonball@ucsd.edu">tritonball@ucsd.edu</a>.</h2> -->
     </div>
