@@ -51,7 +51,6 @@ function getLeaderboard() {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
       if (data && data.leaderboard.length > 0) {
         const table = document.createElement("table");
         table.classList.add("leaderboard-table");
