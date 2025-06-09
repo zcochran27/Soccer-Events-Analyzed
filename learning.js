@@ -37,12 +37,12 @@ const topTenSequencePasses = [
             ],
             "outcome": 1,
             "team": "Cross",
-            "data": "Crosses start from the sides of the field and are aimed at the middle to far areas inside the box."
+            "data": "Crosses are balls played in from the side of the field into the box, typically in the air."
         },
         {
             "start": [
-                60,
-                5
+                90,
+                75
             ],
             "end": [
                 110,
@@ -50,7 +50,7 @@ const topTenSequencePasses = [
             ],
             "outcome": 1,
             "team": "Cross",
-            "data": "Crosses start from the sides of the field and are aimed at the middle to far areas inside the box."
+            "data": "Crosses are balls played in from the side of the field into the box, typically in the air."
         }
     ],
     [
@@ -63,27 +63,27 @@ const topTenSequencePasses = [
             ],
             "outcome": 1,
             "team": "Cutback",
-            "data": "Cutbacks start close to the goal line and are passed backward diagonally toward the top of the box."
+            "data": "Cutbacks are passes played close to the opponent's goal line and are passed backward towards the middle/top of the box."
         },
         {
             "start": [
-                118, 70
+                119, 55
             ],
             "end": [
-                102, 50
+                113, 45
             ],
             "outcome": 1,
             "team": "Cutback",
-            "data": "Cutbacks start close to the goal line and are passed backward diagonally toward the top of the box."
+            "data": "Cutbacks are passes played close to the opponent's goal line and are passed backward towards the middle/top of the box."
         }
     ],
     [
         {
             "start": [
-                30, 10
+                30, 70
             ],
             "end": [
-                30, 70
+                30, 10
             ],
 
             "outcome": 1,
@@ -106,10 +106,10 @@ const topTenSequencePasses = [
     [
         {
             "start": [
-                85, 50
+                65, 50
             ],
             "end": [
-                115, 25
+                95, 25
             ],
 
             "outcome": 1,
@@ -129,30 +129,20 @@ const svg3 = d3.select("#pitch33");
 let currentSequenceIndex = 0;
 
 const defs3 = svg3.append("defs");
+defs3
+    .append("marker")
+    .attr("id", `arrow3`)
+    .attr("viewBox", "0 0 10 10")
+    .attr("refX", 2)
+    .attr("refY", 5)
+    .attr("markerWidth", 4)
+    .attr("markerHeight", 4)
+    .attr("orient", "auto")
+    .attr("markerUnits", "strokeWidth")
+    .append("path")
+    .attr("d", "M 0 0 L 10 5 L 0 10 z")
+    .attr("fill", "green");
 
-function updateArrowDefs() {
-    // Clear existing markers
-    defs3.selectAll("marker").remove();
-
-    topTenSequencePasses[currentSequenceIndex].forEach((d, i) => {
-        const color = d.outcome === 1.0 ? "green" : "red";
-        const strokeWidth = 1.2 + i * 0.1;
-
-        defs3
-            .append("marker")
-            .attr("id", `arrow3-${i}`)
-            .attr("viewBox", "0 0 10 10")
-            .attr("refX", 2)
-            .attr("refY", 5)
-            .attr("markerWidth", strokeWidth)
-            .attr("markerHeight", strokeWidth)
-            .attr("orient", "auto")
-            .attr("markerUnits", "strokeWidth")
-            .append("path")
-            .attr("d", "M 0 0 L 10 5 L 0 10 z")
-            .attr("fill", color);
-    });
-}
 
 
 function drawFootballPitch(svg) {
@@ -309,8 +299,6 @@ function drawFootballPitch(svg) {
 }
 
 function updatePassDisplay() {
-    updateArrowDefs();
-
     // Update sequence header
     const currentSequence = topTenSequencePasses[currentSequenceIndex][0];
     d3.select("#sequence-header2").html(
@@ -328,7 +316,7 @@ function updatePassDisplay() {
         .attr("y2", (d) => d.end[1])
         .attr("stroke", (d) => (d.outcome === 1.0 ? "green" : "red"))
         .attr("stroke-width", 1)
-        .attr("marker-end", (d, i) => `url(#arrow3-${i})`)
+        .attr("marker-end", (d, i) => `url(#arrow3)`)
 
     // Update sequence counter display
     d3.select("#sequence-counter2").text(
@@ -338,7 +326,7 @@ function updatePassDisplay() {
     d3.select("#learning-commentary").text(`${currentSequence.data}`);
 
     if (currentSequence.team == "Through Ball"){
-        const x = 100;     // X position
+        const x = 80;     // X position
         const y = 30;      // Y position
         const size = 2;   // Half the height of the triangle
 

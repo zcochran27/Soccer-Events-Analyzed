@@ -6,6 +6,7 @@ html {
   margin: 0;
   scroll-behavior: smooth;
   overflow-x: hidden;
+  margin-bottom: 30px;
 }
 
 .intro {
